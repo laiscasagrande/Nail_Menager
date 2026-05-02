@@ -5,24 +5,25 @@ import { createStackNavigator } from '@react-navigation/stack';
 import CalendarioTela from './screens/CalendarioTela';
 
 
-export default function App() {
-    const Stack = createStackNavigator();
-return(
-  <NavigationContainer>
-    <Stack.Navigator 
-      initialRouteName='Calendario'
-      screenOptions={{headerShown: false}}
-    >
-      <Stack.Screen name="Calendario" component={CalendarioTela} />
-    </Stack.Navigator>
-  </NavigationContainer>
-);
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-  }})
+  },
+});
+
+export default function App() {
+  const Stack = createStackNavigator();
+  return (
+    <NavigationContainer>
+      <Stack.Navigator 
+        initialRouteName='Calendario'
+        screenOptions={{headerShown: false}}
+      >
+        <Stack.Screen name="Calendario" component={CalendarioTela} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 }
