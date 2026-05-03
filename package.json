@@ -14,7 +14,9 @@
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-paper": "^5.15.1",
-    "react-native-safe-area-context": "^5.7.0"
+    "react-native-safe-area-context": "^5.7.0",
+    "react-native-calendar-strip": "^2.2.6",
+    "react-native-gesture-handler": "^2.31.1"
   },
   "private": true
 }

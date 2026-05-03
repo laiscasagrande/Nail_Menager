@@ -1,18 +1,9 @@
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from 'expo-status-bar';  
 import { StyleSheet, Text, View } from 'react-native';
-import Header from './components/Header';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import CalendarioTela from './screens/CalendarioTela';
 
-export default function App() {
-  return (
-    <SafeAreaProvider>
-      <View style={styles.container}>
-        <Header />
-        <StatusBar style="auto" />
-      </View>
-    </SafeAreaProvider>
-  );
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -22,3 +13,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+export default function App() {
+  const Stack = createStackNavigator();
+  return (
+    <NavigationContainer>
+      <Stack.Navigator 
+        initialRouteName='Calendario'
+        screenOptions={{headerShown: false}}
+      >
+        <Stack.Screen name="Calendario" component={CalendarioTela} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
