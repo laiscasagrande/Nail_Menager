@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar';  
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
 import CalendarioTela from './screens/CalendarioTela';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
 const styles = StyleSheet.create({
@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
 });
 
 export default function App() {
-  const Stack = createStackNavigator();
+  const Stack = createNativeStackNavigator();
   return (
     <NavigationContainer>
       <Stack.Navigator 
