@@ -1,29 +1,28 @@
-import { StatusBar } from 'expo-status-bar';  
-import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import CalendarioTela from './screens/CalendarioTela';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import HeaderButton from './components/HeaderButton';
+import { defaultScreenOptions } from './styles';
 
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+const DrawerNav = createDrawerNavigator();
 
 export default function App() {
-  const Stack = createNativeStackNavigator();
+
   return (
     <NavigationContainer>
-      <Stack.Navigator 
-        initialRouteName='Calendario'
-        screenOptions={{headerShown: false}}
+      <DrawerNav.Navigator
+        screenOptions={defaultScreenOptions}
       >
-        <Stack.Screen name="Calendario" component={CalendarioTela} />
-      </Stack.Navigator>
+        <DrawerNav.Screen
+          name="Calendário"
+          component={CalendarioTela}
+          options={() => ({
+            headerRight: () => (
+              <HeaderButton />
+            )
+          })}
+        />
+      </DrawerNav.Navigator>
     </NavigationContainer>
   );
 }
