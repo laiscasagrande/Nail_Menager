@@ -4,6 +4,8 @@ import HeaderButton from "./components/HeaderButton";
 import { ChartColumnBig, Clock, Coffee, HandCoins, Settings, Sparkles, UsersRound } from "lucide-react-native";
 import { StyleSheet } from "react-native";
 import CalendarioTela from "../screens/CalendarioTela";
+import { COLORS } from "../constants/colors";
+import { ICONS } from "../constants/icons";
 
 const DrawerNav = createDrawerNavigator();
 
@@ -19,7 +21,7 @@ export default function DrawerRoutes() {
                 options={{
                     headerRight: () => <HeaderButton />,
                     drawerIcon: ({ color, size }) => (
-                        <Clock size={size} color='#FFFFFF' />
+                        <ICONS.clock/>
                     ),
                 }}
             />
@@ -28,7 +30,7 @@ export default function DrawerRoutes() {
                 component={CalendarioTela}
                 options={{
                     drawerIcon: ({ color, size }) => (
-                        <Coffee size={size} color='#FFFFFF' />
+                        <ICONS.coffee/>
                     ),
                 }}
             />
@@ -37,7 +39,7 @@ export default function DrawerRoutes() {
                 component={CalendarioTela}
                 options={{
                     drawerIcon: ({ color, size }) => (
-                        <UsersRound size={size} color='#FFFFFF' />
+                        <ICONS.usersRound/>
                     ),
                 }}
             />
@@ -46,7 +48,7 @@ export default function DrawerRoutes() {
                 component={CalendarioTela}
                 options={{
                     drawerIcon: ({ color, size }) => (
-                        <Sparkles size={size} color='#FFFFFF' />
+                        <ICONS.sparkles/>
                     ),
                 }}
             />
@@ -56,7 +58,7 @@ export default function DrawerRoutes() {
                 options={{
                     headerRight: () => <HeaderButton />,
                     drawerIcon: ({ color, size }) => (
-                        <HandCoins size={size} color='#FFFFFF' />
+                        <ICONS.handCoins/>
                     ),
                 }}
             />
@@ -66,7 +68,7 @@ export default function DrawerRoutes() {
                 options={{
                     headerRight: () => <HeaderButton />,
                     drawerIcon: ({ color, size }) => (
-                        <ChartColumnBig size={size} color='#FFFFFF' />
+                        <ICONS.chartColumnBig/>
                     ),
                 }}
             />
@@ -75,7 +77,7 @@ export default function DrawerRoutes() {
                 component={CalendarioTela}
                 options={{
                     drawerIcon: ({ color, size }) => (
-                        <Settings size={size} color='#FFFFFF' />
+                        <ICONS.settings/>
                     ),
                 }}
             />
@@ -85,14 +87,14 @@ export default function DrawerRoutes() {
 
 const styles = StyleSheet.create({
     defaultScreenOptions: {
-        drawerStyle: { backgroundColor: '#E94B97' },
-        headerStyle: { backgroundColor: '#E94B97' },
+        drawerStyle: { backgroundColor: COLORS.primary },
+        headerStyle: { backgroundColor: COLORS.primary },
         headerTintColor: '#fff',
         headerTitleAlign: 'center',
         headerTitleStyle: {
             fontSize: 20,
         },
         drawerLabelStyle: { color: '#FFFFFF' },
-        drawerActiveBackgroundColor: '#E94B97'
+        drawerActiveBackgroundColor: COLORS.primary
     }
 })

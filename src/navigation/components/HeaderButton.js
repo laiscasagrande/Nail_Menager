@@ -1,5 +1,5 @@
 import { TouchableOpacity } from "react-native";
-import { Icon } from "react-native-paper";
+import { ICONS } from "../../constants/icons";
 
 export default function HeaderButton() {
     return (
@@ -7,7 +7,7 @@ export default function HeaderButton() {
             onPress={() => console.log('clicou')}
             style={{ marginRight: 10 }}
         >
-            <Icon source="filter" size={28} color={'#fff'} />
+           <ICONS.filter/>
         </TouchableOpacity>
     )
 }
