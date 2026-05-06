@@ -6,6 +6,7 @@ import { StyleSheet } from "react-native";
 import CalendarioTela from "../screens/CalendarioTela";
 import { COLORS } from "../constants/colors";
 import { ICONS } from "../constants/icons";
+import SchedulingScreen from "../screens/SchedulingScreen";
 
 const DrawerNav = createDrawerNavigator();
 
@@ -17,7 +18,7 @@ export default function DrawerRoutes() {
         >
             <DrawerNav.Screen
                 name="Horários agendados"
-                component={CalendarioTela}
+                component={SchedulingScreen}
                 options={{
                     headerRight: () => <HeaderButton />,
                     drawerIcon: ({ color, size }) => (
