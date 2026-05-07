@@ -83,11 +83,6 @@ const CalendarioTela = () => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.titulo}>Calendário</Text>
-      </View>
-
       {/* Navegação do mês */}
       <View style={styles.mesContainer}>
         <TouchableOpacity onPress={mesAnterior} style={styles.botaoNav}>
