@@ -7,6 +7,7 @@ import ScheduleScreen from "../screens/ScheduleScreen";
 import { COLORS } from "../constants/colors";
 import { ICONS } from "../constants/icons";
 import BillingScreen from "../screens/BillingScreen";
+import SchedulingScreen from "../screens/SchedulingScreen";
 
 const DrawerNav = createDrawerNavigator();
 
