@@ -1,22 +1,43 @@
+import React, { useCallback, useRef, useState } from "react";
 import {
-    CalendarBody,
     CalendarContainer,
     CalendarHeader,
+    CalendarBody,
     DraggingEvent,
 } from "@howljs/calendar-kit";
-import React, { useCallback, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import FormSheetScheduling from "./components/FormSheetScheduling";
 import { COLORS } from "../../constants/colors";
-import FormSheet from "../../components/FormSheet";
-import { Button, TextInput } from "react-native-paper";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { View } from "react-native";
 
 export default function SchedulingScreen() {
+
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
-    const [newEvent, setNewEvent] = React.useState("");
-    const [date, setDate] = useState(new Date());
-    const bottomSheetRef = useRef(null)
+
+    const [dateStart, setDateStart] = useState(new Date());
+    const [dateEnd, setDateEnd] = useState(new Date());
+
+    const bottomSheetRef = useRef(null);
+    const [idEvent, setIdEvent] = useState("")
+
+    const formScheduling = z.object({
+        dateStart: z.date(),
+        dateEnd: z.date(),
+        event: z.string({ message: "campo obrigatório" }).min(3)
+    })
+
+
+    const methods = useForm({
+        resolver: zodResolver(formScheduling),
+        defaultValues: {
+            event: "",
+            dateStart: dateStart,
+            dateEnd: dateEnd,
+        },
+    })
 
     const handleDragCreateStart = (start) => {
         console.log("começou:", start);
@@ -24,19 +45,24 @@ export default function SchedulingScreen() {
 
     const handleDragCreateEnd = (event) => {
         if (!event) return;
-        bottomSheetRef.current.expand()
+        methods.reset()
+
+        bottomSheetRef.current.expand();
 
         setEvents((prev) => {
-            const newEvent = {
+
+            const createdEvent = {
                 ...event,
                 id: Math.random(),
-                title: newEvent,
+                title: "",
                 color: COLORS.primary,
             };
 
-            const updated = [...prev, newEvent];
+            setDateStart(new Date(event.start.dateTime));
+            setDateEnd(new Date(event.end.dateTime));
+            setIdEvent(createdEvent.id)
 
-            return updated;
+            return [...prev, createdEvent];
         });
     };
 
@@ -45,6 +71,7 @@ export default function SchedulingScreen() {
     };
 
     const handleDragEnd = (event) => {
+        console.log(event)
         setEvents((prev) =>
             prev.map((e) =>
                 e.id === event.id
@@ -58,6 +85,53 @@ export default function SchedulingScreen() {
 
         setSelectedEvent(null);
     };
+
+    function onSubmit(data) {
+        console.log("submit chamou")
+        console.log(data)
+        setEvents((prev) =>
+            prev.map((e) =>
+                e.id === idEvent
+                    ? {
+                        ...e,
+                        title: data.event,
+                        start: {
+                            dateTime: dateStart.toISOString(),
+                            timeZone: "local",
+                        },
+                        end: {
+                            dateTime: dateEnd.toISOString(),
+                            timeZone: "local",
+                        },
+                    }
+                    : e
+            )
+        )
+        bottomSheetRef.current.close()
+        setIdEvent("")
+        setSelectedEvent(null)
+        methods.reset()
+    }
+
+    function handlePressEvent(event) {
+        setSelectedEvent(event)
+
+        const start = new Date(event.start.dateTime)
+        const end = new Date(event.end.dateTime)
+
+        setDateStart(start)
+        setDateEnd(end)
+
+        methods.reset({
+            event: event.title,
+            dateStart: start,
+            dateEnd: end
+        })
+
+        setIdEvent(event.id)
+
+        bottomSheetRef.current.expand()
+    }
 
     const renderDraggingEvent = useCallback((props) => {
         return (
@@ -89,109 +163,37 @@ export default function SchedulingScreen() {
     }, []);
 
     return (
-        <CalendarContainer
-            events={events}
-            scrollByDay
-            allowDragToCreate
-            allowDragToEdit
-            dragStep={15}
-            selectedEvent={selectedEvent}
-            onPressEvent={(event) => setSelectedEvent(event)}
-            onDragCreateEventStart={handleDragCreateStart}
-            onDragCreateEventEnd={handleDragCreateEnd}
-            onDragSelectedEventStart={handleDragStart}
-            onDragSelectedEventEnd={handleDragEnd}
-        >
-            <CalendarHeader />
-            <CalendarBody renderDraggingEvent={renderDraggingEvent} />
-            <FormSheet ref={bottomSheetRef}>
-                <View style={styles.container}>
-                    <View style={styles.dates}>
-                        <Pressable style={styles.inputDate}>
-                            <Text style={styles.label}>Início</Text>
-                            <Text>
-                                {date.toLocaleDateString("pt-BR", {
-                                    day: "2-digit",
-                                    month: "long",
-                                    year: "numeric",
-                                })}
-                            </Text>
-                        </Pressable>
-                        <Pressable style={styles.inputDate}>
-                            <Text style={styles.label}>Fim</Text>
-                            <Text>
-                                {date.toLocaleDateString("pt-BR", {
-                                    day: "2-digit",
-                                    month: "long",
-                                    year: "numeric",
-                                })}
-                            </Text>
-                        </Pressable>
-                    </View>
-                    <View>
-                        <TextInput
-                            label="Novo evento"
-                            mode="outlined"
-                            value={newEvent}
-                            onChangeText={text => setNewEvent(text)}
-                            activeOutlineColor={COLORS.primary}
-                            outlineColor={COLORS.gray}
-                        />
-                    </View>
-                    <View style={styles.containerButton}>
-                        <Button style={styles.button}>
-                            <Text style={styles.buttonText}>Salvar</Text>
-                        </Button>
-                    </View>
-                </View>
-            </FormSheet>
-        </CalendarContainer>
+        <>
+            <CalendarContainer
+                events={events}
+                scrollByDay
+                allowDragToCreate
+                allowDragToEdit
+                dragStep={15}
+                selectedEvent={selectedEvent}
+                onPressEvent={(event) => handlePressEvent(event)}
+                onDragCreateEventStart={handleDragCreateStart}
+                onDragCreateEventEnd={handleDragCreateEnd}
+                onDragSelectedEventStart={handleDragStart}
+                onDragSelectedEventEnd={handleDragEnd}
+            >
+                <CalendarHeader />
+
+                <CalendarBody
+                    renderDraggingEvent={renderDraggingEvent}
+                />
+
+                <FormSheetScheduling
+                    setDateStart={setDateStart}
+                    dateStart={dateStart}
+                    setDateEnd={setDateEnd}
+                    dateEnd={dateEnd}
+                    bottomSheetRef={bottomSheetRef}
+                    methods={methods}
+                    onSubmit={onSubmit}
+                />
+
+            </CalendarContainer>
+        </>
     );
-}
-
-const styles = StyleSheet.create({
-    dates: {
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    },
-
-    container: {
-        flexDirection: 'column',
-        gap: 30,
-        justifyContent: 'center'
-    },
-
-    inputDate: {
-        borderWidth: 1,
-        borderColor: COLORS.gray,
-        borderRadius: 3,
-        paddingLeft: 15,
-        paddingRight: 15,
-        paddingTop: 10,
-        paddingBottom: 10,
-        gap: 10
-    },
-
-    label: {
-        fontSize: 15,
-        color: COLORS.primary
-    },
-
-    button: {
-        borderRadius: 10,
-        backgroundColor: COLORS.primary,
-        width: 282,
-        height: 58,
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-
-    buttonText: {
-        fontSize: 18,
-        color: COLORS.white
-    },
-
-    containerButton: {
-        alignItems: 'center'
-    }
-})
+} 
