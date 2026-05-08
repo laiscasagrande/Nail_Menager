@@ -15,7 +15,7 @@ const FormSheet = forwardRef(({ children }, ref) => {
       enablePanDownToClose={false}
       handleIndicatorStyle={{ backgroundColor: COLORS.primary, width: 70 }}
     >
-      <BottomSheetScrollView style={styles.contentContainer}>
+      <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
         {children}
       </BottomSheetScrollView>
     </BottomSheet>
@@ -27,5 +27,6 @@ export default FormSheet;
 const styles = StyleSheet.create({
   contentContainer: {
     padding: 20,
+    flexGrow: 1
   },
 });

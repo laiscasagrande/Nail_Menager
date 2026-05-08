@@ -3,10 +3,10 @@ import CustomDrawerContent from "./components/CustomDrawerContent";
 import HeaderButton from "./components/HeaderButton";
 import { ChartColumnBig, Clock, Coffee, HandCoins, Settings, Sparkles, UsersRound } from "lucide-react-native";
 import { StyleSheet } from "react-native";
-import CalendarioTela from "../screens/CalendarioTela";
+import ScheduleScreen from "../screens/ScheduleScreen";
 import { COLORS } from "../constants/colors";
 import { ICONS } from "../constants/icons";
-import SchedulingScreen from "../screens/SchedulingScreen";
+import BillingScreen from "../screens/BillingScreen";
 
 const DrawerNav = createDrawerNavigator();
 
@@ -28,7 +28,7 @@ export default function DrawerRoutes() {
             />
             <DrawerNav.Screen
                 name="Horários disponíveis"
-                component={CalendarioTela}
+                component={ScheduleScreen}
                 options={{
                     drawerIcon: ({ color, size }) => (
                         <ICONS.coffee/>
@@ -37,7 +37,7 @@ export default function DrawerRoutes() {
             />
             <DrawerNav.Screen
                 name="Clientes"
-                component={CalendarioTela}
+                component={ScheduleScreen}
                 options={{
                     drawerIcon: ({ color, size }) => (
                         <ICONS.usersRound/>
@@ -46,7 +46,7 @@ export default function DrawerRoutes() {
             />
             <DrawerNav.Screen
                 name="Serviços"
-                component={CalendarioTela}
+                component={ScheduleScreen}
                 options={{
                     drawerIcon: ({ color, size }) => (
                         <ICONS.sparkles/>
@@ -55,7 +55,7 @@ export default function DrawerRoutes() {
             />
             <DrawerNav.Screen
                 name="Faturamento"
-                component={CalendarioTela}
+                component={BillingScreen}
                 options={{
                     headerRight: () => <HeaderButton />,
                     drawerIcon: ({ color, size }) => (
@@ -65,7 +65,7 @@ export default function DrawerRoutes() {
             />
             <DrawerNav.Screen
                 name="Dashboard"
-                component={CalendarioTela}
+                component={ScheduleScreen}
                 options={{
                     headerRight: () => <HeaderButton />,
                     drawerIcon: ({ color, size }) => (
@@ -75,7 +75,7 @@ export default function DrawerRoutes() {
             />
             <DrawerNav.Screen
                 name="Configurações"
-                component={CalendarioTela}
+                component={ScheduleScreen}
                 options={{
                     drawerIcon: ({ color, size }) => (
                         <ICONS.settings/>
