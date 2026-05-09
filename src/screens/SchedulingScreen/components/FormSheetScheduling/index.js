@@ -6,6 +6,7 @@ import { Calendar, Timer } from "lucide-react-native";
 import { useState } from "react";
 import { COLORS } from "../../../../constants/colors";
 import DatePickerModal from "./DatePickerModal";
+import DateCard from "./DateCard";
 
 export default function FormSheetScheduling({ setDateStart, dateStart, setDateEnd, dateEnd, bottomSheetRef, methods, onSubmit }) {
 
@@ -36,86 +37,18 @@ export default function FormSheetScheduling({ setDateStart, dateStart, setDateEn
                             )}
                         />
                         <View style={styles.dates}>
-                            <View style={styles.card}>
-                                <Text style={styles.label}>
-                                    Início
-                                </Text>
-                                <View style={styles.row}>
-                                    <Text>
-                                        {dateStart.toLocaleDateString(
-                                            "pt-BR",
-                                            {
-                                                day: "2-digit",
-                                                month: "long",
-                                                year: "numeric",
-                                            }
-                                        )}
-                                    </Text>
-                                    <Calendar
-                                        color={COLORS.primary}
-                                        onPress={() =>
-                                            setShowDateStart(true)
-                                        }
-                                    />
-                                </View>
-                                <View style={styles.row}>
-                                    <Text>
-                                        {dateStart.toLocaleTimeString(
-                                            "pt-BR",
-                                            {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            }
-                                        )}
-                                    </Text>
-                                    <Timer
-                                        color={COLORS.primary}
-                                        onPress={() =>
-                                            setShowTimeStart(true)
-                                        }
-                                    />
-                                </View>
-                            </View>
-                            <View style={styles.card}>
-                                <Text style={styles.label}>
-                                    Fim
-                                </Text>
-                                <View style={styles.row}>
-                                    <Text>
-                                        {dateEnd.toLocaleDateString(
-                                            "pt-BR",
-                                            {
-                                                day: "2-digit",
-                                                month: "long",
-                                                year: "numeric",
-                                            }
-                                        )}
-                                    </Text>
-                                    <Calendar
-                                        color={COLORS.primary}
-                                        onPress={() =>
-                                            setShowDateEnd(true)
-                                        }
-                                    />
-                                </View>
-                                <View style={styles.row}>
-                                    <Text>
-                                        {dateEnd.toLocaleTimeString(
-                                            "pt-BR",
-                                            {
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                            }
-                                        )}
-                                    </Text>
-                                    <Timer
-                                        color={COLORS.primary}
-                                        onPress={() =>
-                                            setShowTimeEnd(true)
-                                        }
-                                    />
-                                </View>
-                            </View>
+                            <DateCard
+                                date={dateStart}
+                                title={"Início"}
+                                setShowDate={setShowDateStart}
+                                setShowTime={setShowTimeStart}
+                            />
+                            <DateCard
+                                date={dateEnd}
+                                title={"Fim"}
+                                setShowDate={setShowDateEnd}
+                                setShowTime={setShowTimeEnd}
+                            />
                         </View>
                     </View>
                     <View style={styles.containerButton}>
@@ -190,26 +123,6 @@ const styles = StyleSheet.create({
     dates: {
         flexDirection: "column",
         gap: 20,
-    },
-
-    card: {
-        borderWidth: 1,
-        borderColor: COLORS.gray,
-        borderRadius: 10,
-        padding: 15,
-        gap: 15,
-    },
-
-    label: {
-        fontSize: 15,
-        color: COLORS.primary,
-        fontWeight: "600",
-    },
-
-    row: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
     },
 
     button: {
