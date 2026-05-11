@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import styles from './styles';
+import styles from '../constants/styles';
 
 export default function TelaBoasVindas({ onLoginPress, onRegisterPress, onGoogleSignIn }) {
   return (

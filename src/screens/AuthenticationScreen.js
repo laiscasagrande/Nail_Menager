@@ -7,10 +7,10 @@ import {
   Text,
   View,
 } from 'react-native';
-import { TelaLogin, TelaCadastro, TelaBoasVindas } from '.';
-import styles from './styles';
+import { TelaLogin, TelaCadastro, TelaBoasVindas } from './';
+import styles from '../constants/styles';
 
-export default function TelaAutenticacao() {
+export default function AuthenticationScreen({ navigation }) {
   const [screen, setScreen] = useState('welcome');
   const [loginUser, setLoginUser] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -23,11 +23,15 @@ export default function TelaAutenticacao() {
   };
 
   const handleLoginSubmit = () => {
-    console.log('Login com credenciais', { loginUser, loginPassword });
+    // Frontend only - navigate directly to ScheduleScreen
+    console.log('Login realizado (frontend only)', { loginUser, loginPassword });
+    navigation.replace('ScheduleScreen');
   };
 
   const handleRegisterSubmit = () => {
     console.log('Registrar usuário', { registerName, registerPassword, registerConfirm });
+    // After registration, navigate to login screen
+    setScreen('login');
   };
 
   return (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
-import styles from './styles';
+import styles from '../constants/styles';
 
 export default function TelaCadastro({ name, password, confirmPassword, onChangeName, onChangePassword, onChangeConfirmPassword, onSubmit, onBack }) {
   return (
@@ -39,7 +39,7 @@ export default function TelaCadastro({ name, password, confirmPassword, onChange
       </View>
 
       <TouchableOpacity style={styles.primaryButton} onPress={onSubmit}>
-        <Text style={styles.primaryButtonText}>Entrar</Text>
+        <Text style={styles.primaryButtonText}>Cadastrar</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.secondaryLink} onPress={onBack}>

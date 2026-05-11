@@ -1,7 +1,12 @@
 import React from 'react';
-import TelaAutenticacao from './Login/TelaAutenticacao';
+import { NavigationContainer } from '@react-navigation/native';
+import StackRoutes from './src/navigation/StackRoutes';
 
 export default function App() {
-  return <TelaAutenticacao />;
+  return (
+    <NavigationContainer>
+      <StackRoutes />
+    </NavigationContainer>
+  );
 }
 
