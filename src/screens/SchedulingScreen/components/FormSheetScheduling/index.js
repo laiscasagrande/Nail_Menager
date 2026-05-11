@@ -1,11 +1,17 @@
 import { StyleSheet, Text, View } from "react-native";
 import FormSheet from "../../../../components/FormSheet";
 import { Controller, useFormContext } from "react-hook-form";
-import { Button, TextInput } from "react-native-paper";
+import { Button, Menu, TextInput } from "react-native-paper";
 import { useState } from "react";
 import { COLORS } from "../../../../constants/colors";
 import DatePickerModal from "./DatePickerModal";
 import DateCard from "./DateCard";
+
+export const CLIENTS = [
+    { label: "Laís Kaminski Casagrande", value: "1" },
+    { label: "João Silva", value: "2" },
+    { label: "Maria Souza", value: "3" },
+];
 
 export default function FormSheetScheduling({ bottomSheetRef, onSubmit }) {
 
@@ -18,6 +24,10 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit }) {
     const { handleSubmit, control, watch } = useFormContext()
     const dateStart = watch("dateStart");
     const dateEnd = watch("dateEnd");
+    const [visibleMenu, setVisibleMenu] = useState(false);
+    const eventValue = watch("event");
+    const selectedLabel =
+        CLIENTS.find((item) => String(item.value) === String(eventValue))?.label || "";
 
     return (
         <>
@@ -26,18 +36,44 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit }) {
                     <View style={styles.form}>
                         <Controller
                             control={control}
-                            name="event"
-                            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-                                <TextInput
-                                    label="Novo evento"
-                                    mode="outlined"
-                                    value={value}
-                                    onChangeText={onChange}
-                                    activeOutlineColor={COLORS.primary}
-                                    outlineColor={COLORS.gray}
-                                    error={!!fieldState.error}
-                                />
-                            )}
+                            name="client"
+                            render={({ field: { onChange, value } }) => {
+                                const selectedLabel =
+                                    CLIENTS.find((item) => item.value === value)?.label || "";
+
+                                return (
+                                    <Menu
+                                        visible={visibleMenu}
+                                        onDismiss={() => setVisibleMenu(false)}
+                                        anchor={
+                                            <TextInput
+                                                label="Clientes"
+                                                value={selectedLabel}
+                                                mode="outlined"
+                                                editable={false}
+                                                right={
+                                                    <TextInput.Icon
+                                                        icon="menu-down"
+                                                        onPress={() => setVisibleMenu(true)}
+                                                    />
+                                                }
+                                                onPressIn={() => setVisibleMenu(true)}
+                                            />
+                                        }
+                                    >
+                                        {CLIENTS.map((item) => (
+                                            <Menu.Item
+                                                key={item.value}
+                                                title={item.label}
+                                                onPress={() => {
+                                                    onChange(item.value);
+                                                    setVisibleMenu(false);
+                                                }}
+                                            />
+                                        ))}
+                                    </Menu>
+                                );
+                            }}
                         />
                         <View style={styles.dates}>
                             <DateCard

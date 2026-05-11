@@ -7,6 +7,12 @@ import { COLORS } from "../../../constants/colors";
 import { DraggingEvent } from "@howljs/calendar-kit";
 import { View } from "react-native";
 
+export const CLIENTS = [
+    { label: "Laís Kaminski Casagrande", value: "1" },
+    { label: "João Silva", value: "2" },
+    { label: "Maria Souza", value: "3" },
+];
+
 export function useScheduling() {
 
     const [events, setEvents] = useState([]);
@@ -18,7 +24,7 @@ export function useScheduling() {
     const methods = useForm({
         resolver: zodResolver(formScheduling),
         defaultValues: {
-            event: "",
+            client: "",
             dateStart: new Date(),
             dateEnd: new Date(),
         },
@@ -41,7 +47,7 @@ export function useScheduling() {
         };
 
         methods.reset({
-            event: "",
+            client: "",
             dateStart: new Date(event.start.dateTime),
             dateEnd: new Date(event.end.dateTime),
         });
@@ -72,13 +78,17 @@ export function useScheduling() {
     };
 
     function onSubmit(data) {
-        console.log(data)
+
+        const selectedClient = CLIENTS.find(
+            (client) => client.value === data.client
+        );
         setEvents((prev) =>
             prev.map((e) =>
                 e.id === idEvent
                     ? {
                         ...e,
-                        title: data.event,
+                        client: data.client,
+                        title: selectedClient?.label || "",
                         start: {
                             dateTime: data.dateStart.toISOString(),
                             timeZone: "local",
@@ -104,7 +114,7 @@ export function useScheduling() {
         const end = new Date(event.end.dateTime)
 
         methods.reset({
-            event: event.title,
+            client: event.client,
             dateStart: start,
             dateEnd: end
         })
