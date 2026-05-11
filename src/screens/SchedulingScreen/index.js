@@ -7,35 +7,25 @@ import {
 } from "@howljs/calendar-kit";
 import FormSheetScheduling from "./components/FormSheetScheduling";
 import { COLORS } from "../../constants/colors";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { View } from "react-native";
+import { v4 as uuidv4 } from 'uuid';
+import { formScheduling } from "../../schemas/schedulingSchema";
 
 export default function SchedulingScreen() {
 
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
-
-    const [dateStart, setDateStart] = useState(new Date());
-    const [dateEnd, setDateEnd] = useState(new Date());
-
     const bottomSheetRef = useRef(null);
-    const [idEvent, setIdEvent] = useState("")
-
-    const formScheduling = z.object({
-        dateStart: z.date(),
-        dateEnd: z.date(),
-        event: z.string({ message: "campo obrigatório" }).min(3)
-    })
-
+    const [idEvent, setIdEvent] = useState(null)
 
     const methods = useForm({
         resolver: zodResolver(formScheduling),
         defaultValues: {
             event: "",
-            dateStart: dateStart,
-            dateEnd: dateEnd,
+            dateStart: new Date(),
+            dateEnd: new Date(),
         },
     })
 
@@ -45,25 +35,25 @@ export default function SchedulingScreen() {
 
     const handleDragCreateEnd = (event) => {
         if (!event) return;
-        methods.reset()
 
         bottomSheetRef.current.expand();
 
-        setEvents((prev) => {
+        const createdEvent = {
+            ...event,
+            id: uuidv4(),
+            title: "",
+            color: COLORS.primary,
+        };
 
-            const createdEvent = {
-                ...event,
-                id: Math.random(),
-                title: "",
-                color: COLORS.primary,
-            };
-
-            setDateStart(new Date(event.start.dateTime));
-            setDateEnd(new Date(event.end.dateTime));
-            setIdEvent(createdEvent.id)
-
-            return [...prev, createdEvent];
+        methods.reset({
+            event: "",
+            dateStart: new Date(event.start.dateTime),
+            dateEnd: new Date(event.end.dateTime),
         });
+
+        setIdEvent(createdEvent.id)
+
+        setEvents((prev) => [...prev, createdEvent]);
     };
 
     const handleDragStart = (event) => {
@@ -87,7 +77,6 @@ export default function SchedulingScreen() {
     };
 
     function onSubmit(data) {
-        console.log("submit chamou")
         console.log(data)
         setEvents((prev) =>
             prev.map((e) =>
@@ -96,11 +85,11 @@ export default function SchedulingScreen() {
                         ...e,
                         title: data.event,
                         start: {
-                            dateTime: dateStart.toISOString(),
+                            dateTime: data.dateStart.toISOString(),
                             timeZone: "local",
                         },
                         end: {
-                            dateTime: dateEnd.toISOString(),
+                            dateTime: data.dateEnd.toISOString(),
                             timeZone: "local",
                         },
                     }
@@ -118,9 +107,6 @@ export default function SchedulingScreen() {
 
         const start = new Date(event.start.dateTime)
         const end = new Date(event.end.dateTime)
-
-        setDateStart(start)
-        setDateEnd(end)
 
         methods.reset({
             event: event.title,
@@ -183,15 +169,12 @@ export default function SchedulingScreen() {
                     renderDraggingEvent={renderDraggingEvent}
                 />
 
-                <FormSheetScheduling
-                    setDateStart={setDateStart}
-                    dateStart={dateStart}
-                    setDateEnd={setDateEnd}
-                    dateEnd={dateEnd}
-                    bottomSheetRef={bottomSheetRef}
-                    methods={methods}
-                    onSubmit={onSubmit}
-                />
+                <FormProvider {...methods}>
+                    <FormSheetScheduling
+                        bottomSheetRef={bottomSheetRef}
+                        onSubmit={onSubmit}
+                    />
+                </FormProvider>
 
             </CalendarContainer>
         </>

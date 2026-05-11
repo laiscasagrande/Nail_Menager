@@ -1,20 +1,23 @@
 import { StyleSheet, Text, View } from "react-native";
 import FormSheet from "../../../../components/FormSheet";
-import { Controller } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 import { Button, TextInput } from "react-native-paper";
-import { Calendar, Timer } from "lucide-react-native";
 import { useState } from "react";
 import { COLORS } from "../../../../constants/colors";
 import DatePickerModal from "./DatePickerModal";
 import DateCard from "./DateCard";
 
-export default function FormSheetScheduling({ setDateStart, dateStart, setDateEnd, dateEnd, bottomSheetRef, methods, onSubmit }) {
+export default function FormSheetScheduling({ bottomSheetRef, onSubmit }) {
 
-    const [showDateStart, setShowDateStart] = useState(false);
-    const [showDateEnd, setShowDateEnd] = useState(false);
-    const [showTimeStart, setShowTimeStart] = useState(false);
-    const [showTimeEnd, setShowTimeEnd] = useState(false);
-    const { handleSubmit, control } = methods
+    const [modal, setModal] = useState({
+        visible: false,
+        name: "",
+        mode: "date",
+        title: "",
+    });
+    const { handleSubmit, control, watch } = useFormContext()
+    const dateStart = watch("dateStart");
+    const dateEnd = watch("dateEnd");
 
     return (
         <>
@@ -40,14 +43,42 @@ export default function FormSheetScheduling({ setDateStart, dateStart, setDateEn
                             <DateCard
                                 date={dateStart}
                                 title={"Início"}
-                                setShowDate={setShowDateStart}
-                                setShowTime={setShowTimeStart}
+                                onPressDate={() =>
+                                    setModal({
+                                        visible: true,
+                                        name: "dateStart",
+                                        mode: "date",
+                                        title: "Selecione a data inicial"
+                                    })
+                                }
+                                onPressTime={() =>
+                                    setModal({
+                                        visible: true,
+                                        name: "dateStart",
+                                        mode: "time",
+                                        title: "Selecione o horário inicial",
+                                    })
+                                }
                             />
                             <DateCard
                                 date={dateEnd}
                                 title={"Fim"}
-                                setShowDate={setShowDateEnd}
-                                setShowTime={setShowTimeEnd}
+                                onPressDate={() =>
+                                    setModal({
+                                        visible: true,
+                                        name: "dateEnd",
+                                        mode: "date",
+                                        title: "Selecione a data final"
+                                    })
+                                }
+                                onPressTime={() =>
+                                    setModal({
+                                        visible: true,
+                                        name: "dateEnd",
+                                        mode: "time",
+                                        title: "Selecione o horário final",
+                                    })
+                                }
                             />
                         </View>
                     </View>
@@ -62,50 +93,18 @@ export default function FormSheetScheduling({ setDateStart, dateStart, setDateEn
             </FormSheet>
 
             <DatePickerModal
-                showDate={showDateStart}
-                setShowDate={setShowDateStart}
-                title={"Selecione a data inicial"}
-                control={methods.control}
-                setDate={setDateStart}
-                date={dateStart}
-                mode={"date"}
-                name={"dateStart"}
-            />
-
-            <DatePickerModal
-                showDate={showTimeStart}
-                setShowDate={setShowTimeStart}
-                title={"Selecione o horário inicial"}
-                control={methods.control}
-                setDate={setDateStart}
-                date={dateStart}
-                mode={"time"}
-                name={"dateStart"}
-            />
-
-            <DatePickerModal
-                showDate={showDateEnd}
-                setShowDate={setShowDateEnd}
-                title={"Selecione a data final"}
-                control={methods.control}
-                setDate={setDateEnd}
-                date={dateEnd}
-                mode={"date"}
-                name={"dateEnd"}
-            />
-
-            <DatePickerModal
-                showDate={showTimeEnd}
-                setShowDate={setShowTimeEnd}
-                title={"Selecione o horário final"}
-                control={methods.control}
-                setDate={setDateEnd}
-                date={dateEnd}
-                mode={"time"}
-                name={"dateEnd"}
+                visible={modal.visible}
+                setVisible={(value) =>
+                    setModal((prev) => ({
+                        ...prev,
+                        visible: value,
+                    }))
+                }
+                title={modal.title}
+                mode={modal.mode}
+                name={modal.name}
             />
         </>
-
     )
 }
 

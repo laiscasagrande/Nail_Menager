@@ -2,7 +2,7 @@ import { Calendar, Timer } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
 import { COLORS } from "../../../../constants/colors";
 
-export default function DateCard({ date, title, setShowDate, setShowTime }) {
+export default function DateCard({ date, title, onPressDate, onPressTime }) {
     return (
         <View style={styles.card}>
             <Text style={styles.label}>
@@ -21,9 +21,7 @@ export default function DateCard({ date, title, setShowDate, setShowTime }) {
                 </Text>
                 <Calendar
                     color={COLORS.primary}
-                    onPress={() =>
-                        setShowDate(true)
-                    }
+                    onPress={onPressDate}
                 />
             </View>
             <View style={styles.row}>
@@ -38,9 +36,7 @@ export default function DateCard({ date, title, setShowDate, setShowTime }) {
                 </Text>
                 <Timer
                     color={COLORS.primary}
-                    onPress={() =>
-                        setShowTime(true)
-                    }
+                    onPress={onPressTime}
                 />
             </View>
         </View>

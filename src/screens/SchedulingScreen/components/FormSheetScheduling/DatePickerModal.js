@@ -1,13 +1,33 @@
-import { Controller } from "react-hook-form";
+import 'react-native-get-random-values';
+import { useFormContext } from "react-hook-form";
 import { Modal, StyleSheet, Text, View } from "react-native";
 import { Button } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS } from "../../../../constants/colors";
 
-export default function DatePickerModal({ showDate, setShowDate, title, control, date, setDate, mode, name }) {
+export default function DatePickerModal({ visible, setVisible, title, mode, name }) {
+
+    const { watch, setValue } = useFormContext()
+    const value = watch(name)
+
+    function handleDateChange(selectedDate) {
+        const updated = new Date(value);
+
+        if (mode === "date") {
+            updated.setFullYear(selectedDate.getFullYear());
+            updated.setMonth(selectedDate.getMonth());
+            updated.setDate(selectedDate.getDate());
+        } else {
+            updated.setHours(selectedDate.getHours());
+            updated.setMinutes(selectedDate.getMinutes());
+        }
+
+        setValue(name, updated);
+    }
+
     return (
         <Modal
-            visible={showDate}
+            visible={visible}
             transparent
             animationType="fade"
         >
@@ -16,82 +36,22 @@ export default function DatePickerModal({ showDate, setShowDate, title, control,
                     <Text style={styles.modalTitle}>
                         {title}
                     </Text>
-                    {mode === "date" ?
-                        <Controller
-                            control={control}
-                            name={name}
-                            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-                                <DateTimePicker
-                                    value={value}
-                                    mode={mode}
-                                    display="inline"
-                                    locale="pt-BR"
-                                    onChange={(event, selectedDate) => {
-
-                                        if (selectedDate) {
-
-                                            const updated =
-                                                new Date(date);
-
-                                            updated.setFullYear(
-                                                selectedDate.getFullYear()
-                                            );
-
-                                            updated.setMonth(
-                                                selectedDate.getMonth()
-                                            );
-
-                                            updated.setDate(
-                                                selectedDate.getDate()
-                                            );
-
-                                            onChange(updated);
-
-                                            setDate(updated);
-                                        }
-                                    }}
-                                />
-                            )}
-                        />
-                        :
-                        <Controller
-                            control={control}
-                            name={name}
-                            render={({ field: { onChange, onBlur, value }, fieldState }) => (
-                                <DateTimePicker
-                                    value={value}
-                                    mode={mode}
-                                    display="spinner"
-                                    locale="pt-BR"
-                                    onChange={(event, selectedDate) => {
-
-                                        if (selectedDate) {
-
-                                            const updated =
-                                                new Date(date);
-
-                                            updated.setHours(
-                                                selectedDate.getHours()
-                                            );
-
-                                            updated.setMinutes(
-                                                selectedDate.getMinutes()
-                                            );
-
-                                            onChange(updated);
-
-                                            setDate(updated);
-                                        }
-                                    }}
-                                />
-                            )}
-                        />
-                    }
+                    <DateTimePicker
+                        value={value}
+                        mode={mode}
+                        display={mode === "date" ? "inline" : "spinner"}
+                        locale="pt-BR"
+                        onChange={(event, selectedDate) => {
+                            if (selectedDate) {
+                                handleDateChange(selectedDate)
+                            }
+                        }}
+                    />
                     <Button
                         mode="contained"
                         buttonColor={COLORS.primary}
                         onPress={() =>
-                            setShowDate(false)
+                            setVisible(false)
                         }
                     >
                         Confirmar
