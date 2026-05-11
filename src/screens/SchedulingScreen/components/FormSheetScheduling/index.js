@@ -13,6 +13,12 @@ export const CLIENTS = [
     { label: "Maria Souza", value: "3" },
 ];
 
+export const SERVICES = [
+    { label: "Manicure Tradicional", value: "1" },
+    { label: "Alongamento em Gel", value: "2" },
+    { label: "Banho de Gel", value: "3" },
+];
+
 export default function FormSheetScheduling({ bottomSheetRef, onSubmit }) {
 
     const [modal, setModal] = useState({
@@ -25,6 +31,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit }) {
     const dateStart = watch("dateStart");
     const dateEnd = watch("dateEnd");
     const [visibleMenu, setVisibleMenu] = useState(false);
+    const [visibleService, setVisibleService] = useState(false);
     const eventValue = watch("event");
     const selectedLabel =
         CLIENTS.find((item) => String(item.value) === String(eventValue))?.label || "";
@@ -68,6 +75,47 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit }) {
                                                 onPress={() => {
                                                     onChange(item.value);
                                                     setVisibleMenu(false);
+                                                }}
+                                            />
+                                        ))}
+                                    </Menu>
+                                );
+                            }}
+                        />
+                        <Controller
+                            control={control}
+                            name="service"
+                            render={({ field: { onChange, value } }) => {
+                                const selectedLabel =
+                                    SERVICES.find((item) => item.value === value)?.label || "";
+
+                                return (
+                                    <Menu
+                                        visible={visibleService}
+                                        onDismiss={() => setVisibleService(false)}
+                                        anchor={
+                                            <TextInput
+                                                label="Serviços"
+                                                value={selectedLabel}
+                                                mode="outlined"
+                                                editable={false}
+                                                right={
+                                                    <TextInput.Icon
+                                                        icon="menu-down"
+                                                        onPress={() => setVisibleService(true)}
+                                                    />
+                                                }
+                                                onPressIn={() => setVisibleService(true)}
+                                            />
+                                        }
+                                    >
+                                        {SERVICES.map((item) => (
+                                            <Menu.Item
+                                                key={item.value}
+                                                title={item.label}
+                                                onPress={() => {
+                                                    onChange(item.value);
+                                                    setVisibleService(false);
                                                 }}
                                             />
                                         ))}

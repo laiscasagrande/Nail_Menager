@@ -25,6 +25,7 @@ export function useScheduling() {
         resolver: zodResolver(formScheduling),
         defaultValues: {
             client: "",
+            service: "",
             dateStart: new Date(),
             dateEnd: new Date(),
         },
@@ -48,6 +49,7 @@ export function useScheduling() {
 
         methods.reset({
             client: "",
+            service: "",
             dateStart: new Date(event.start.dateTime),
             dateEnd: new Date(event.end.dateTime),
         });
@@ -88,6 +90,7 @@ export function useScheduling() {
                     ? {
                         ...e,
                         client: data.client,
+                        service: data.service,
                         title: selectedClient?.label || "",
                         start: {
                             dateTime: data.dateStart.toISOString(),
@@ -115,6 +118,7 @@ export function useScheduling() {
 
         methods.reset({
             client: event.client,
+            service: event.service,
             dateStart: start,
             dateEnd: end
         })
