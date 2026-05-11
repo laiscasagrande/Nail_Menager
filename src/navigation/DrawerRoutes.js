@@ -7,6 +7,7 @@ import ScheduleScreen from "../screens/ScheduleScreen";
 import { COLORS } from "../constants/colors";
 import { ICONS } from "../constants/icons";
 import BillingScreen from "../screens/BillingScreen";
+import ScreenServices from "../screens/ScreenServices";
 
 const DrawerNav = createDrawerNavigator();
 
@@ -46,7 +47,7 @@ export default function DrawerRoutes() {
             />
             <DrawerNav.Screen
                 name="Serviços"
-                component={ScheduleScreen}
+                component={ScreenServices}
                 options={{
                     drawerIcon: ({ color, size }) => (
                         <ICONS.sparkles/>
