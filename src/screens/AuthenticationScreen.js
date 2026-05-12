@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { TelaLogin, TelaCadastro, TelaBoasVindas } from './';
+import { ScreenLogin, ScreenRegister, ScreenWelcome } from './';
 import styles from '../constants/styles';
 
 export default function AuthenticationScreen({ navigation, route }) {
@@ -47,7 +47,7 @@ export default function AuthenticationScreen({ navigation, route }) {
         </View>
 
         {screen === 'welcome' && (
-          <TelaBoasVindas
+          <ScreenWelcome
             onLoginPress={() => setScreen('login')}
             onRegisterPress={() => setScreen('register')}
             onGoogleSignIn={handleGoogleSignIn}
@@ -55,7 +55,7 @@ export default function AuthenticationScreen({ navigation, route }) {
         )}
 
         {screen === 'login' && (
-          <TelaLogin
+          <ScreenLogin
             user={loginUser}
             password={loginPassword}
             onChangeUser={setLoginUser}
@@ -66,7 +66,7 @@ export default function AuthenticationScreen({ navigation, route }) {
         )}
 
         {screen === 'register' && (
-          <TelaCadastro
+          <ScreenRegister
             name={registerName}
             password={registerPassword}
             confirmPassword={registerConfirm}

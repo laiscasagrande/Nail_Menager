@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import styles from '../constants/styles';
 
-export default function TelaLogin({ user, password, onChangeUser, onChangePassword, onSubmit, onBack }) {
+export default function ScreenLogin({ user, password, onChangeUser, onChangePassword, onSubmit, onBack }) {
   return (
     <View style={styles.card}>
       <Text style={styles.brandTitle}>Nail</Text>

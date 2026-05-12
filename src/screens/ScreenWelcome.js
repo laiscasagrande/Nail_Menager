@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import styles from '../constants/styles';
 
-export default function TelaBoasVindas({ onLoginPress, onRegisterPress, onGoogleSignIn }) {
+export default function ScreenWelcome({ onLoginPress, onRegisterPress, onGoogleSignIn }) {
   return (
     <View style={styles.card}>
       <Text style={styles.brandTitle}>Nail</Text>

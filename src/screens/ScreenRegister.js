@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import styles from '../constants/styles';
 
-export default function TelaCadastro({ name, password, confirmPassword, onChangeName, onChangePassword, onChangeConfirmPassword, onSubmit, onBack }) {
+export default function ScreenRegister({ name, password, confirmPassword, onChangeName, onChangePassword, onChangeConfirmPassword, onSubmit, onBack }) {
   return (
     <View style={styles.card}>
       <Text style={styles.brandTitle}>Nail</Text>
