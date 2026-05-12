@@ -84,26 +84,35 @@ export function useScheduling() {
         const selectedClient = CLIENTS.find(
             (client) => client.value === data.client
         );
+
+        const formattedEvent = {
+            id: idEvent || uuidv4(),
+            client: data.client,
+            service: data.service,
+            title: selectedClient?.label || "",
+            color: COLORS.primary,
+            start: {
+                dateTime: data.dateStart.toISOString(),
+                timeZone: "local",
+            },
+            end: {
+                dateTime: data.dateEnd.toISOString(),
+                timeZone: "local",
+            }
+        }
+
         setEvents((prev) =>
-            prev.map((e) =>
+            idEvent ? prev.map((e) =>
                 e.id === idEvent
                     ? {
                         ...e,
-                        client: data.client,
-                        service: data.service,
-                        title: selectedClient?.label || "",
-                        start: {
-                            dateTime: data.dateStart.toISOString(),
-                            timeZone: "local",
-                        },
-                        end: {
-                            dateTime: data.dateEnd.toISOString(),
-                            timeZone: "local",
-                        },
+                        ...formattedEvent
                     }
                     : e
             )
+                : [...prev, formattedEvent]
         )
+
         bottomSheetRef.current.close()
         setIdEvent(null)
         setSelectedEvent(null)

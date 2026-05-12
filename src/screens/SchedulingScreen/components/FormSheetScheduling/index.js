@@ -41,88 +41,90 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit }) {
             <FormSheet ref={bottomSheetRef}>
                 <View style={styles.container}>
                     <View style={styles.form}>
-                        <Controller
-                            control={control}
-                            name="client"
-                            render={({ field: { onChange, value } }) => {
-                                const selectedLabel =
-                                    CLIENTS.find((item) => item.value === value)?.label || "";
+                        <View style={styles.selects}>
+                            <Controller
+                                control={control}
+                                name="client"
+                                render={({ field: { onChange, value } }) => {
+                                    const selectedLabel =
+                                        CLIENTS.find((item) => item.value === value)?.label || "";
 
-                                return (
-                                    <Menu
-                                        visible={visibleMenu}
-                                        onDismiss={() => setVisibleMenu(false)}
-                                        anchor={
-                                            <TextInput
-                                                label="Clientes"
-                                                value={selectedLabel}
-                                                mode="outlined"
-                                                editable={false}
-                                                right={
-                                                    <TextInput.Icon
-                                                        icon="menu-down"
-                                                        onPress={() => setVisibleMenu(true)}
-                                                    />
-                                                }
-                                                onPressIn={() => setVisibleMenu(true)}
-                                            />
-                                        }
-                                    >
-                                        {CLIENTS.map((item) => (
-                                            <Menu.Item
-                                                key={item.value}
-                                                title={item.label}
-                                                onPress={() => {
-                                                    onChange(item.value);
-                                                    setVisibleMenu(false);
-                                                }}
-                                            />
-                                        ))}
-                                    </Menu>
-                                );
-                            }}
-                        />
-                        <Controller
-                            control={control}
-                            name="service"
-                            render={({ field: { onChange, value } }) => {
-                                const selectedLabel =
-                                    SERVICES.find((item) => item.value === value)?.label || "";
+                                    return (
+                                        <Menu
+                                            visible={visibleMenu}
+                                            onDismiss={() => setVisibleMenu(false)}
+                                            anchor={
+                                                <TextInput
+                                                    label="Clientes"
+                                                    value={selectedLabel}
+                                                    mode="outlined"
+                                                    editable={false}
+                                                    right={
+                                                        <TextInput.Icon
+                                                            icon="menu-down"
+                                                            onPress={() => setVisibleMenu(true)}
+                                                        />
+                                                    }
+                                                    onPressIn={() => setVisibleMenu(true)}
+                                                />
+                                            }
+                                        >
+                                            {CLIENTS.map((item) => (
+                                                <Menu.Item
+                                                    key={item.value}
+                                                    title={item.label}
+                                                    onPress={() => {
+                                                        onChange(item.value);
+                                                        setVisibleMenu(false);
+                                                    }}
+                                                />
+                                            ))}
+                                        </Menu>
+                                    );
+                                }}
+                            />
+                            <Controller
+                                control={control}
+                                name="service"
+                                render={({ field: { onChange, value } }) => {
+                                    const selectedLabel =
+                                        SERVICES.find((item) => item.value === value)?.label || "";
 
-                                return (
-                                    <Menu
-                                        visible={visibleService}
-                                        onDismiss={() => setVisibleService(false)}
-                                        anchor={
-                                            <TextInput
-                                                label="Serviços"
-                                                value={selectedLabel}
-                                                mode="outlined"
-                                                editable={false}
-                                                right={
-                                                    <TextInput.Icon
-                                                        icon="menu-down"
-                                                        onPress={() => setVisibleService(true)}
-                                                    />
-                                                }
-                                                onPressIn={() => setVisibleService(true)}
-                                            />
-                                        }
-                                    >
-                                        {SERVICES.map((item) => (
-                                            <Menu.Item
-                                                key={item.value}
-                                                title={item.label}
-                                                onPress={() => {
-                                                    onChange(item.value);
-                                                    setVisibleService(false);
-                                                }}
-                                            />
-                                        ))}
-                                    </Menu>
-                                );
-                            }}
-                        />
+                                    return (
+                                        <Menu
+                                            visible={visibleService}
+                                            onDismiss={() => setVisibleService(false)}
+                                            anchor={
+                                                <TextInput
+                                                    label="Serviços"
+                                                    value={selectedLabel}
+                                                    mode="outlined"
+                                                    editable={false}
+                                                    right={
+                                                        <TextInput.Icon
+                                                            icon="menu-down"
+                                                            onPress={() => setVisibleService(true)}
+                                                        />
+                                                    }
+                                                    onPressIn={() => setVisibleService(true)}
+                                                />
+                                            }
+                                        >
+                                            {SERVICES.map((item) => (
+                                                <Menu.Item
+                                                    key={item.value}
+                                                    title={item.label}
+                                                    onPress={() => {
+                                                        onChange(item.value);
+                                                        setVisibleService(false);
+                                                    }}
+                                                />
+                                            ))}
+                                        </Menu>
+                                    );
+                                }}
+                            />
+                        </View>
                         <View style={styles.dates}>
                             <DateCard
                                 date={dateStart}
@@ -200,12 +202,16 @@ const styles = StyleSheet.create({
     },
 
     form: {
-        gap: 30,
+        gap: 10,
+    },
+
+    selects: {
+        gap: 4
     },
 
     dates: {
         flexDirection: "column",
-        gap: 20,
+        gap: 10,
     },
 
     button: {
