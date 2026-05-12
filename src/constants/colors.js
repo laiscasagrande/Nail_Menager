@@ -1,3 +1,10 @@
+export const COLORS = {
+  primary: '#E94B97',
+  white: '#FFFFFF',
+  black: '#000000',
+  gray: '#999999',
+};
+
 export const colors = {
   primary: '#D6336C',
   primaryDark: '#9C1F54',

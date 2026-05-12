@@ -15,7 +15,7 @@ export default function RootStack() {
       {!isLoggedIn ? (
         <Stack.Screen name="Auth" component={AuthenticationScreen} />
       ) : (
-        <Stack.Screen name="App" component={DrawerRoutes} />
+        <Stack.Screen name="DrawerRoutes" component={DrawerRoutes} />
       )}
     </Stack.Navigator>
   );

@@ -30,8 +30,9 @@ export default function AuthenticationScreen({ navigation }) {
 
   const handleLoginSubmit = () => {
   setIsLoggedIn(true);
-  navigation.navigate('App');
 };
+
+
 
 
   const handleRegisterSubmit = () => {
