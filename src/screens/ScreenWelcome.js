@@ -7,7 +7,7 @@ export default function ScreenWelcome({ onLoginPress, onRegisterPress, onGoogleS
     <View style={styles.card}>
       <Text style={styles.brandTitle}>Nail</Text>
       <Text style={styles.brandSubtitle}>Manager</Text>
-      <Text style={styles.description}>Sua rotina de beleza, organizada com perfeição</Text>
+      <Text style={styles.description}>Sua rotina de beleza, organizada com perfeição.</Text>
 
       <TouchableOpacity style={styles.primaryButton} onPress={onLoginPress}>
         <Text style={styles.primaryButtonText}>Entrar</Text>

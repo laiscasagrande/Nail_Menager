@@ -1,36 +1,21 @@
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AuthenticationScreen from '../screens/AuthenticationScreen';
 import DrawerRoutes from './DrawerRoutes';
+import { AuthContext } from '../context/AuthContext';
+
 
 const Stack = createNativeStackNavigator();
 
 export default function RootStack() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn } = useContext(AuthContext);
 
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       {!isLoggedIn ? (
-        <Stack.Screen
-          name="Auth"
-          component={AuthenticationScreen}
-          options={{
-            animationEnabled: false,
-          }}
-          initialParams={{ setIsLoggedIn }}
-        />
+        <Stack.Screen name="Auth" component={AuthenticationScreen} />
       ) : (
-        <Stack.Screen
-          name="App"
-          component={DrawerRoutes}
-          options={{
-            animationEnabled: false,
-          }}
-        />
+        <Stack.Screen name="App" component={DrawerRoutes} />
       )}
     </Stack.Navigator>
   );

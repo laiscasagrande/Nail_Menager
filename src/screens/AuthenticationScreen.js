@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -7,10 +7,14 @@ import {
   Text,
   View,
 } from 'react-native';
-import { ScreenLogin, ScreenRegister, ScreenWelcome } from './';
+import ScreenLogin from './ScreenLogin';
+import ScreenRegister from './ScreenRegister';
+import ScreenWelcome from './ScreenWelcome';
 import styles from '../constants/styles';
+import { AuthContext } from '../context/AuthContext';
 
-export default function AuthenticationScreen({ navigation, route }) {
+
+export default function AuthenticationScreen({ navigation }) {
   const [screen, setScreen] = useState('welcome');
   const [loginUser, setLoginUser] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -18,19 +22,20 @@ export default function AuthenticationScreen({ navigation, route }) {
   const [registerPassword, setRegisterPassword] = useState('');
   const [registerConfirm, setRegisterConfirm] = useState('');
 
+  const { setIsLoggedIn } = useContext(AuthContext); // pega do contexto
+
   const handleGoogleSignIn = () => {
     console.log('Entrar com Google');
   };
 
   const handleLoginSubmit = () => {
-    // Frontend only - navigate to drawer navigation
-    console.log('Login realizado (frontend only)', { loginUser, loginPassword });
-    route?.params?.setIsLoggedIn?.(true);
-  };
+  setIsLoggedIn(true);
+  navigation.navigate('App');
+};
+
 
   const handleRegisterSubmit = () => {
     console.log('Registrar usuário', { registerName, registerPassword, registerConfirm });
-    // After registration, navigate to login screen
     setScreen('login');
   };
 
