@@ -1,10 +1,8 @@
 import React, { useState, createContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import RootStack from './src/navigation/RootStack';
+import RootStack from './navigation/RootStack';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
-// Criamos o contexto aqui
-export const AuthContext = createContext();
+import { AuthContext } from './context/AuthContext';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
