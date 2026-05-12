@@ -10,7 +10,7 @@ import {
 import { TelaLogin, TelaCadastro, TelaBoasVindas } from './';
 import styles from '../constants/styles';
 
-export default function AuthenticationScreen({ navigation }) {
+export default function AuthenticationScreen({ navigation, route }) {
   const [screen, setScreen] = useState('welcome');
   const [loginUser, setLoginUser] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -23,9 +23,9 @@ export default function AuthenticationScreen({ navigation }) {
   };
 
   const handleLoginSubmit = () => {
-    // Frontend only - navigate directly to ScheduleScreen
+    // Frontend only - navigate to drawer navigation
     console.log('Login realizado (frontend only)', { loginUser, loginPassword });
-    navigation.replace('ScheduleScreen');
+    route?.params?.setIsLoggedIn?.(true);
   };
 
   const handleRegisterSubmit = () => {
