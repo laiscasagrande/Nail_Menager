@@ -6,6 +6,7 @@ import { StyleSheet } from "react-native";
 import CalendarioTela from "../screens/CalendarioTela";
 import { COLORS } from "../constants/colors";
 import { ICONS } from "../constants/icons";
+import ClientsScreen from "../screens/ClientsScreen";
 
 const DrawerNav = createDrawerNavigator();
 
@@ -36,7 +37,7 @@ export default function DrawerRoutes() {
             />
             <DrawerNav.Screen
                 name="Clientes"
-                component={CalendarioTela}
+                component={ClientsScreen}
                 options={{
                     drawerIcon: ({ color, size }) => (
                         <ICONS.usersRound/>

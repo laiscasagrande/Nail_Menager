@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -26,6 +26,8 @@ const clientes = [
 ];
 
 export default function ClientsScreen() {
+
+    const [clienteAberto, setClienteAberto] = useState(null);
 
     return (
         <View style={styles.container}>
@@ -61,11 +63,12 @@ export default function ClientsScreen() {
                                 {item.telefone}
                             </Text>
 
-                            {item.alergia &&(
+                            {clienteAberto} === item.id && item.alergia && (
                                 <Text style={styles.alergia}>
                                     {item.alergia}
                                 </Text>
-                            )}
+                            )
+
                         </View>
 
                         <View style={styles.actions}>
@@ -81,11 +84,24 @@ export default function ClientsScreen() {
                             color="#ff5ba7"
                             />
 
+                            <TouchableOpacity
+                            onPress={() =>
+                                setClienteAberto(
+                                    clienteAberto === item.id ? null : item.id
+                                )
+                            }
+                        >
                             <Ionicons
-                            name="eye-outline"
+                            name={
+                                clienteAberto === item.id
+                                ? 'eye-off-outline'
+                                : 'eye-outline'
+                            }
                             size={22}
                             color="#bbb"
                             />
+                        </TouchableOpacity>
+
                         </View>
 
                     </View>
