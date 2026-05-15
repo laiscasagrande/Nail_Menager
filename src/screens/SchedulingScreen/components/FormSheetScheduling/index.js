@@ -19,7 +19,7 @@ export const SERVICES = [
     { label: "Banho de Gel", value: "3" },
 ];
 
-export default function FormSheetScheduling({ bottomSheetRef, onSubmit }) {
+export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel, onCompleted, isEditing, onReactivate }) {
 
     const [modal, setModal] = useState({
         visible: false,
@@ -33,8 +33,9 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit }) {
     const [visibleMenu, setVisibleMenu] = useState(false);
     const [visibleService, setVisibleService] = useState(false);
     const eventValue = watch("event");
-    const selectedLabel =
-        CLIENTS.find((item) => String(item.value) === String(eventValue))?.label || "";
+    const status = watch("status");
+    const statusIsOverdue = status === "scheduled" && new Date(dateEnd) < new Date();
+    const selectedLabel = CLIENTS.find((item) => String(item.value) === String(eventValue))?.label || "";
 
     return (
         <>
@@ -169,11 +170,41 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit }) {
                         </View>
                     </View>
                     <View style={styles.containerButton}>
-                        <Button style={styles.button} onPress={handleSubmit(onSubmit)}>
-                            <Text style={styles.buttonText}>
-                                Salvar
-                            </Text>
-                        </Button>
+                        {statusIsOverdue ?
+                            <Button style={styles.buttonCompleted} onPress={onCompleted}>
+                                <Text style={styles.buttonText}>
+                                    Concluir
+                                </Text>
+                            </Button>
+                            : status === "scheduled" ? (
+                                <>
+                                    <Button style={styles.buttonSave} onPress={handleSubmit(onSubmit)}>
+                                        <Text style={styles.buttonText}>
+                                            Salvar
+                                        </Text>
+                                    </Button>
+                                    {isEditing && (
+                                        <Button style={styles.buttonCancel} onPress={onCancel}>
+                                            <Text style={styles.buttonText}>
+                                                Cancelar
+                                            </Text>
+                                        </Button>
+                                    )}
+                                </>
+                            ) : status === "cancelled" ? (
+                                <>
+                                    <Button style={styles.buttonSave} onPress={handleSubmit(onSubmit)}>
+                                        <Text style={styles.buttonText}>
+                                            Salvar
+                                        </Text>
+                                    </Button>
+                                    <Button style={styles.buttonCancel} onPress={onReactivate}>
+                                        <Text style={styles.buttonText}>
+                                            Reativar
+                                        </Text>
+                                    </Button>
+                                </>
+                            ) : null}
                     </View>
                 </View>
             </FormSheet>
@@ -214,10 +245,30 @@ const styles = StyleSheet.create({
         gap: 10,
     },
 
-    button: {
+    buttonSave: {
         borderRadius: 10,
         backgroundColor: COLORS.primary,
-        width: 282,
+        width: 150,
+        height: 58,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 15,
+    },
+
+    buttonCancel: {
+        borderRadius: 10,
+        backgroundColor: COLORS.gray,
+        width: 150,
+        height: 58,
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 15,
+    },
+
+    buttonCompleted: {
+        borderRadius: 10,
+        backgroundColor: COLORS.gray,
+        width: 150,
         height: 58,
         alignItems: "center",
         justifyContent: "center",
@@ -231,5 +282,8 @@ const styles = StyleSheet.create({
 
     containerButton: {
         alignItems: "center",
+        flexDirection: "row",
+        gap: 10,
+        justifyContent: "center",
     }
 });

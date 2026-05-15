@@ -5,7 +5,8 @@ import { formScheduling } from "../../../schemas/schedulingSchema";
 import { v4 as uuidv4 } from 'uuid';
 import { COLORS } from "../../../constants/colors";
 import { DraggingEvent } from "@howljs/calendar-kit";
-import { View } from "react-native";
+import { Text, View } from "react-native";
+import { is } from "zod/locales";
 
 export const CLIENTS = [
     { label: "Laís Kaminski Casagrande", value: "1" },
@@ -18,6 +19,7 @@ export function useScheduling() {
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [idEvent, setIdEvent] = useState(null)
+    const [isEditing, setIsEditing] = useState(false)
 
     const bottomSheetRef = useRef(null);
 
@@ -28,6 +30,7 @@ export function useScheduling() {
             service: "",
             dateStart: new Date(),
             dateEnd: new Date(),
+            status: "scheduled"
         },
     })
 
@@ -37,6 +40,7 @@ export function useScheduling() {
 
     const handleDragCreateEnd = (event) => {
         if (!event) return;
+        setIsEditing(false)
 
         bottomSheetRef.current.expand();
 
@@ -44,7 +48,7 @@ export function useScheduling() {
             ...event,
             id: uuidv4(),
             title: "",
-            color: COLORS.primary,
+            status: "scheduled"
         };
 
         methods.reset({
@@ -52,10 +56,10 @@ export function useScheduling() {
             service: "",
             dateStart: new Date(event.start.dateTime),
             dateEnd: new Date(event.end.dateTime),
+            status: "scheduled"
         });
 
         setIdEvent(createdEvent.id)
-
         setEvents((prev) => [...prev, createdEvent]);
     };
 
@@ -80,17 +84,18 @@ export function useScheduling() {
     };
 
     function onSubmit(data) {
+        console.log("data: ", data)
 
         const selectedClient = CLIENTS.find(
             (client) => client.value === data.client
         );
+        const status = methods.watch("status")
 
         const formattedEvent = {
             id: idEvent || uuidv4(),
             client: data.client,
             service: data.service,
             title: selectedClient?.label || "",
-            color: COLORS.primary,
             start: {
                 dateTime: data.dateStart.toISOString(),
                 timeZone: "local",
@@ -98,7 +103,8 @@ export function useScheduling() {
             end: {
                 dateTime: data.dateEnd.toISOString(),
                 timeZone: "local",
-            }
+            },
+            status: status,
         }
 
         setEvents((prev) =>
@@ -116,11 +122,70 @@ export function useScheduling() {
         bottomSheetRef.current.close()
         setIdEvent(null)
         setSelectedEvent(null)
-        methods.reset()
+        methods.reset({
+            client: "",
+            service: "",
+            dateStart: new Date(),
+            dateEnd: new Date(),
+            status: "scheduled"
+        })
+    }
+
+    function handlePressCancel() {
+
+        setEvents((prev) =>
+            prev.map((e) =>
+                e.id === idEvent
+                    ? {
+                        ...e,
+                        status: "cancelled"
+                    }
+                    : e
+            )
+        )
+
+        bottomSheetRef.current.close()
+        setSelectedEvent(null)
+    }
+
+    function handlePressCompleted() {
+
+        setEvents((prev) =>
+            prev.map((e) =>
+                e.id === idEvent
+                    ? {
+                        ...e,
+                        status: "completed",
+                    }
+                    : e
+            )
+        );
+
+        bottomSheetRef.current.close();
+        setSelectedEvent(null)
+    }
+
+    function handlePressonReactivate(){
+
+        setEvents((prev) =>
+            prev.map((e) =>
+                e.id === idEvent
+                    ? {
+                        ...e,
+                        status: "scheduled",
+                    }
+                    : e
+            )
+        );
+
+        bottomSheetRef.current.close();
+        setSelectedEvent(null)
     }
 
     function handlePressEvent(event) {
+        setIsEditing(true)
         setSelectedEvent(event)
+        const status = methods.watch("status")
 
         const start = new Date(event.start.dateTime)
         const end = new Date(event.end.dateTime)
@@ -129,7 +194,8 @@ export function useScheduling() {
             client: event.client,
             service: event.service,
             dateStart: start,
-            dateEnd: end
+            dateEnd: end,
+            status: event.status
         })
 
         setIdEvent(event.id)
@@ -137,32 +203,35 @@ export function useScheduling() {
         bottomSheetRef.current.expand()
     }
 
-    const renderDraggingEvent = useCallback((props) => {
+    const renderEvent = useCallback((event) => {
+
+        const isOverdue =
+            event.status === "scheduled" &&
+            new Date(event.end.dateTime) < new Date();
+
+        const backgroundColor =
+            isOverdue
+                ? COLORS.red
+                : event.status === "cancelled"
+                    ? COLORS.gray
+                    : event.status === "completed"
+                        ? COLORS.green
+                        : COLORS.primary;
+
         return (
-            <DraggingEvent
-                {...props}
-                TopEdgeComponent={
-                    <View
-                        style={{
-                            height: 10,
-                            width: "100%",
-                            backgroundColor: COLORS.primary,
-                            position: "absolute",
-                        }}
-                    />
-                }
-                BottomEdgeComponent={
-                    <View
-                        style={{
-                            height: 10,
-                            width: "100%",
-                            backgroundColor: COLORS.primary,
-                            bottom: 0,
-                            position: "absolute",
-                        }}
-                    />
-                }
-            />
+            <View
+                style={{
+                    flex: 1,
+                    backgroundColor,
+                    borderRadius: 8,
+                    padding: 4,
+                    justifyContent: "center",
+                }}
+            >
+                <Text style={{ color: COLORS.white }}>
+                    {event.title}
+                </Text>
+            </View>
         );
     }, []);
 
@@ -170,6 +239,7 @@ export function useScheduling() {
         events,
         selectedEvent,
         bottomSheetRef,
+        isEditing,
         methods,
 
         handlers: {
@@ -179,8 +249,12 @@ export function useScheduling() {
             handleDragEnd,
             handlePressEvent,
             onSubmit,
+            handlePressCancel,
+            handlePressCompleted,
+            handlePressonReactivate
+
         },
 
-        renderDraggingEvent,
+        renderEvent,
     }
 }
