@@ -71,7 +71,7 @@ export function useScheduling() {
     };
 
     const handleDragEnd = (event) => {
-        console.log(event)
+        
         setEvents((prev) =>
             prev.map((e) =>
                 e.id === event.id
@@ -87,7 +87,6 @@ export function useScheduling() {
     };
 
     async function handleCreateScheduling(data) {
-        console.log("Criando agendamento com os dados:", data);
 
         const selectedClient = CLIENTS.find(
             (client) => client.value === data.client
@@ -119,7 +118,6 @@ export function useScheduling() {
     }
 
     async function handleEditScheduling(data) {
-        console.log("Editando agendamento com os dados:", data);
 
         const selectedClient = CLIENTS.find(
             (client) => client.value === data.client
@@ -179,8 +177,6 @@ export function useScheduling() {
 
             bottomSheetRef.current.expand()
             if (schedulingSnap.exists()) {
-                console.log("Agendamento encontrado:", schedulingSnap.data());
-
                 methods.reset({
                     id: schedulingSnap.id,
                     client: schedulingSnap.data().client,
@@ -214,7 +210,6 @@ export function useScheduling() {
                 },
             }))
 
-            console.log("Agendamentos buscados:", data);
             setEvents(data)
         } catch (error) {
             console.log("Erro ao buscar agendamentos:", error);
