@@ -206,7 +206,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                             Salvar
                                         </Text>
                                     </Button>
-                                    <Button style={styles.buttonCancel} onPress={onReactivate}>
+                                    <Button style={styles.buttonCancel} onPress={handleSubmit(onReactivate)}>
                                         <Text style={styles.buttonText}>
                                             Reativar
                                         </Text>

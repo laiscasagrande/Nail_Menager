@@ -125,7 +125,8 @@ export function useScheduling() {
                 status: "scheduled",
             })
 
-            bottomSheetRef.current.close()
+            await getSchedulings();
+
             setIdEvent(null)
             setSelectedEvent(null)
             methods.reset({
@@ -135,6 +136,7 @@ export function useScheduling() {
                 dateEnd: new Date(),
                 status: "scheduled"
             })
+            bottomSheetRef.current.close()
         } catch (error) {
             console.log("Erro ao criar agendamento:", error);
         }
@@ -300,16 +302,16 @@ export function useScheduling() {
         }
     }
 
-    async function handlePressonReactivate() {
+    async function handlePressonReactivate(data) {
 
         try {
-            await updateDoc(doc(db, "scheduling", idEvent), {
+            await updateDoc(doc(db, "scheduling", data.id), {
                 status: "scheduled",
             });
 
             setEvents((prev) =>
                 prev.map((e) =>
-                    e.id === idEvent
+                    e.id === data.id
                         ? {
                             ...e,
                             status: "scheduled",
