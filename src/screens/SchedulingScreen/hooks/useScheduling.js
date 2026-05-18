@@ -16,6 +16,24 @@ export const CLIENTS = [
     { label: "Maria Souza", value: "3" },
 ];
 
+export const SERVICES = [
+    {
+        label: "Manicure Tradicional",
+        value: "1",
+        price: 50
+    },
+    {
+        label: "Alongamento em Gel",
+        value: "2",
+        price: 120
+    },
+    {
+        label: "Banho de Gel",
+        value: "3",
+        price: 80
+    },
+];
+
 export function useScheduling() {
 
     const [events, setEvents] = useState([]);
@@ -71,7 +89,7 @@ export function useScheduling() {
     };
 
     const handleDragEnd = (event) => {
-        
+
         setEvents((prev) =>
             prev.map((e) =>
                 e.id === event.id
@@ -92,10 +110,15 @@ export function useScheduling() {
             (client) => client.value === data.client
         );
 
+        const selectedService = SERVICES.find(
+            (service) => service.value === data.service
+        );
+
         try {
             await addDoc(collection(db, "scheduling"), {
                 client: data.client,
                 service: data.service,
+                servicePrice: selectedService?.price || 0,
                 title: selectedClient?.label || "",
                 start: Timestamp.fromDate(new Date(data.dateStart)),
                 end: Timestamp.fromDate(new Date(data.dateEnd)),
@@ -123,10 +146,15 @@ export function useScheduling() {
             (client) => client.value === data.client
         );
 
+        const selectedService = SERVICES.find(
+            (service) => service.value === data.service
+        );
+
         try {
             await updateDoc(doc(db, "scheduling", data.id), {
                 client: data.client,
                 service: data.service,
+                servicePrice: selectedService?.price || 0,
                 title: selectedClient?.label || "",
                 start: Timestamp.fromDate(data.dateStart),
                 end: Timestamp.fromDate(data.dateEnd),
@@ -143,6 +171,7 @@ export function useScheduling() {
                             ...event,
                             client: data.client,
                             service: data.service,
+                            servicePrice: selectedService?.price || 0,
                             title: selectedClient?.label || "",
                             start: {
                                 dateTime: data.dateStart.toISOString(),
