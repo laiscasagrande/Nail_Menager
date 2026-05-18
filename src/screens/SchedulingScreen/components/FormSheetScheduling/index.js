@@ -19,7 +19,7 @@ export const SERVICES = [
     { label: "Banho de Gel", value: "3" },
 ];
 
-export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel, onCompleted, isEditing, onReactivate }) {
+export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel, onCompleted, isEditing, onReactivate, onEdit }) {
 
     const [modal, setModal] = useState({
         visible: false,
@@ -36,6 +36,14 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
     const status = watch("status");
     const statusIsOverdue = status === "scheduled" && new Date(dateEnd) < new Date();
     const selectedLabel = CLIENTS.find((item) => String(item.value) === String(eventValue))?.label || "";
+
+    function callFunctionCreateOrEdit() {
+    if (isEditing) {
+        handleSubmit(onEdit)();
+    } else {
+        handleSubmit(onSubmit)();
+    }
+}
 
     return (
         <>
@@ -171,20 +179,20 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                     </View>
                     <View style={styles.containerButton}>
                         {statusIsOverdue ?
-                            <Button style={styles.buttonCompleted} onPress={onCompleted}>
+                            <Button style={styles.buttonCompleted} onPress={handleSubmit(onCompleted)}>
                                 <Text style={styles.buttonText}>
                                     Concluir
                                 </Text>
                             </Button>
                             : status === "scheduled" ? (
                                 <>
-                                    <Button style={styles.buttonSave} onPress={handleSubmit(onSubmit)}>
+                                    <Button style={styles.buttonSave} onPress={callFunctionCreateOrEdit}>
                                         <Text style={styles.buttonText}>
                                             Salvar
                                         </Text>
                                     </Button>
                                     {isEditing && (
-                                        <Button style={styles.buttonCancel} onPress={onCancel}>
+                                        <Button style={styles.buttonCancel} onPress={handleSubmit(onCancel)}>
                                             <Text style={styles.buttonText}>
                                                 Cancelar
                                             </Text>
@@ -193,7 +201,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                 </>
                             ) : status === "cancelled" ? (
                                 <>
-                                    <Button style={styles.buttonSave} onPress={handleSubmit(onSubmit)}>
+                                    <Button style={styles.buttonSave} onPress={callFunctionCreateOrEdit}>
                                         <Text style={styles.buttonText}>
                                             Salvar
                                         </Text>

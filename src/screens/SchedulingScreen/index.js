@@ -20,7 +20,7 @@ export default function SchedulingScreen() {
                 allowDragToEdit
                 dragStep={15}
                 selectedEvent={selectedEvent}
-                onPressEvent={(event) => handlers.handlePressEvent(event)}
+                onPressEvent={(event) => handlers.getSchedulingById(event.id)}
                 onDragCreateEventStart={handlers.handleDragCreateStart}
                 onDragCreateEventEnd={handlers.handleDragCreateEnd}
                 onDragSelectedEventStart={handlers.handleDragStart}
@@ -35,11 +35,12 @@ export default function SchedulingScreen() {
                 <FormProvider {...methods}>
                     <FormSheetScheduling
                         bottomSheetRef={bottomSheetRef}
-                        onSubmit={handlers.onSubmit}
+                        onSubmit={handlers.handleCreateScheduling}
                         onCancel={handlers.handlePressCancel}
                         onCompleted={handlers.handlePressCompleted}
                         isEditing={isEditing}
                         onReactivate={handlers.handlePressonReactivate}
+                        onEdit={handlers.handleEditScheduling}
                     />
                 </FormProvider>
 
