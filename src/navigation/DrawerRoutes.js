@@ -9,7 +9,7 @@ import { ICONS } from "../constants/icons";
 import BillingScreen from "../screens/BillingScreen";
 import SchedulingScreen from "../screens/SchedulingScreen";
 //import ScreenServices from "../screens/ScreenServices";
-import ClientScreen from "../screens/ClientScreen";
+import ClientsScreen from "../screens/ClientsScreen";
 
 const DrawerNav = createDrawerNavigator();
 
@@ -40,7 +40,7 @@ export default function DrawerRoutes() {
             />
             <DrawerNav.Screen
                 name="Clientes"
-                component={ClientScreen}
+                component={ClientsScreen}
                 options={{
                     drawerIcon: ({ color, size }) => (
                         <ICONS.usersRound/>
