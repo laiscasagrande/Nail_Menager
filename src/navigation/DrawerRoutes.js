@@ -8,7 +8,8 @@ import { COLORS } from "../constants/colors";
 import { ICONS } from "../constants/icons";
 import BillingScreen from "../screens/BillingScreen";
 import SchedulingScreen from "../screens/SchedulingScreen";
-import ScreenServices from "../screens/ScreenServices";
+//import ScreenServices from "../screens/ScreenServices";
+import ClientScreen from "../screens/ClientScreen";
 
 const DrawerNav = createDrawerNavigator();
 
@@ -39,7 +40,7 @@ export default function DrawerRoutes() {
             />
             <DrawerNav.Screen
                 name="Clientes"
-                component={ScheduleScreen}
+                component={ClientScreen}
                 options={{
                     drawerIcon: ({ color, size }) => (
                         <ICONS.usersRound/>
@@ -48,8 +49,8 @@ export default function DrawerRoutes() {
             />
             <DrawerNav.Screen
                 name="Serviços"
-                component={ScreenServices}
-                options={{
+                component={ScheduleScreen}
+                options={{  
                     drawerIcon: ({ color, size }) => (
                         <ICONS.sparkles/>
                     ),

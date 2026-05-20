@@ -37,26 +37,16 @@ const PaymentFilter = (Billing, mes) => {
     }); 
 };
 
-// Agrupar os pagamentos por dia
-const GroupByDay = {};
-PaymentFilter(Billing, 5).forEach((item)  => {
-    if (!GroupByDay[item.date]) {
-        GroupByDay[item.date] = 0
-    }
-    GroupByDay[item.date] += item.amount;
-});
-
-// Calcular o total de faturamento do mês atual
-const PaymentBilling = PaymentFilter(Billing, 5).reduce((acumulator, currentValue) => {
-    return acumulator + currentValue.amount;
-}, 0);  
+// Meses no JS sao baseados em 0 (0 = janeiro, 5 = junho)
+const currentMonth = 5;
+const filteredBilling = PaymentFilter(Billing, currentMonth);
 
 export default function BillingScreen() {
     return (
         <View style={styles.container}>
             <FlatList
-                data={Object.entries(GroupByDay)}
-                keyExtractor={(item) => item[0]}
+                data={filteredBilling}
+                keyExtractor={(item) => item.id}
                 renderItem={({ item }) => <BillingCardComponent item={item} />}
                 contentContainerStyle={styles.listContent}
             />
