@@ -21,6 +21,11 @@ import ActionButtonAdd from '../components/ActionButtonAdd';
 import FormSheet from '../components/FormSheet';
 
 import { COLORS } from '../constants/colors';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { formCustomer } from '../schemas/customerSchema';
+import { addDoc, collection, getDocs } from 'firebase/firestore';
+import { db } from '../services/firebase';
 
 const clientes = [
     {
@@ -40,12 +45,18 @@ const clientes = [
 export default function ClientsScreen() {
 
     const [clienteAberto, setClienteAberto] = useState(null);
-
-    const [nome, setNome] = useState('');
-    const [telefone, setTelefone] = useState('');
-    const [observacao, setObservacao] = useState('');
-
     const [sheetIndex, setSheetIndex] = useState(0);
+    const [customers, setCustomers] = useState([]);
+
+    const methods = useForm({
+        resolver: zodResolver(formCustomer),
+        defaultValues: {
+            id: "",
+            name: "",
+            telephone: "",
+            observation: "",
+        }
+    })
 
     const bottomSheetRef = useRef(null);
 
@@ -69,26 +80,58 @@ export default function ClientsScreen() {
         bottomSheetRef.current?.snapToIndex(0);
     }
 
-    function handleSalvar() {
-        const novoCliente = {
-            nome,
-            telefone,
-            observacao,
-        };
+    // function handleSalvar() {
+    //     const novoCliente = {
+    //         nome,
+    //         telefone,
+    //         observacao,
+    //     };
 
-        console.log(novoCliente);
+    //     console.log(novoCliente);
 
-        fecharSheet();
+    //     fecharSheet();
 
-        setNome('');
-        setTelefone('');
-        setObservacao('');
+    //     setNome('');
+    //     setTelefone('');
+    //     setObservacao('');
+    // }
+
+    async function handleSaveClient(data) {
+        try {
+            await addDoc(collection(db, "customers"), {
+                name: data.name,
+                telephone: data.telephone,
+                observation: data.observation,
+            });
+
+            bottomSheetRef.current.close()
+        } catch (error) {
+            console.log(error)
+        }
     }
+
+    async function getCustomers() {
+        try {
+            const customers = await getDocs(collection(db, "customers"));
+            const data = customers.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }))
+            
+            setCustomers(data);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        getCustomers();
+    }, [])
 
     return (
         <>
             <FlatList
-                data={clientes}
+                data={customers}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={{
                     paddingTop: 10,
@@ -101,7 +144,7 @@ export default function ClientsScreen() {
 
                         <View style={styles.avatar}>
                             <Text style={styles.avatarText}>
-                                {item.nome
+                                {item.name
                                     .split(' ')
                                     .map((n) => n[0])
                                     .slice(0, 2)
@@ -112,16 +155,16 @@ export default function ClientsScreen() {
 
                         <View style={styles.info}>
                             <Text style={styles.nome}>
-                                {item.nome}
+                                {item.name}
                             </Text>
 
                             <Text style={styles.telefone}>
-                                {item.telefone}
+                                {item.telephone}
                             </Text>
 
-                            {clienteAberto === item.id && item.alergia && (
+                            {clienteAberto === item.id && item.observation && (
                                 <Text style={styles.alergia}>
-                                    {item.alergia}
+                                    {item.observation}
                                 </Text>
                             )}
                         </View>
@@ -181,26 +224,42 @@ export default function ClientsScreen() {
                         <View style={styles.inputContainer}>
                             <AntDesign name="user" size={20} color="#c7c7c7" />
 
-                            <TextInput
-                                placeholder="Nome"
-                                placeholderTextColor="#c7c7c7"
-                                value={nome}
-                                onChangeText={setNome}
-                                style={styles.input}
-                            />
+                            <Controller
+                                control={methods.control}
+                                name="name"
+                                render={({ field: { onChange, value } }) => (
+                                    <TextInput
+                                        placeholder="Nome"
+                                        placeholderTextColor="#c7c7c7"
+                                        style={styles.input}
+                                        value={value}
+                                        onChangeText={onChange}
+                                    />
+                                )}
+                            >
+
+                            </Controller>
                         </View>
 
                         <View style={styles.inputContainer}>
                             <Feather name="smartphone" size={20} color="#c7c7c7" />
 
-                            <TextInput
-                                placeholder="Telefone"
-                                placeholderTextColor="#c7c7c7"
-                                keyboardType="phone-pad"
-                                value={telefone}
-                                onChangeText={setTelefone}
-                                style={styles.input}
-                            />
+                            <Controller
+                                control={methods.control}
+                                name="telephone"
+                                render={({ field: { onChange, value } }) => (
+                                    <TextInput
+                                        placeholder="Telefone"
+                                        placeholderTextColor="#c7c7c7"
+                                        value={value}
+                                        onChangeText={onChange}
+                                        keyboardType="phone-pad"
+                                        style={styles.input}
+                                    />
+                                )}
+                            >
+
+                            </Controller>
                         </View>
 
                         <View style={styles.textAreaContainer}>
@@ -210,15 +269,23 @@ export default function ClientsScreen() {
                                 color="#c7c7c7"
                             />
 
-                            <TextInput
-                                placeholder="Observação"
-                                placeholderTextColor="#c7c7c7"
-                                multiline
-                                textAlignVertical="top"
-                                value={observacao}
-                                onChangeText={setObservacao}
-                                style={styles.textArea}
-                            />
+                            <Controller
+                                control={methods.control}
+                                name="observation"
+                                render={({ field: { onChange, value } }) => (
+                                    <TextInput
+                                        placeholder="Observação"
+                                        placeholderTextColor="#c7c7c7"
+                                        multiline
+                                        value={value}
+                                        onChangeText={onChange}
+                                        textAlignVertical="top"
+                                        style={styles.textArea}
+                                    />
+                                )}
+                            >
+
+                            </Controller>
                         </View>
 
                     </View>
@@ -227,7 +294,7 @@ export default function ClientsScreen() {
                         <TouchableOpacity
                             style={styles.buttonSave}
                         >
-                            <Text style={styles.buttonText}>
+                            <Text style={styles.buttonText} onPress={methods.handleSubmit(handleSaveClient)}>
                                 Salvar
                             </Text>
                         </TouchableOpacity>

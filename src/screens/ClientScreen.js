@@ -4,6 +4,9 @@ import { TextInput } from "react-native-paper";
 import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "../services/firebase";
 import { COLORS } from "../constants/colors";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { formClient } from "../schemas/customerSchema";
 
 export default function ClientScreen() {
     const [clients, setClients] = useState([]);
@@ -11,6 +14,16 @@ export default function ClientScreen() {
     const [telefone, setTelefone] = useState("");
     const [editingId, setEditingId] = useState(null);
     const [loading, setLoading] = useState(false);
+
+    const methods = useForm({
+        resolver: zodResolver(formClient),
+        defaultValues: {
+            id: "",
+            name: "",
+            telephone: "",
+            observation: "",
+        }
+    })
 
     useEffect(() => {
         seekClients();
@@ -134,14 +147,14 @@ export default function ClientScreen() {
                 <Text style={styles.title}>Clientes</Text>
                 <TextInput
                     label="Nome"
-                    value={name}
+                    {...register("name", { required: true })}
                     mode="outlined"
                     onChangeText={setName}
                     style={styles.input}
                 />
                 <TextInput
                     label="Telefone"
-                    value={telefone}
+                    {...register("telephone", { required: true })}
                     mode="outlined"
                     onChangeText={setTelefone}
                     keyboardType="phone-pad"
