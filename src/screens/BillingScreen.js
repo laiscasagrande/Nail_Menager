@@ -1,66 +1,409 @@
-import React from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
-import BillingCardComponent from '../components/BillingCard';
-
-// Dados de exemplo para faturamento
-const Billing = [
-    {
-        id: '1',
-        clientName: 'Maria Souza',
-        date: '2024-06-01',
-        status: 'Pago',
-        amount: 150.00,
-        description: 'Faturamento do dia 01/06/2024',
-    },
-    {
-        id: '2',
-        clientName: 'Mikaela Pera',
-        date: '2024-06-02',
-        status: 'Pendente',
-        amount: 200.00,
-        description: 'Faturamento do dia 02/06/2024',
-    },
-    {
-        id: '3',
-        clientName: 'Maisha Fernandes',
-        date: '2024-06-03',
-        status: 'Pago',
-        amount: 180.00,
-        description: 'Faturamento do dia 03/06/2024',
-    },
-];
-
-// Função para filtrar os pagamentos do mês atual
-const PaymentFilter = (Billing, mes) => {
-    return Billing.filter((item) => {
-        return item.status === 'Pago' && new Date(item.date).getMonth() === mes;
-    }); 
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../services/firebase';
+import { PieChart } from 'react-native-chart-kit';
+import { Dimensions } from 'react-native';
+ 
+const screenWidth = Dimensions.get('window').width;
+ 
+const STATUS_CONFIG = {
+  completed: {
+    label: 'Concluído',
+    color: '#4CAF50',
+    legendFontColor: '#555',
+  },
+  scheduled: {
+    label: 'Agendado',
+    color: '#2196F3',
+    legendFontColor: '#555',
+  },
+  cancelled: {
+    label: 'Cancelado',
+    color: '#F44336',
+    legendFontColor: '#555',
+  },
+  pending: {
+    label: 'Pendente',
+    color: '#FF9800',
+    legendFontColor: '#555',
+  },
+  unknown: {
+    label: 'Outros',
+    color: '#9E9E9E',
+    legendFontColor: '#555',
+  },
 };
+ 
 
-// Meses no JS sao baseados em 0 (0 = janeiro, 5 = junho)
-const currentMonth = 5;
-const filteredBilling = PaymentFilter(Billing, currentMonth);
+const MONTHS = [
+  'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+];
+ 
+export default function FaturamentoTela() {
 
-export default function BillingScreen() {
+  const [appointments, setAppointments] = useState([]); 
+  const [loading, setLoading] = useState(true);          
+ 
+
+  const today = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(today.getMonth());     
+  const [selectedYear, setSelectedYear] = useState(today.getFullYear());
+ 
+  
+  useEffect(() => {
+    async function fetchAppointments() {
+      setLoading(true);
+      try {
+      
+        const snapshot = await getDocs(collection(db, 'scheduling'));
+ 
+        const list = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+ 
+        setAppointments(list);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+ 
+    fetchAppointments();
+  }, []); 
+
+  const appointmentsInMonth = appointments.filter((item) => {
+    if (!item.start) return false; 
+    const date = item.start.toDate(); 
     return (
-        <View style={styles.container}>
-            <FlatList
-                data={filteredBilling}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => <BillingCardComponent item={item} />}
-                contentContainerStyle={styles.listContent}
-            />
-        </View>
+      date.getMonth() === selectedMonth &&
+      date.getFullYear() === selectedYear
     );
+  });
+ 
+
+  const completedAppointments = appointmentsInMonth.filter(
+    (item) => item.status === 'completed'
+  );
+ 
+
+
+  const totalRevenue = completedAppointments.reduce(
+    (sum, item) => sum + Number(item.servicePrice || 0),
+    0 
+  );
+
+  function buildPieData() {
+
+    const counter = {};
+ 
+    appointmentsInMonth.forEach((item) => {
+      const status = item.status || 'unknown';
+      if (!counter[status]) counter[status] = 0;
+      counter[status]++;
+    });
+
+    return Object.keys(counter).map((status) => {
+        const config = STATUS_CONFIG[status] || STATUS_CONFIG.unknown;
+        return {
+            name: config.label,
+            population: counter[status],
+            color: config.color,
+            legendFontColor: config.legendFontColor,
+            legendFontSize: 13,
+        };
+    });
 }
 
-const styles = StyleSheet.create({
+    const pieData = buildPieData();
+        function goToPreviousMonth() {
+            if (selectedMonth === 0) {
+                setSelectedYear(selectedYear - 1);
+                setSelectedMonth(11);
+            } else {
+                setSelectedMonth(selectedMonth - 1);
+            }
+        }
+        function goToNextMonth() {
+            if (selectedMonth === 11) {
+                setSelectedYear(selectedYear + 1);
+                setSelectedMonth(0);
+            } else {
+                setSelectedMonth(selectedMonth + 1);
+            }
+        }
+
+    function formatDate(timestamp) {
+        if (!timestamp) return '-';
+        const date = timestamp.toDate();
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+      if (loading) {
+        return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#E91E8C" />
+        <Text style={styles.loadingText}>Carregando faturamento...</Text>
+      </View>
+    );
+  }
+
+  function renderItem ({ item }) {
+    return (
+        <View style={styles.appointmentItem}>
+            <Text style={styles.appointmentText}>{item.clientName || 'Cliente Desconecido'}</Text>
+            <Text style={styles.appointmentText}>{item.serviceName || 'Serviço Desconecido'}</Text>
+            <Text style={styles.appointmentText}>{formatDate(item.start)}</Text>
+            <Text style={styles.appointmentText}>R$ {item.servicePrice || '0.00'}</Text>
+        </View>
+    );
+  }
+
+  return (
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+
+        <Text style={styles.title}>Faturamento</Text>
+
+         <View style={styles.monthSelector}>
+        <TouchableOpacity onPress={goToPreviousMonth} style={styles.arrowButton}>
+          <Text style={styles.arrowText}>{'‹'}</Text>
+        </TouchableOpacity>
+ 
+        <Text style={styles.monthText}>
+          {MONTHS[selectedMonth]} {selectedYear}
+        </Text>
+ 
+        <TouchableOpacity onPress={goToNextMonth} style={styles.arrowButton}>
+          <Text style={styles.arrowText}>{'›'}</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.cardRow}>
+        <View style={[styles.card, styles.highlightCard]}>
+          <Text style={styles.cardTitle}>Total Faturado</Text>
+          <Text style={styles.cardValue}>R$ {totalRevenue.toFixed(2)}</Text>
+        </View>
+    
+
+         <View style={styles.card}>
+             <Text style={styles.cardLabel}>Total do Mês</Text>
+             <Text style={styles.cardNumber}>{appointmentsInMonth.length}</Text>
+        </View>
+      </View>
+
+        <Text style={styles.sectionTittle}>Status dos Agendamentos</Text>
+
+        {pieData.length > 0 ? (
+          <PieChart
+            data={pieData}
+            width={screenWidth - 32}
+            height={220}
+            chartConfig={{
+                 color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            }}
+            accessor="population"
+            backgroundColor="transparent"
+            paddingLeft="15"
+            absolute
+            />
+        ) : (
+          <Text style={styles.noDataText}>Nenhum agendamento para este mês</Text>
+        )}
+
+          <Text style={styles.sectionTitle}>Atendimentos concluídos</Text>
+
+            {completedAppointments.length === 0 ? (
+                <Text style={styles.emptyText}>Nenhum atendimento concluído neste mês</Text>
+            ) : (  
+            <>
+                <View style={styles.appointmentHeader}>
+                    <Text style={styles.appointmentHeaderText}>Cliente</Text>
+                    <Text style={styles.appointmentHeaderText}>Data</Text>
+                    <Text style={styles.appointmentHeaderText}>Valor</Text>
+                </View>
+                <FlatList
+                    data={completedAppointments}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderItem}
+                    scrollEnabled={false}
+                />
+            </>  
+        )}
+    </ScrollView>
+  );
+ }
+
+
+ const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F8F8F8',
   },
-    listContent: {
+  content: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    color: '#888',
+    fontSize: 14,
+  },
+ 
+
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#222',
+    marginBottom: 16,
+  },
+ 
+  
+  monthSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    gap: 16,
+  },
+  arrowButton: {
+    padding: 8,
+  },
+  arrowText: {
+    fontSize: 28,
+    color: '#E91E8C',
+    lineHeight: 30,
+  },
+  monthText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    minWidth: 110,
+    textAlign: 'center',
+  },
+ 
+  cardRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 24,
+  },
+  card: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    borderRadius: 12,
     padding: 12,
-        gap: 12,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  highlightCard: {
+    flex: 1.4,
+    backgroundColor: '#E91E8C',
+  },
+  cardLabel: {
+    fontSize: 11,
+    color: '#888',
+    marginBottom: 4,
+  },
+  cardValue: {
+    fontSize: 16,
+    fontWeight: 'bold', 
+    color: '#FFF',
+  },
+  cardNumber: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+ 
+
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+    marginTop: 8,
+  },
+ 
+  
+  emptyText: {
+    color: '#999',
+    fontSize: 14,
+    textAlign: 'center',
+    marginVertical: 16,
+  },
+ 
+  
+  listHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#DDD',
+    marginBottom: 4,
+  },
+  headerText: {
+    fontSize: 12,
+    color: '#999',
+    fontWeight: '600',
+    flex: 1,
+    textAlign: 'center',
+  },
+ 
+
+  itemCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 8,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+  },
+  clientName: {
+    flex: 1,
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '500',
+  },
+  itemDate: {
+    flex: 1,
+    fontSize: 13,
+    color: '#777',
+    textAlign: 'center',
+  },
+  itemValue: {
+    flex: 1,
+    fontSize: 14,
+    color: '#4CAF50',
+    fontWeight: '600',
+    textAlign: 'right',
   },
 });
