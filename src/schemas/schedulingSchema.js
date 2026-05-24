@@ -1,8 +1,10 @@
 import { z } from "zod";
 
 export const formScheduling = z.object({
+    id: z.string().optional(),
+    client: z.string(),
+    service: z.string(),
     dateStart: z.date(),
     dateEnd: z.date(),
-    client: z.string().min(1, "Selecione um cliente"),
-    service: z.string().min(1, "Selecione um serviço") 
+    status: z.string().optional(),
 })

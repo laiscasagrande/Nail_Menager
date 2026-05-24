@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import styles from '../constants/styles';
+import { Image } from 'react-native';
 
 export default function ScreenWelcome({ onLoginPress, onRegisterPress, onGoogleSignIn }) {
   return (
@@ -22,9 +23,10 @@ export default function ScreenWelcome({ onLoginPress, onRegisterPress, onGoogleS
         <Text style={styles.orText}>ou</Text>
         <View style={styles.line} />
       </View>
-
+      <Text style={styles.description}>É novo por aqui?🥰</Text>
       <TouchableOpacity onPress={onRegisterPress}>
-        <Text style={styles.footerLink}>É novo por aqui? Crie sua conta!</Text>
+        
+        <Text style={styles.footerLink}>Crie sua conta!</Text>
       </TouchableOpacity>
     </View>
   );
