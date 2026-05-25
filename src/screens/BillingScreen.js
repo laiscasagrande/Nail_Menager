@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { PieChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
  
 const screenWidth = Dimensions.get('window').width;
  
@@ -60,28 +61,29 @@ export default function FaturamentoTela() {
   const [selectedYear, setSelectedYear] = useState(today.getFullYear());
  
   
-  useEffect(() => {
-    async function fetchAppointments() {
-      setLoading(true);
-      try {
-      
-        const snapshot = await getDocs(collection(db, 'scheduling'));
- 
-        const list = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
- 
-        setAppointments(list);
-      } catch (error) {
-        console.error('Error fetching appointments:', error);
-      } finally {
-        setLoading(false);
+  useFocusEffect(
+    useCallback(() => {
+      async function fetchAppointments() {
+        setLoading(true);
+        try {
+          const snapshot = await getDocs(collection(db, 'scheduling'));
+
+          const list = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          setAppointments(list);
+        } catch (error) {
+          console.error('Error fetching appointments:', error);
+        } finally {
+          setLoading(false);
+        }
       }
-    }
- 
-    fetchAppointments();
-  }, []); 
+
+      fetchAppointments();
+    }, [])
+  ); 
 
   const appointmentsInMonth = appointments.filter((item) => {
     if (!item.start) return false; 

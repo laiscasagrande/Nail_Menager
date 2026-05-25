@@ -118,6 +118,8 @@ export function useScheduling() {
             await addDoc(collection(db, "scheduling"), {
                 client: data.client,
                 service: data.service,
+                clientName: selectedClient?.label || "",
+                serviceName: selectedService?.label || "",
                 servicePrice: selectedService?.price || 0,
                 title: selectedClient?.label || "",
                 start: Timestamp.fromDate(new Date(data.dateStart)),
