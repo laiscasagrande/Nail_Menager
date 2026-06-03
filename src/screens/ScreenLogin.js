@@ -1,8 +1,8 @@
 import React from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import styles from '../constants/styles';
 
-export default function ScreenLogin({ user, password, onChangeUser, onChangePassword, onSubmit, onBack }) {
+export default function ScreenLogin({ email, password, onChangeEmail, onChangePassword, onSubmit, onBack, loading }) {
   return (
     <View style={styles.card}>
       <Text style={styles.brandTitle}>Nail</Text>
@@ -11,11 +11,12 @@ export default function ScreenLogin({ user, password, onChangeUser, onChangePass
       <View style={styles.inputWrapper}>
         <TextInput
           style={styles.input}
-          placeholder="Usuário"
+          placeholder="Gmail"
           placeholderTextColor="#999"
-          value={user}
-          onChangeText={onChangeUser}
+          value={email}
+          onChangeText={onChangeEmail}
           autoCapitalize="none"
+          keyboardType="email-address"
         />
       </View>
       <View style={styles.inputWrapper}>
@@ -29,8 +30,12 @@ export default function ScreenLogin({ user, password, onChangeUser, onChangePass
         />
       </View>
 
-      <TouchableOpacity style={styles.primaryButton} onPress={onSubmit}>
-        <Text style={styles.primaryButtonText}>Entrar</Text>
+      <TouchableOpacity style={[styles.primaryButton, loading && { opacity: 0.6 }]} onPress={onSubmit} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator size="small" color="#FFF" />
+        ) : (
+          <Text style={styles.primaryButtonText}>Entrar</Text>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.secondaryLink} onPress={onBack}>

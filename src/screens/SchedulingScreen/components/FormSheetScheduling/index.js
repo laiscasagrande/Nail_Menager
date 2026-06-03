@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import FormSheet from "../../../../components/FormSheet";
 import { Controller, useFormContext } from "react-hook-form";
 import { Button, Menu, TextInput } from "react-native-paper";
@@ -38,12 +38,12 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
     const selectedLabel = CLIENTS.find((item) => String(item.value) === String(eventValue))?.label || "";
 
     function callFunctionCreateOrEdit() {
-    if (isEditing) {
-        handleSubmit(onEdit)();
-    } else {
-        handleSubmit(onSubmit)();
+        if (isEditing) {
+            handleSubmit(onEdit)();
+        } else {
+            handleSubmit(onSubmit)();
+        }
     }
-}
 
     return (
         <>
@@ -177,41 +177,43 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                             />
                         </View>
                     </View>
-                    <View style={styles.containerButton}>
-                        {statusIsOverdue && isEditing ?
-                            <Button style={styles.buttonCompleted} onPress={handleSubmit(onCompleted)}>
-                                <Text style={styles.buttonText}>
-                                    Concluir
-                                </Text>
-                            </Button>
+                    <View>
+                        {statusIsOverdue ?
+                            <View style={{ width: '100%', height: 65, marginBottom: 15, flexDirection: "row", gap: 10 }}>
+                                <TouchableOpacity style={styles.buttonCompleted} onPress={handleSubmit(onCompleted)}>
+                                    <Text style={styles.buttonText}>
+                                        Concluir
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
                             : status === "scheduled" ? (
-                                <>
-                                    <Button style={styles.buttonSave} onPress={callFunctionCreateOrEdit}>
+                                <View style={{ width: '100%', height: 65, marginBottom: 15, flexDirection: "row", gap: 10 }}>
+                                    <TouchableOpacity style={styles.buttonSave} onPress={callFunctionCreateOrEdit}>
                                         <Text style={styles.buttonText}>
                                             Salvar
                                         </Text>
-                                    </Button>
+                                    </TouchableOpacity>
                                     {isEditing && (
-                                        <Button style={styles.buttonCancel} onPress={handleSubmit(onCancel)}>
+                                        <TouchableOpacity style={styles.buttonCancel} onPress={handleSubmit(onCancel)}>
                                             <Text style={styles.buttonText}>
                                                 Cancelar
                                             </Text>
-                                        </Button>
+                                        </TouchableOpacity>
                                     )}
-                                </>
+                                </View>
                             ) : status === "cancelled" ? (
-                                <>
-                                    <Button style={styles.buttonSave} onPress={callFunctionCreateOrEdit}>
+                                <View style={{ width: '100%', height: 65, marginBottom: 15, flexDirection: "row", gap: 10 }}>
+                                    <TouchableOpacity style={styles.buttonSave} onPress={callFunctionCreateOrEdit}>
                                         <Text style={styles.buttonText}>
                                             Salvar
                                         </Text>
-                                    </Button>
-                                    <Button style={styles.buttonCancel} onPress={handleSubmit(onReactivate)}>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={styles.buttonCancel} onPress={handleSubmit(onReactivate)}>
                                         <Text style={styles.buttonText}>
                                             Reativar
                                         </Text>
-                                    </Button>
-                                </>
+                                    </TouchableOpacity>
+                                </View>
                             ) : null}
                     </View>
                 </View>
@@ -256,9 +258,8 @@ const styles = StyleSheet.create({
     buttonSave: {
         borderRadius: 10,
         backgroundColor: COLORS.primary,
-        width: 150,
-        height: 58,
         alignItems: "center",
+        flex: 1,
         justifyContent: "center",
         marginBottom: 15,
     },
@@ -266,8 +267,7 @@ const styles = StyleSheet.create({
     buttonCancel: {
         borderRadius: 10,
         backgroundColor: COLORS.gray,
-        width: 150,
-        height: 58,
+        flex: 1,
         alignItems: "center",
         justifyContent: "center",
         marginBottom: 15,
@@ -276,8 +276,7 @@ const styles = StyleSheet.create({
     buttonCompleted: {
         borderRadius: 10,
         backgroundColor: COLORS.gray,
-        width: 150,
-        height: 58,
+        flex: 1,
         alignItems: "center",
         justifyContent: "center",
         marginBottom: 15,
@@ -286,12 +285,5 @@ const styles = StyleSheet.create({
     buttonText: {
         fontSize: 18,
         color: COLORS.white,
-    },
-
-    containerButton: {
-        alignItems: "center",
-        flexDirection: "row",
-        gap: 10,
-        justifyContent: "center",
     }
 });
