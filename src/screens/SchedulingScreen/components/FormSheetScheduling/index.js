@@ -178,7 +178,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                         </View>
                     </View>
                     <View style={styles.containerButton}>
-                        {statusIsOverdue ?
+                        {statusIsOverdue && isEditing ?
                             <Button style={styles.buttonCompleted} onPress={handleSubmit(onCompleted)}>
                                 <Text style={styles.buttonText}>
                                     Concluir
