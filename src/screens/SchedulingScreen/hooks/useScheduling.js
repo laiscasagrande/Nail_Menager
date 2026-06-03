@@ -158,6 +158,8 @@ export function useScheduling() {
             await updateDoc(doc(db, "scheduling", data.id), {
                 client: data.client,
                 service: data.service,
+                clientName: selectedClient?.label || "",
+                serviceName: selectedService?.label || "",
                 servicePrice: selectedService?.price || 0,
                 title: selectedClient?.label || "",
                 start: Timestamp.fromDate(data.dateStart),
@@ -175,6 +177,8 @@ export function useScheduling() {
                             ...event,
                             client: data.client,
                             service: data.service,
+                            clientName: selectedClient?.label || "",
+                            serviceName: selectedService?.label || "",
                             servicePrice: selectedService?.price || 0,
                             title: selectedClient?.label || "",
                             start: {
@@ -255,6 +259,10 @@ export function useScheduling() {
     }, [])
 
     async function handlePressCancel(data) {
+        if (!data?.id) {
+            console.log("Cancelamento ignorado: agendamento sem id.");
+            return;
+        }
 
         try {
             await updateDoc(doc(db, "scheduling", data.id), {
@@ -280,6 +288,10 @@ export function useScheduling() {
     }
 
     async function handlePressCompleted(data) {
+        if (!data?.id) {
+            console.log("Conclusao ignorada: agendamento sem id.");
+            return;
+        }
 
         try {
             await updateDoc(doc(db, "scheduling", data.id), {
@@ -305,6 +317,10 @@ export function useScheduling() {
     }
 
     async function handlePressonReactivate(data) {
+        if (!data?.id) {
+            console.log("Reativacao ignorada: agendamento sem id.");
+            return;
+        }
 
         try {
             await updateDoc(doc(db, "scheduling", data.id), {
