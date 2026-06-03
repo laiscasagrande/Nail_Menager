@@ -21,7 +21,6 @@ export default function DrawerRoutes() {
                 name="Horários agendados"
                 component={SchedulingScreen}
                 options={{
-                    headerRight: () => <HeaderButton />,
                     drawerIcon: ({ color, size }) => (
                         <ICONS.clock/>
                     ),
