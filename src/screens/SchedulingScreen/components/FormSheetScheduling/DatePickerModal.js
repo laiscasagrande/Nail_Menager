@@ -1,16 +1,27 @@
 import 'react-native-get-random-values';
 import { useFormContext } from "react-hook-form";
-import { Modal, StyleSheet, Text, View } from "react-native";
+import { Modal, Platform, StyleSheet, Text, View } from "react-native";
 import { Button } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { COLORS } from "../../../../constants/colors";
 
-export default function DatePickerModal({ visible, setVisible, title, mode, name }) {
+export default function DatePickerModal({
+    visible,
+    setVisible,
+    title,
+    mode,
+    name,
+}) {
+    const { watch, setValue } = useFormContext();
 
-    const { watch, setValue } = useFormContext()
-    const value = watch(name)
+    const value = watch(name) || new Date();
 
-    function handleDateChange(selectedDate) {
+    function handleDateChange(event, selectedDate) {
+        if (!selectedDate) {
+            setVisible(false);
+            return;
+        }
+
         const updated = new Date(value);
 
         if (mode === "date") {
@@ -23,47 +34,64 @@ export default function DatePickerModal({ visible, setVisible, title, mode, name
         }
 
         setValue(name, updated);
+
+        if (Platform.OS === "android") {
+            setVisible(false);
+        }
     }
 
+    if (!visible) {
+        return null;
+    }
+
+    // ANDROID
+    if (Platform.OS === "android") {
+        return (
+            <DateTimePicker
+                value={value}
+                mode={mode}
+                display="default"
+                onChange={handleDateChange}
+            />
+        );
+    }
+
+    // IOS
     return (
         <Modal
             visible={visible}
             transparent
             animationType="fade"
+            onRequestClose={() => setVisible(false)}
         >
             <View style={styles.overlay}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>
                         {title}
                     </Text>
+
                     <DateTimePicker
                         value={value}
                         mode={mode}
-                        display={mode === "date" ? "inline" : "spinner"}
                         locale="pt-BR"
-                        onChange={(event, selectedDate) => {
-                            if (selectedDate) {
-                                handleDateChange(selectedDate)
-                            }
-                        }}
+                        display={mode === "date" ? "inline" : "spinner"}
+                        onChange={handleDateChange}
                     />
+
                     <Button
                         mode="contained"
                         buttonColor={COLORS.primary}
-                        onPress={() =>
-                            setVisible(false)
-                        }
+                        onPress={() => setVisible(false)}
                     >
                         Confirmar
                     </Button>
                 </View>
             </View>
         </Modal>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
-
     overlay: {
         flex: 1,
         backgroundColor: "rgba(0,0,0,0.4)",
@@ -85,5 +113,4 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         color: COLORS.primary,
     },
-
 });
