@@ -15,6 +15,9 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
         <FormSheet ref={ref} onChange={onSheetChange}>
             <View style={styles.container}>
                 <View style={styles.form}>
+                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', display: 'flex'}}>
+                        <Text style={styles.formTitle}>Cadastrar Novo Serviço</Text>
+                    </View>
 
                     <Controller
                         control={control}
@@ -107,6 +110,12 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
 })
 
 const styles = StyleSheet.create({
+    formTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: COLORS.primary,
+        marginBottom: 12
+    },
     form: {
         gap: 5,
     },

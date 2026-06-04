@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Alert } from "react-native";
 import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
 import { db } from "../../../services/firebase";
@@ -11,6 +11,7 @@ export function useService() {
     const [services, setServices] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [sheetOpen, setSheetOpen] = useState(false);
+    const sheetRef = useRef(null);
 
     const methods = useForm({
         resolver: zodResolver(formService),
@@ -83,6 +84,7 @@ export function useService() {
             image: service.image || null,
         });
         setSheetOpen(true);
+        sheetRef.current.expand()
     }
 
     function resetForm() {
@@ -95,6 +97,7 @@ export function useService() {
         });
         setEditingId(null);
         setSheetOpen(false);
+        sheetRef.current.close()
     }
 
     function confirmDelete(service) {
@@ -123,6 +126,7 @@ export function useService() {
         editingId,
         sheetOpen,
         setSheetOpen,
+        sheetRef,
         handlers: {
             seekServices,
             pickImage,

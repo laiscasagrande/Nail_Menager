@@ -14,7 +14,7 @@ export function ServiceCard({ item, onEdit, onDelete }) {
                 <Text style={styles.cardTitle}>{item.procedure}</Text>
                 <View style={styles.dataLinha}>
                     <Text style={styles.price}>R$ {item.price}</Text>
-                    <Text style={styles.dataTexto}>{item.duration}</Text>
+                    <Text style={styles.dataTexto}>{item.duration}h</Text>
                 </View>
             </View>
 

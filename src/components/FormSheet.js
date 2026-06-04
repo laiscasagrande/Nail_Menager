@@ -4,15 +4,15 @@ import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { COLORS } from '../constants/colors';
 
 const FormSheet = forwardRef(({ children, onChange }, ref) => {
-  const snapPoints = useMemo(() => ['7%', '80%'], []);
+  const snapPoints = useMemo(() => ['80%'], []);
 
   return (
     <BottomSheet
       ref={ref}
-      index={0} 
+      index={-1}
       snapPoints={snapPoints}
       onChange={onChange}
-      enablePanDownToClose={false}
+      enablePanDownToClose={true}
       handleIndicatorStyle={{ backgroundColor: COLORS.primary, width: 70 }}
     >
       <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>

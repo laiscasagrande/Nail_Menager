@@ -3,12 +3,12 @@ import { View, Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
 import { FormProvider } from 'react-hook-form';
 import ActionButtonAdd from '../../components/ActionButtonAdd';
 import { ServiceCard } from './components/serviceCard';
-import { FormSheetServices } from './components/FormSheetServices';
 import { useService } from './hooks/useService';
+import { FormSheetServices } from './components/FormSheetServices'
 
 export default function ScreenServices() {
-  const { methods, services, editingId, sheetOpen, setSheetOpen, handlers } = useService();
-  const sheetRef = useRef(null);
+  const { methods, services, editingId, sheetOpen, setSheetOpen, handlers, sheetRef } = useService();
+  
 
   useEffect(() => {
     handlers.seekServices();
@@ -39,7 +39,7 @@ export default function ScreenServices() {
           pickImage={handlers.pickImage}
           onSave={handlers.handleSave}
           onCancel={handlers.resetForm}
-          onSheetChange={(index) => setSheetOpen(index === 1)}
+          onSheetChange={(index) => setSheetOpen(index >= 0)}
         />
       </FormProvider>
 
