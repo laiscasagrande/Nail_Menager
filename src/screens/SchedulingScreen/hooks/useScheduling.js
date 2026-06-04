@@ -111,8 +111,8 @@ export function useScheduling() {
             (client) => client.value === data.client
         );
 
-        const selectedService = SERVICES.find(
-            (service) => service.value === data.service
+        const selectedService = services.find(
+            (service) => service.id === data.service
         );
 
         try {
@@ -149,8 +149,8 @@ export function useScheduling() {
             (client) => client.value === data.client
         );
 
-        const selectedService = SERVICES.find(
-            (service) => service.value === data.service
+        const selectedService = services.find(
+            (service) => service.id === data.service
         );
 
         try {
@@ -253,6 +253,10 @@ export function useScheduling() {
         getSchedulings()
     }, [])
 
+    useEffect(() => {
+        getServices()
+    }, [])
+
     async function handlePressCancel(data) {
 
         try {
@@ -331,7 +335,11 @@ export function useScheduling() {
     async function getServices() {
         try {
             const getServicesData = await getDocs(collection(db, "services"))
-            setServices(getServicesData.docs.map((doc) => ({ id: doc.id, ...doc.data() })))
+            const serviceList = getServicesData.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }))
+            setServices(serviceList)
         } catch (error) {
             console.log("Erro ao buscar serviços:", error);
         }
