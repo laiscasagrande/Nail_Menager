@@ -19,7 +19,7 @@ export const SERVICES = [
     { label: "Banho de Gel", value: "3" },
 ];
 
-export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel, onCompleted, isEditing, onReactivate, onEdit }) {
+export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel, onCompleted, isEditing, onReactivate, onEdit, services }) {
 
     const [modal, setModal] = useState({
         visible: false,
@@ -119,9 +119,9 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                                 />
                                             }
                                         >
-                                            {SERVICES.map((item) => (
+                                            {services.map((item) => (
                                                 <Menu.Item
-                                                    key={item.value}
+                                                    key={item.id}
                                                     title={item.label}
                                                     onPress={() => {
                                                         onChange(item.value);

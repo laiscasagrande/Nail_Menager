@@ -40,6 +40,7 @@ export function useScheduling() {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [idEvent, setIdEvent] = useState(null)
     const [isEditing, setIsEditing] = useState(false)
+    const [services, setServices] = useState([]);
 
     const bottomSheetRef = useRef(null);
 
@@ -327,6 +328,15 @@ export function useScheduling() {
         }
     }
 
+    async function getServices() {
+        try {
+            const getServicesData = await getDocs(collection(db, "services"))
+            setServices(getServicesData.docs.map((doc) => ({ id: doc.id, ...doc.data() })))
+        } catch (error) {
+            console.log("Erro ao buscar serviços:", error);
+        }
+    }
+
     const renderEvent = useCallback((event) => {
 
         const isOverdue =
@@ -365,6 +375,7 @@ export function useScheduling() {
         bottomSheetRef,
         isEditing,
         methods,
+        services,
 
         handlers: {
             handleDragCreateStart,
