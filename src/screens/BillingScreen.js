@@ -74,6 +74,7 @@ export default function FaturamentoTela() {
           }));
 
           setAppointments(list);
+          console.log(list[0]);
         } catch (error) {
           console.error('Error fetching appointments:', error);
         } finally {
@@ -97,6 +98,12 @@ export default function FaturamentoTela() {
 
   const completedAppointments = appointmentsInMonth.filter(
     (item) => item.status === 'completed'
+  );
+  const pendingAppointments = appointmentsInMonth.filter(
+    (item) => item.status === 'pending'
+  );
+  const cancelledAppointments = appointmentsInMonth.filter(
+    (item) => item.status === 'cancelled'
   );
  
 
@@ -126,7 +133,7 @@ export default function FaturamentoTela() {
             legendFontSize: 13,
         };
     });
-}
+  }
 
     const pieData = buildPieData();
         function goToPreviousMonth() {
@@ -146,16 +153,28 @@ export default function FaturamentoTela() {
             }
         }
 
-    function formatDate(timestamp) {
-        if (!timestamp) return '-';
-        const date = timestamp.toDate();
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
+  function formatDate(timestamp) {
+    if (!timestamp) return '-';
+    const date = timestamp.toDate();
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  function formatCurrency(value) {
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) {
+      return 'R$ 0,00';
     }
 
-      if (loading) {
+    const fixed = numericValue.toFixed(2);
+    const parts = fixed.split('.');
+    const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `R$ ${integerPart},${parts[1]}`;
+  }
+
+  if (loading) {
         return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#E91E8C" />
@@ -164,14 +183,39 @@ export default function FaturamentoTela() {
     );
   }
 
-  function renderItem ({ item }) {
+  function renderItem({ item }) {
+    const clientLabel = item.clientName || item.client || 'Cliente Desconhecido';
+    const serviceLabel = item.serviceName || item.service || 'Serviço Desconhecido';
+
     return (
-        <View style={styles.appointmentItem}>
-            <Text style={styles.appointmentText}>{item.clientName || 'Cliente Desconecido'}</Text>
-            <Text style={styles.appointmentText}>{item.serviceName || 'Serviço Desconecido'}</Text>
-            <Text style={styles.appointmentText}>{formatDate(item.start)}</Text>
-            <Text style={styles.appointmentText}>R$ {item.servicePrice || '0.00'}</Text>
+      <View style={styles.appointmentCard}>
+        <View style={styles.appointmentRow}>
+          <Text style={styles.appointmentPrimaryText}>{clientLabel}</Text>
+          <Text style={styles.appointmentValue}>{formatCurrency(item.servicePrice)}</Text>
         </View>
+        <View style={styles.appointmentRow}>
+          <Text style={styles.appointmentSecondaryText}>{serviceLabel}</Text>
+          <Text style={styles.appointmentDate}>{formatDate(item.start)}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  function renderSection(title, data) {
+    return (
+      <>
+        <Text style={styles.sectionTitle}>{title}</Text>
+        {data.length === 0 ? (
+          <Text style={styles.emptyText}>Nenhum registro neste período</Text>
+        ) : (
+          <FlatList
+            data={data}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            scrollEnabled={false}
+          />
+        )}
+      </>
     );
   }
 
@@ -197,13 +241,23 @@ export default function FaturamentoTela() {
       <View style={styles.cardRow}>
         <View style={[styles.card, styles.highlightCard]}>
           <Text style={styles.cardTitle}>Total Faturado</Text>
-          <Text style={styles.cardValue}>R$ {totalRevenue.toFixed(2)}</Text>
+          <Text style={styles.cardValue}>{formatCurrency(totalRevenue)}</Text>
         </View>
-    
 
-         <View style={styles.card}>
-             <Text style={styles.cardLabel}>Total do Mês</Text>
-             <Text style={styles.cardNumber}>{appointmentsInMonth.length}</Text>
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>Total do Mês</Text>
+          <Text style={styles.cardNumber}>{appointmentsInMonth.length}</Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>Ticket Médio</Text>
+          <Text style={styles.cardNumber}>
+            {formatCurrency(
+              completedAppointments.length === 0
+                ? 0
+                : totalRevenue / completedAppointments.length
+            )}
+          </Text>
         </View>
       </View>
 
@@ -226,25 +280,9 @@ export default function FaturamentoTela() {
           <Text style={styles.noDataText}>Nenhum agendamento para este mês</Text>
         )}
 
-          <Text style={styles.sectionTitle}>Atendimentos concluídos</Text>
-
-            {completedAppointments.length === 0 ? (
-                <Text style={styles.emptyText}>Nenhum atendimento concluído neste mês</Text>
-            ) : (  
-            <>
-                <View style={styles.appointmentHeader}>
-                    <Text style={styles.appointmentHeaderText}>Cliente</Text>
-                    <Text style={styles.appointmentHeaderText}>Data</Text>
-                    <Text style={styles.appointmentHeaderText}>Valor</Text>
-                </View>
-                <FlatList
-                    data={completedAppointments}
-                    keyExtractor={(item) => item.id}
-                    renderItem={renderItem}
-                    scrollEnabled={false}
-                />
-            </>  
-        )}
+            {renderSection('✅ Concluídos', completedAppointments)}
+            {renderSection('⏳ Pendentes', pendingAppointments)}
+            {renderSection('❌ Cancelados', cancelledAppointments)}
     </ScrollView>
   );
  }
@@ -355,57 +393,44 @@ export default function FaturamentoTela() {
     textAlign: 'center',
     marginVertical: 16,
   },
- 
-  
-  listHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#DDD',
-    marginBottom: 4,
-  },
-  headerText: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: '600',
-    flex: 1,
-    textAlign: 'center',
-  },
- 
 
-  itemCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  appointmentCard: {
     backgroundColor: '#FFF',
     borderRadius: 10,
     padding: 12,
+    elevation: 2,
     marginBottom: 8,
-    elevation: 1,
     shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
   },
-  clientName: {
-    flex: 1,
+  appointmentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  appointmentPrimaryText: {
     fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
-  },
-  itemDate: {
+    fontWeight: '700',
+    color: '#222',
     flex: 1,
+  },
+  appointmentSecondaryText: {
     fontSize: 13,
-    color: '#777',
-    textAlign: 'center',
-  },
-  itemValue: {
+    color: '#888',
     flex: 1,
+  },
+  appointmentValue: {
     fontSize: 14,
+    fontWeight: '700',
     color: '#4CAF50',
-    fontWeight: '600',
-    textAlign: 'right',
+    marginLeft: 8,
+  },
+  appointmentDate: {
+    fontSize: 13,
+    color: '#888',
+    marginLeft: 8,
   },
 });
