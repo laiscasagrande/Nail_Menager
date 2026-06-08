@@ -6,6 +6,16 @@ import { AuthContext } from './context/AuthContext';
 import { Provider as PaperProvider } from "react-native-paper";
 import { auth } from './services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import * as Notifications from 'expo-notifications';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,  
+    shouldShowList: true,    
+  }),
+});
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);

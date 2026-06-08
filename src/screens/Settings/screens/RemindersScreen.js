@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { Avatar, Button, Card, Checkbox, Chip, Divider, RadioButton, Switch } from "react-native-paper";
 import { COLORS } from "../../../constants/colors";
 import styles from "../styles";
 import { ActivityIndicator } from "react-native";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../../../services/firebase";
 
 export default function RemindersScreen({ navigation }) {
@@ -13,9 +13,10 @@ export default function RemindersScreen({ navigation }) {
     const [push, setPush] = useState(false);
     const [email, setEmail] = useState(false);
     const [loading, setLoading] = useState(false);
+    const user = auth.currentUser;
 
     async function handleSavePreferencesNotificationsUser() {
-        const user = auth.currentUser;
+        
         try {
             await setDoc(doc(db, 'users', user.uid), {
                 notificationPreferences: {
@@ -27,6 +28,26 @@ export default function RemindersScreen({ navigation }) {
             console.log('Error saving notification preferences:', error);
         }
     }
+
+    async function loadPreferencesNotificationsUser() {
+        try{
+            const docSnap = await getDoc(doc(db, 'users', user.uid))
+            if (docSnap.exists()) {
+                const preferences = docSnap.data().notificationPreferences;
+                if (preferences) {
+                    setPush(preferences.push);
+                    setEmail(preferences.email);
+                    setOn(preferences.push || preferences.email);
+                }
+            }
+        } catch (error) {
+            console.log('Error loading notification preferences:', error);
+        }
+    }
+
+    useEffect(() => {
+        loadPreferencesNotificationsUser();
+    }, []);
 
     return (
         <>
@@ -43,7 +64,8 @@ export default function RemindersScreen({ navigation }) {
                     )}
                 </TouchableOpacity>
             </View>
-            <Card style={{ padding: 10, margin: 16 }}>
+            <Text style={{fontSize: 11, fontWeight: '600', color: '#aaa', textTransform: 'uppercase', letterSpacing: 0.8, marginRight: 16, marginLeft: 16, marginTop: 16}}>Canais de Notificações</Text>
+            <Card style={{ padding: 10, marginLeft: 16, marginRight: 16, marginTop: 8 }}>
                 <Card.Content>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                         <View>

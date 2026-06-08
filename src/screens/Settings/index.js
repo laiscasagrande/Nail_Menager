@@ -191,7 +191,7 @@ export default function ConfigurationScreen({ navigation }) {
                         <Divider />
                         <TouchableOpacity
                             style={[styles.optionCard]}
-                            onPress={() => setActiveSection('notifications')}
+                            onPress={() => navigation.navigate('AutomaticMessage')}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
