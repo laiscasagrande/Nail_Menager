@@ -15,11 +15,13 @@ import {
 } from 'firebase/auth';
 import { COLORS } from "../../../constants/colors";
 import { doc, setDoc } from "firebase/firestore";
+import { useTheme } from "../../../context/ThemeContext";
 
 export default function PasswordSecurityScreen({ navigation }) {
     const [showCurrent, setShowCurrent] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const { theme } = useTheme();
 
     const { handleSubmit, control, reset } = useForm({
         resolver: zodResolver(passwordSchema),
@@ -72,25 +74,31 @@ export default function PasswordSecurityScreen({ navigation }) {
     };
 
     return (
-        <>
-            <View style={styles.header}>
+        <View style={{flex: 1, backgroundColor: theme.background}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: theme.card, borderBottomWidth: 0.5, borderBottomColor: theme.border || '#ddd' }}>
                 <TouchableOpacity onPress={() => navigation.navigate('Configurações')}>
-                    <Text style={styles.headerCancel}>Cancelar</Text>
+                    <Text style={{ fontSize: 16, color: COLORS.primary }}>
+                        Cancelar
+                    </Text>
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Alterar senha</Text>
-                <TouchableOpacity onPress={handleSubmit(onSubmit)} disabled={loading}>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: theme.text }}>
+                    Tema claro/escuro
+                </Text>
+                <TouchableOpacity disabled={loading} onPress={handleSubmit(onSubmit)}>
                     {loading ? (
                         <ActivityIndicator color={COLORS.primary} />
                     ) : (
-                        <Text style={styles.headerDone}>Concluído</Text>
+                        <Text style={{ fontSize: 16, color: COLORS.primary, fontWeight: '600' }}>
+                            Concluído
+                        </Text>
                     )}
                 </TouchableOpacity>
             </View>
             <ScrollView style={styles.contentPasswordSecurity}>
-                <Text style={styles.sectionLabelPasswordSecurity}>Alterar senha</Text>
-                <View style={styles.group}>
+                <Text style={{fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4,}}>Alterar senha</Text>
+                <View style={{backgroundColor: theme.card, borderRadius: 12, marginBottom: 24, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1}}>
                     <View style={styles.fieldRow}>
-                        <Text style={styles.fieldLabel}>Senha atual</Text>
+                        <Text style={{width: 100, fontSize: 15, color: theme.text}}>Senha atual</Text>
                         <Controller
                             control={control}
                             name="currentPassword"
@@ -109,9 +117,8 @@ export default function PasswordSecurityScreen({ navigation }) {
                             {showCurrent ? <EyeOff size={16} color="#ccc" /> : <Eye size={16} color="#ccc" />}
                         </TouchableOpacity>
                     </View>
-                    <View style={styles.separator} />
                     <View style={styles.fieldRow}>
-                        <Text style={styles.fieldLabel}>Nova senha</Text>
+                        <Text style={{width: 100, fontSize: 15, color: theme.text}}>Nova senha</Text>
                         <Controller
                             control={control}
                             name="newPassword"
@@ -130,9 +137,8 @@ export default function PasswordSecurityScreen({ navigation }) {
                             {showNew ? <EyeOff size={16} color="#ccc" /> : <Eye size={16} color="#ccc" />}
                         </TouchableOpacity>
                     </View>
-                    <View style={styles.separator} />
                     <View style={styles.fieldRow}>
-                        <Text style={styles.fieldLabel}>Confirmar</Text>
+                        <Text style={{width: 100, fontSize: 15, color: theme.text}}>Confirmar</Text>
                         <Controller
                             control={control}
                             name="confirmPassword"
@@ -153,6 +159,6 @@ export default function PasswordSecurityScreen({ navigation }) {
                     </View>
                 </View>
             </ScrollView>
-        </>
+        </View>
     )
 }

@@ -15,6 +15,7 @@ import PersonalDataScreen from "../screens/Settings/screens/PersonalDataScreen";
 import PasswordSecurityScreen from "../screens/Settings/screens/PasswordSecurityScreen";
 import RemindersScreen from "../screens/Settings/screens/RemindersScreen";
 import AutomaticMessage from "../screens/Settings/screens/AutomaticMessage";
+import Theme from "../screens/Settings/screens/Theme";
 
 const DrawerNav = createDrawerNavigator();
 
@@ -119,6 +120,14 @@ export default function DrawerRoutes() {
                 component={AutomaticMessage}
                 options={{
                     title: 'Mensagem Automática',
+                    drawerItemStyle: { display: 'none' }, 
+                }}
+            />
+            <DrawerNav.Screen
+                name="Theme"
+                component={Theme}
+                options={{
+                    title: 'Tema',
                     drawerItemStyle: { display: 'none' }, 
                 }}
             />

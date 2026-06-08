@@ -22,6 +22,7 @@ import styles from './styles';
 import NotificationsScreen from './components/NotificationsScreen';
 import AccountScreen from './components/AccountScreen';
 import { Avatar, Card, Divider } from 'react-native-paper';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function ConfigurationScreen({ navigation }) {
     const [activeSection, setActiveSection] = useState('account');
@@ -35,6 +36,7 @@ export default function ConfigurationScreen({ navigation }) {
         reminders: true,
         promotions: false,
     });
+    const { theme } = useTheme();
     const LeftContent = props => <Avatar.Icon {...props} icon="folder" />
 
     useEffect(() => {
@@ -129,14 +131,14 @@ export default function ConfigurationScreen({ navigation }) {
     };
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <ScrollView style={{flex: 1, backgroundColor: theme.background}} contentContainerStyle={styles.content}>
 
             <View style={styles.cardRow}>
-                <Text style={styles.sectionLabelPersonalData}>Meu perfil</Text>
-                <Card style={styles.card}>
+                <Text style={{fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4,}}>Meu perfil</Text>
+                <Card style={{backgroundColor: theme.card, marginBottom: 20}}>
                     <Card.Content>
                         <TouchableOpacity
-                            style={[styles.optionCard]}
+                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
                             onPress={() => navigation.navigate('PersonalData')}
                         >
                             <View style={styles.description}>
@@ -144,8 +146,8 @@ export default function ConfigurationScreen({ navigation }) {
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
                                 <View>
-                                    <Text style={styles.optionLabel}>Dados pessoais</Text>
-                                    <Text style={styles.optionText}>Nome, email</Text>
+                                    <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Dados pessoais</Text>
+                                    <Text style={{flex: 1, fontSize: 14, fontWeight: '600', color: theme.subtitle}}>Nome, email</Text>
                                 </View>
                             </View>
 
@@ -153,7 +155,7 @@ export default function ConfigurationScreen({ navigation }) {
                         </TouchableOpacity>
                         <Divider />
                         <TouchableOpacity
-                            style={[styles.optionCard]}
+                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
                             onPress={() => navigation.navigate('PasswordSecurity')}
                         >
                             <View style={styles.description}>
@@ -161,8 +163,8 @@ export default function ConfigurationScreen({ navigation }) {
                                     <Bell size={22} color={COLORS.primary} />
                                 </View>
                                 <View>
-                                    <Text style={styles.optionLabel}>Senha e segurança</Text>
-                                    <Text style={styles.optionText}>Alterar senha</Text>
+                                    <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Senha e segurança</Text>
+                                    <Text style={{flex: 1, fontSize: 14, fontWeight: '600', color: theme.subtitle}}>Alterar senha</Text>
                                 </View>
                             </View>
                             <ChevronRight size={18} color="#999" />
@@ -170,11 +172,11 @@ export default function ConfigurationScreen({ navigation }) {
                     </Card.Content>
                 </Card>
 
-                <Text style={styles.sectionLabelPersonalData}>Notificações</Text>
-                <Card style={styles.card}>
+                <Text style={{fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4,}}>Notificações</Text>
+                <Card style={{backgroundColor: theme.card, marginBottom: 20}}>
                     <Card.Content>
                         <TouchableOpacity
-                            style={[styles.optionCard]}
+                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
                             onPress={() => navigation.navigate('RemindersScreen')}
                         >
                             <View style={styles.description}>
@@ -182,15 +184,15 @@ export default function ConfigurationScreen({ navigation }) {
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
                                 <View>
-                                    <Text style={styles.optionLabel}>Lembretes</Text>
-                                    <Text style={styles.optionText}>Push, SMS ou email</Text>
+                                    <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Lembretes</Text>
+                                    <Text style={{flex: 1, fontSize: 14, fontWeight: '600', color: theme.subtitle}}>Push, SMS ou email</Text>
                                 </View>
                             </View>
                             <ChevronRight size={18} color="#999" />
                         </TouchableOpacity>
                         <Divider />
                         <TouchableOpacity
-                            style={[styles.optionCard]}
+                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
                             onPress={() => navigation.navigate('AutomaticMessage')}
                         >
                             <View style={styles.description}>
@@ -198,8 +200,8 @@ export default function ConfigurationScreen({ navigation }) {
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
                                 <View>
-                                    <Text style={styles.optionLabel}>Mensagem automática</Text>
-                                    <Text style={styles.optionText}>Confirmação e lembretes</Text>
+                                    <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Mensagem automática</Text>
+                                    <Text style={{flex: 1, fontSize: 14, fontWeight: '600', color: theme.subtitle}}>Confirmação e lembretes</Text>
                                 </View>
                             </View>
                             <ChevronRight size={18} color="#999" />
@@ -207,20 +209,20 @@ export default function ConfigurationScreen({ navigation }) {
                     </Card.Content>
                 </Card>
 
-                <Text style={styles.sectionLabelPersonalData}>Aparência</Text>
-                <Card style={styles.card}>
+                <Text style={{fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4,}}>Aparência</Text>
+                <Card style={{backgroundColor: theme.card, marginBottom: 20}}>
                     <Card.Content>
                         <TouchableOpacity
-                            style={[styles.optionCard]}
-                            onPress={() => setActiveSection('account')}
+                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
+                            onPress={() => navigation.navigate('Theme')}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
                                 <View>
-                                    <Text style={styles.optionLabel}>Tema</Text>
-                                    <Text style={styles.optionText}>Claro, escuro</Text>
+                                    <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Tema</Text>
+                                    <Text style={{flex: 1, fontSize: 14, fontWeight: '600', color: theme.subtitle}}>Claro, escuro</Text>
                                 </View>
                             </View>
                             <ChevronRight size={18} color="#999" />
@@ -228,43 +230,43 @@ export default function ConfigurationScreen({ navigation }) {
                     </Card.Content>
                 </Card>
 
-                <Text style={styles.sectionLabelPersonalData}>Conta</Text>
-                <Card style={styles.card}>
+                <Text style={{fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4,}}>Conta</Text>
+                <Card style={{backgroundColor: theme.card, marginBottom: 20}}>
                     <Card.Content>
                         <TouchableOpacity
-                            style={[styles.optionCard]}
+                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
                             onPress={() => setActiveSection('account')}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
-                                <Text style={styles.optionLabel}>Ajuda e suporte</Text>
+                                <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Ajuda e suporte</Text>
                             </View>
                             <ChevronRight size={18} color="#999" />
                         </TouchableOpacity>
                         <Divider />
                         <TouchableOpacity
-                            style={[styles.optionCard]}
+                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
                             onPress={() => setActiveSection('notifications')}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
-                                <Text style={styles.optionLabel}>Termos e privacidade</Text>
+                                <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Termos e privacidade</Text>
                             </View>
                             <ChevronRight size={18} color="#999" />
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[styles.optionCard]}
+                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
                             onPress={() => setActiveSection('notifications')}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
-                                <Text style={styles.optionLabel}>Sair da conta</Text>
+                                <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Sair da conta</Text>
                             </View>
                             <ChevronRight size={18} color="#999" />
                         </TouchableOpacity>
@@ -272,24 +274,6 @@ export default function ConfigurationScreen({ navigation }) {
                 </Card>
             </View>
 
-            {activeSection === 'account' ? (
-                <AccountScreen
-                    name={name}
-                    email={email}
-                    currentPassword={currentPassword}
-                    newPassword={newPassword}
-                    confirmPassword={confirmPassword}
-                    loading={loading}
-                    onChangeName={setName}
-                    onChangeEmail={setEmail}
-                    onChangeCurrentPassword={setCurrentPassword}
-                    onChangeNewPassword={setNewPassword}
-                    onChangeConfirmPassword={setConfirmPassword}
-                    onSubmit={handleUpdateAccount}
-                />
-            ) : (
-                <NotificationsScreen notifications={notifications} onToggle={handleToggleNotification} />
-            )}
         </ScrollView>
     );
 }

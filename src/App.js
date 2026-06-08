@@ -7,13 +7,14 @@ import { Provider as PaperProvider } from "react-native-paper";
 import { auth } from './services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import * as Notifications from 'expo-notifications';
+import { ThemeProvider } from './context/ThemeContext';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldPlaySound: true,
     shouldSetBadge: false,
-    shouldShowBanner: true,  
-    shouldShowList: true,    
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -35,14 +36,16 @@ export default function App() {
   }
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <PaperProvider>
-          <NavigationContainer>
-            <RootStack />
-          </NavigationContainer>
-        </PaperProvider>
-      </GestureHandlerRootView>
-    </AuthContext.Provider>
+    <ThemeProvider>
+      <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <PaperProvider>
+            <NavigationContainer>
+              <RootStack />
+            </NavigationContainer>
+          </PaperProvider>
+        </GestureHandlerRootView>
+      </AuthContext.Provider>
+    </ThemeProvider>
   );
 }
