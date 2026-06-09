@@ -16,6 +16,8 @@ import PasswordSecurityScreen from "../screens/Settings/screens/PasswordSecurity
 import RemindersScreen from "../screens/Settings/screens/RemindersScreen";
 import AutomaticMessage from "../screens/Settings/screens/AutomaticMessage";
 import Theme from "../screens/Settings/screens/Theme";
+import HelpSupport from "../screens/Settings/screens/HelpSupport";
+import TermsPrivacy from "../screens/Settings/screens/TermsPrivacy";
 
 const DrawerNav = createDrawerNavigator();
 
@@ -128,6 +130,22 @@ export default function DrawerRoutes() {
                 component={Theme}
                 options={{
                     title: 'Tema',
+                    drawerItemStyle: { display: 'none' }, 
+                }}
+            />
+            <DrawerNav.Screen
+                name="HelpSupport"
+                component={HelpSupport}
+                options={{
+                    title: 'Ajuda e Suporte',
+                    drawerItemStyle: { display: 'none' }, 
+                }}
+            />
+            <DrawerNav.Screen
+                name="TermsPrivacy"
+                component={TermsPrivacy}
+                options={{
+                    title: 'Termos e Privacidade',
                     drawerItemStyle: { display: 'none' }, 
                 }}
             />
