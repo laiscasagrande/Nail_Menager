@@ -1,7 +1,6 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Alert,
-    Linking,
     ScrollView,
     StyleSheet,
     Text,
@@ -12,7 +11,6 @@ import { auth, db } from '../../services/firebase';
 import {
     EmailAuthProvider,
     reauthenticateWithCredential,
-    signOut,
     updateEmail,
     updatePassword,
     updateProfile,
@@ -21,19 +19,25 @@ import { doc, setDoc } from 'firebase/firestore';
 import { Bell, ChevronRight, UserCircle } from 'lucide-react-native';
 import { COLORS } from '../../constants/colors';
 import styles from './styles';
+import NotificationsScreen from './components/NotificationsScreen';
+import AccountScreen from './components/AccountScreen';
 import { Avatar, Card, Divider } from 'react-native-paper';
 import { useTheme } from '../../context/ThemeContext';
 import { AuthContext } from '../../context/AuthContext';
 
 export default function ConfigurationScreen({ navigation }) {
+    const [activeSection, setActiveSection] = useState('account');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [notifications, setNotifications] = useState({
+        reminders: true,
+        promotions: false,
+    });
     const { theme } = useTheme();
-    const { setIsLoggedIn } = useContext(AuthContext);
     const LeftContent = props => <Avatar.Icon {...props} icon="folder" />
 
     useEffect(() => {
@@ -44,24 +48,13 @@ export default function ConfigurationScreen({ navigation }) {
         }
     }, []);
 
-    const handleHelpSupport = async () => {
-        const url = 'mailto:support@nailmanager.com?subject=Ajuda%20Nail%20Manager';
-        const supported = await Linking.canOpenURL(url);
-        if (supported) {
-            Linking.openURL(url);
-        } else {
-            Alert.alert('Ajuda e suporte', 'Envie um e-mail para support@nailmanager.com.');
-        }
+    const handleToggleNotification = (key) => {
+        setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
     };
 
-    const handleTermsPrivacy = () => {
-        Alert.alert(
-            'Termos e Privacidade',
-            'Em breve aqui estarão os termos de uso e a política de privacidade do aplicativo.'
-        );
-    };
+    const sanitizeEmail = (value) => value.trim();
 
-    const handleSignOut = async () => {
+    const handleLogout = async () => {
         try {
             await signOut(auth);
             setIsLoggedIn(false);
@@ -71,94 +64,15 @@ export default function ConfigurationScreen({ navigation }) {
         }
     };
 
-    const sanitizeEmail = (value) => value.trim();
-
-    const handleUpdateAccount = async () => {
-        const user = auth.currentUser;
-        if (!user) {
-            Alert.alert('Erro', 'Nenhum usuário autenticado.');
-            return;
-        }
-
-        if (!name.trim()) {
-            Alert.alert('Atenção', 'Informe o seu nome.');
-            return;
-        }
-
-        if (!email.trim()) {
-            Alert.alert('Atenção', 'Informe o seu email.');
-            return;
-        }
-
-        if (newPassword && newPassword !== confirmPassword) {
-            Alert.alert('Atenção', 'A senha e a confirmação precisam ser iguais.');
-            return;
-        }
-
-        setLoading(true);
-
-        try {
-            if (currentPassword && (email !== user.email || newPassword)) {
-                const credential = EmailAuthProvider.credential(user.email, currentPassword);
-                await reauthenticateWithCredential(user, credential);
-            }
-
-            if (name !== user.displayName) {
-                await updateProfile(user, { displayName: name.trim() });
-            }
-
-            const sanitizedEmail = sanitizeEmail(email);
-            if (sanitizedEmail !== user.email) {
-                await updateEmail(user, sanitizedEmail);
-            }
-
-            if (newPassword) {
-                await updatePassword(user, newPassword);
-            }
-
-            await setDoc(
-                doc(db, 'users', user.uid),
-                {
-                    name: name.trim(),
-                    email: sanitizedEmail,
-                    updatedAt: new Date(),
-                },
-                { merge: true }
-            );
-
-            Alert.alert('Sucesso', 'Configurações de conta atualizadas.');
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
-        } catch (error) {
-            console.error(error);
-            let message = 'Não foi possível atualizar a conta. Tente novamente.';
-
-            if (error.code === 'auth/invalid-email') {
-                message = 'Email inválido.';
-            } else if (error.code === 'auth/email-already-in-use') {
-                message = 'Este email já está em uso.';
-            } else if (error.code === 'auth/wrong-password') {
-                message = 'Senha atual incorreta.';
-            } else if (error.code === 'auth/requires-recent-login') {
-                message = 'Faça login novamente para atualizar informações sensíveis.';
-            }
-
-            Alert.alert('Erro', message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     return (
-        <ScrollView style={{flex: 1, backgroundColor: theme.background}} contentContainerStyle={styles.content}>
-
+        <ScrollView style={{ flex: 1, backgroundColor: theme.background }} contentContainerStyle={styles.content}>
             <View style={styles.cardRow}>
-                <Text style={{fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4,}}>Meu perfil</Text>
-                <Card style={{backgroundColor: theme.card, marginBottom: 20}}>
+
+                <Text style={{ fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4 }}>Meu perfil</Text>
+                <Card style={{ backgroundColor: theme.card, marginBottom: 20 }}>
                     <Card.Content>
                         <TouchableOpacity
-                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
+                            style={{ backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
                             onPress={() => navigation.navigate('PersonalData')}
                         >
                             <View style={styles.description}>
@@ -166,16 +80,15 @@ export default function ConfigurationScreen({ navigation }) {
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
                                 <View>
-                                    <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Dados pessoais</Text>
-                                    <Text style={{flex: 1, fontSize: 14, fontWeight: '600', color: theme.subtitle}}>Nome, email</Text>
+                                    <Text style={{ fontSize: 16, fontWeight: '600', color: COLORS.primary }}>Dados pessoais</Text>
+                                    <Text style={{ fontSize: 14, fontWeight: '600', color: theme.subtitle }}>Nome, email</Text>
                                 </View>
                             </View>
-
                             <ChevronRight size={18} color="#999" />
                         </TouchableOpacity>
                         <Divider />
                         <TouchableOpacity
-                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
+                            style={{ backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
                             onPress={() => navigation.navigate('PasswordSecurity')}
                         >
                             <View style={styles.description}>
@@ -183,8 +96,8 @@ export default function ConfigurationScreen({ navigation }) {
                                     <Bell size={22} color={COLORS.primary} />
                                 </View>
                                 <View>
-                                    <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Senha e segurança</Text>
-                                    <Text style={{flex: 1, fontSize: 14, fontWeight: '600', color: theme.subtitle}}>Alterar senha</Text>
+                                    <Text style={{ fontSize: 16, fontWeight: '600', color: COLORS.primary }}>Senha e segurança</Text>
+                                    <Text style={{ fontSize: 14, fontWeight: '600', color: theme.subtitle }}>Alterar senha</Text>
                                 </View>
                             </View>
                             <ChevronRight size={18} color="#999" />
@@ -192,11 +105,11 @@ export default function ConfigurationScreen({ navigation }) {
                     </Card.Content>
                 </Card>
 
-                <Text style={{fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4,}}>Notificações</Text>
-                <Card style={{backgroundColor: theme.card, marginBottom: 20}}>
+                <Text style={{ fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4 }}>Notificações</Text>
+                <Card style={{ backgroundColor: theme.card, marginBottom: 20 }}>
                     <Card.Content>
                         <TouchableOpacity
-                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
+                            style={{ backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
                             onPress={() => navigation.navigate('RemindersScreen')}
                         >
                             <View style={styles.description}>
@@ -204,15 +117,15 @@ export default function ConfigurationScreen({ navigation }) {
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
                                 <View>
-                                    <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Lembretes</Text>
-                                    <Text style={{flex: 1, fontSize: 14, fontWeight: '600', color: theme.subtitle}}>Push, SMS ou email</Text>
+                                    <Text style={{ fontSize: 16, fontWeight: '600', color: COLORS.primary }}>Lembretes</Text>
+                                    <Text style={{ fontSize: 14, fontWeight: '600', color: theme.subtitle }}>Push, SMS ou email</Text>
                                 </View>
                             </View>
                             <ChevronRight size={18} color="#999" />
                         </TouchableOpacity>
                         <Divider />
                         <TouchableOpacity
-                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
+                            style={{ backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
                             onPress={() => navigation.navigate('AutomaticMessage')}
                         >
                             <View style={styles.description}>
@@ -220,8 +133,8 @@ export default function ConfigurationScreen({ navigation }) {
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
                                 <View>
-                                    <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Mensagem automática</Text>
-                                    <Text style={{flex: 1, fontSize: 14, fontWeight: '600', color: theme.subtitle}}>Confirmação e lembretes</Text>
+                                    <Text style={{ fontSize: 16, fontWeight: '600', color: COLORS.primary }}>Mensagem automática</Text>
+                                    <Text style={{ fontSize: 14, fontWeight: '600', color: theme.subtitle }}>Confirmação e lembretes</Text>
                                 </View>
                             </View>
                             <ChevronRight size={18} color="#999" />
@@ -229,11 +142,11 @@ export default function ConfigurationScreen({ navigation }) {
                     </Card.Content>
                 </Card>
 
-                <Text style={{fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4,}}>Aparência</Text>
-                <Card style={{backgroundColor: theme.card, marginBottom: 20}}>
+                <Text style={{ fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4 }}>Aparência</Text>
+                <Card style={{ backgroundColor: theme.card, marginBottom: 20 }}>
                     <Card.Content>
                         <TouchableOpacity
-                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
+                            style={{ backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
                             onPress={() => navigation.navigate('Theme')}
                         >
                             <View style={styles.description}>
@@ -241,8 +154,8 @@ export default function ConfigurationScreen({ navigation }) {
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
                                 <View>
-                                    <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Tema</Text>
-                                    <Text style={{flex: 1, fontSize: 14, fontWeight: '600', color: theme.subtitle}}>Claro, escuro</Text>
+                                    <Text style={{ fontSize: 16, fontWeight: '600', color: COLORS.primary }}>Tema</Text>
+                                    <Text style={{ fontSize: 14, fontWeight: '600', color: theme.subtitle }}>Claro, escuro</Text>
                                 </View>
                             </View>
                             <ChevronRight size={18} color="#999" />
@@ -250,50 +163,51 @@ export default function ConfigurationScreen({ navigation }) {
                     </Card.Content>
                 </Card>
 
-                <Text style={{fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4,}}>Conta</Text>
-                <Card style={{backgroundColor: theme.card, marginBottom: 20}}>
+                <Text style={{ fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4 }}>Conta</Text>
+                <Card style={{ backgroundColor: theme.card, marginBottom: 20 }}>
                     <Card.Content>
                         <TouchableOpacity
                             style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
-                            onPress={handleHelpSupport}
+                            onPress={() => setActiveSection('account')}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
-                                <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Ajuda e suporte</Text>
+                                <Text style={{ fontSize: 16, fontWeight: '600', color: COLORS.primary }}>Ajuda e suporte</Text>
                             </View>
                             <ChevronRight size={18} color="#999" />
                         </TouchableOpacity>
                         <Divider />
                         <TouchableOpacity
                             style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
-                            onPress={handleTermsPrivacy}
+                            onPress={() => setActiveSection('notifications')}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
-                                <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Termos e privacidade</Text>
+                                <Text style={{ fontSize: 16, fontWeight: '600', color: COLORS.primary }}>Termos e privacidade</Text>
                             </View>
                             <ChevronRight size={18} color="#999" />
                         </TouchableOpacity>
+                        <Divider />
                         <TouchableOpacity
                             style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
-                            onPress={handleSignOut}
+                            onPress={() => setActiveSection('notifications')}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
-                                <Text style={{flex: 1, fontSize: 16, fontWeight: '600', color: COLORS.primary}}>Sair da conta</Text>
+                                <Text style={{ fontSize: 16, fontWeight: '600', color: COLORS.primary }}>Sair da conta</Text>
                             </View>
                             <ChevronRight size={18} color="#999" />
                         </TouchableOpacity>
                     </Card.Content>
                 </Card>
-            </View>
 
+            </View>
         </ScrollView>
     );
 }
