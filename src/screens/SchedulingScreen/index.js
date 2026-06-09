@@ -6,15 +6,28 @@ import {
 import FormSheetScheduling from "./components/FormSheetScheduling";
 import { useScheduling } from "./hooks/useScheduling";
 import { FormProvider } from "react-hook-form";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function SchedulingScreen() {
-
+    const { theme } = useTheme();
     const {events, selectedEvent, handlers, renderEvent, bottomSheetRef, methods, isEditing, services} = useScheduling()
 
     return (
         <>
             <CalendarContainer
                 events={events}
+                theme={{
+                    colors: {
+                        primary: theme.primary,
+                        onPrimary: '#FFFFFF',
+                        background: theme.background,
+                        onBackground: theme.text,
+                        border: theme.border,
+                        text: theme.text,
+                        surface: theme.card,
+                        onSurface: theme.text,
+                    },
+                }}
                 scrollByDay
                 allowDragToCreate
                 allowDragToEdit

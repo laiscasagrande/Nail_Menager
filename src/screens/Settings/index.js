@@ -14,6 +14,7 @@ import {
     updateEmail,
     updatePassword,
     updateProfile,
+    signOut,
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { Bell, ChevronRight, UserCircle } from 'lucide-react-native';
@@ -38,6 +39,7 @@ export default function ConfigurationScreen({ navigation }) {
         promotions: false,
     });
     const { theme } = useTheme();
+    const { setIsLoggedIn } = React.useContext(AuthContext);
     const LeftContent = props => <Avatar.Icon {...props} icon="folder" />
 
     useEffect(() => {
@@ -194,7 +196,7 @@ export default function ConfigurationScreen({ navigation }) {
                         <Divider />
                         <TouchableOpacity
                             style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
-                            onPress={() => setActiveSection('notifications')}
+                            onPress={handleLogout}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
