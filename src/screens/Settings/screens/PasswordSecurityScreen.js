@@ -82,7 +82,7 @@ export default function PasswordSecurityScreen({ navigation }) {
                     </Text>
                 </TouchableOpacity>
                 <Text style={{ fontSize: 16, fontWeight: '600', color: theme.text }}>
-                    Tema claro/escuro
+                    Senha e segurança
                 </Text>
                 <TouchableOpacity disabled={loading} onPress={handleSubmit(onSubmit)}>
                     {loading ? (

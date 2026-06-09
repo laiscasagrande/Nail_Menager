@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
-import { FormProvider } from 'react-hook-form';
+import { View, Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';import { useTheme } from '../../context/ThemeContext';import { FormProvider } from 'react-hook-form';
 import ActionButtonAdd from '../../components/ActionButtonAdd';
 import { ServiceCard } from './components/serviceCard';
 import { useService } from './hooks/useService';
-import { FormSheetServices } from './components/FormSheetServices'
+import { FormSheetServices } from './components/formSheetServices'
 
 export default function ScreenServices() {
+  const { theme } = useTheme();
   const { methods, services, editingId, sheetOpen, setSheetOpen, handlers, sheetRef } = useService();
   
 
@@ -15,7 +15,7 @@ export default function ScreenServices() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}> 
       <FlatList
         data={services}
         renderItem={({ item }) => (
@@ -28,7 +28,7 @@ export default function ScreenServices() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>Nenhum serviço cadastrado.</Text>
+          <Text style={[styles.emptyText, { color: theme.subtitle }]}>Nenhum serviço cadastrado.</Text>
         }
       />
 

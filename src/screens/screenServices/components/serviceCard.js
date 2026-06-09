@@ -1,20 +1,22 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Pencil, Trash2 } from "lucide-react-native";
 import { COLORS } from "../../../constants/colors";
+import { useTheme } from '../../../context/ThemeContext';
 
 export function ServiceCard({ item, onEdit, onDelete }) {
+    const { theme } = useTheme();
     return (
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: theme.card }]}> 
             <Image
                 source={{ uri: item.image || 'https://via.placeholder.com/150' }}
                 style={styles.cardImage}
             />
 
             <View style={styles.cardInfo}>
-                <Text style={styles.cardTitle}>{item.procedure}</Text>
+                <Text style={[styles.cardTitle, { color: theme.text }]}>{item.procedure}</Text>
                 <View style={styles.dataLinha}>
-                    <Text style={styles.price}>R$ {item.price}</Text>
-                    <Text style={styles.dataTexto}>{item.duration}h</Text>
+                    <Text style={[styles.price, { color: theme.primary }]}>R$ {item.price}</Text>
+                    <Text style={[styles.dataTexto, { color: theme.subtitle }]}>{item.duration}h</Text>
                 </View>
             </View>
 
@@ -52,7 +54,6 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#222',
     },
     dataLinha: {
         flexDirection: 'row',
@@ -67,7 +68,6 @@ const styles = StyleSheet.create({
     },
     dataTexto: {
         fontSize: 12,
-        color: '#888',
     },
     cardButtons: {
         justifyContent: 'space-between',

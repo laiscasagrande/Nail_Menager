@@ -9,6 +9,13 @@ export default function Theme({ navigation }) {
     const [loading, setLoading] = useState(false)
     const { theme, handleSavePreferencesTheme, selectedTheme, setSelectedTheme } = useTheme();
 
+    const handleSaveTheme = async () => {
+        setLoading(true);
+        await handleSavePreferencesTheme();
+        setLoading(false);
+        navigation.navigate('Configurações');
+    };
+
     return (
         <View style={{ flex: 1, backgroundColor: theme.background }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: theme.card, borderBottomWidth: 0.5, borderBottomColor: theme.border || '#ddd' }}>
@@ -20,7 +27,7 @@ export default function Theme({ navigation }) {
                 <Text style={{ fontSize: 16, fontWeight: '600', color: theme.text }}>
                     Tema claro/escuro
                 </Text>
-                <TouchableOpacity disabled={loading} onPress={() => {handleSavePreferencesTheme(); navigation.navigate('Configurações')}}>
+                <TouchableOpacity disabled={loading} onPress={handleSaveTheme}>
                     {loading ? (
                         <ActivityIndicator color={COLORS.primary} />
                     ) : (

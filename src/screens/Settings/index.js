@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     Alert,
+    Linking,
     ScrollView,
     StyleSheet,
     Text,
@@ -11,6 +12,7 @@ import { auth, db } from '../../services/firebase';
 import {
     EmailAuthProvider,
     reauthenticateWithCredential,
+    signOut,
     updateEmail,
     updatePassword,
     updateProfile,
@@ -19,24 +21,19 @@ import { doc, setDoc } from 'firebase/firestore';
 import { Bell, ChevronRight, UserCircle } from 'lucide-react-native';
 import { COLORS } from '../../constants/colors';
 import styles from './styles';
-import NotificationsScreen from './components/NotificationsScreen';
-import AccountScreen from './components/AccountScreen';
 import { Avatar, Card, Divider } from 'react-native-paper';
 import { useTheme } from '../../context/ThemeContext';
+import { AuthContext } from '../../context/AuthContext';
 
 export default function ConfigurationScreen({ navigation }) {
-    const [activeSection, setActiveSection] = useState('account');
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [notifications, setNotifications] = useState({
-        reminders: true,
-        promotions: false,
-    });
     const { theme } = useTheme();
+    const { setIsLoggedIn } = useContext(AuthContext);
     const LeftContent = props => <Avatar.Icon {...props} icon="folder" />
 
     useEffect(() => {
@@ -47,8 +44,31 @@ export default function ConfigurationScreen({ navigation }) {
         }
     }, []);
 
-    const handleToggleNotification = (key) => {
-        setNotifications((prev) => ({ ...prev, [key]: !prev[key] }));
+    const handleHelpSupport = async () => {
+        const url = 'mailto:support@nailmanager.com?subject=Ajuda%20Nail%20Manager';
+        const supported = await Linking.canOpenURL(url);
+        if (supported) {
+            Linking.openURL(url);
+        } else {
+            Alert.alert('Ajuda e suporte', 'Envie um e-mail para support@nailmanager.com.');
+        }
+    };
+
+    const handleTermsPrivacy = () => {
+        Alert.alert(
+            'Termos e Privacidade',
+            'Em breve aqui estarão os termos de uso e a política de privacidade do aplicativo.'
+        );
+    };
+
+    const handleSignOut = async () => {
+        try {
+            await signOut(auth);
+            setIsLoggedIn(false);
+        } catch (error) {
+            console.error('Erro ao sair:', error);
+            Alert.alert('Erro', 'Não foi possível sair. Tente novamente.');
+        }
     };
 
     const sanitizeEmail = (value) => value.trim();
@@ -235,7 +255,7 @@ export default function ConfigurationScreen({ navigation }) {
                     <Card.Content>
                         <TouchableOpacity
                             style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
-                            onPress={() => setActiveSection('account')}
+                            onPress={handleHelpSupport}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
@@ -248,7 +268,7 @@ export default function ConfigurationScreen({ navigation }) {
                         <Divider />
                         <TouchableOpacity
                             style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
-                            onPress={() => setActiveSection('notifications')}
+                            onPress={handleTermsPrivacy}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
@@ -260,7 +280,7 @@ export default function ConfigurationScreen({ navigation }) {
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
-                            onPress={() => setActiveSection('notifications')}
+                            onPress={handleSignOut}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>

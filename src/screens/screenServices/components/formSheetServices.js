@@ -6,19 +6,19 @@ import { useRef } from "react";
 import { COLORS } from "../../../constants/colors";
 import { Controller, useFormContext } from "react-hook-form";
 import { forwardRef } from "react";
+import { useTheme } from '../../../context/ThemeContext';
 
 export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onCancel, onSheetChange }, ref) => {
+    const { theme } = useTheme();
     const { handleSubmit, control, watch } = useFormContext();
     const image = watch('image');
 
     return (
         <FormSheet ref={ref} onChange={onSheetChange}>
-            <View style={styles.container}>
+            <View style={[styles.container, { backgroundColor: theme.card }]}> 
                 <View style={styles.form}>
                     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', display: 'flex'}}>
-                        <Text style={styles.formTitle}>Cadastrar Novo Serviço</Text>
-                    </View>
-
+                        <Text style={[styles.formTitle, { color: theme.primary }]}>Cadastrar Novo Serviço</Text>
                     <Controller
                         control={control}
                         name="procedure"
@@ -71,6 +71,7 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
                         )}
                     />
 
+                    </View>
                 </View>
 
                 <View>
@@ -81,8 +82,8 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
                                     <Upload size={22} color={COLORS.primary} />
                                 </View>
                                 <View>
-                                    <Text style={styles.buttonImageLabel}>Anexar imagem</Text>
-                                    <Text style={styles.buttonImageSubLabel}>JPG, PNG até 5MB</Text>
+                                    <Text style={[styles.buttonImageLabel, { color: theme.primary }]}>Anexar imagem</Text>
+                                    <Text style={[styles.buttonImageSubLabel, { color: theme.subtitle }]}>JPG, PNG até 5MB</Text>
                                 </View>
                             </View>
                         </TouchableOpacity>
