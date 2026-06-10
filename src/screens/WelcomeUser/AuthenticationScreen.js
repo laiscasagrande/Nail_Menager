@@ -14,6 +14,7 @@ import { makeRedirectUri } from 'expo-auth-session';
 import ScreenLogin from './ScreenLogin';
 import ScreenRegister from './ScreenRegister';
 import ScreenWelcome from './ScreenWelcome';
+import ForgotPasswordScreen from './ForgotPasswordScreen';
 import styles from '../../constants/styles';
 import { AuthContext } from '../../context/AuthContext';
 import { auth } from '../../services/firebase';
@@ -24,6 +25,8 @@ import {
   updateProfile,
   GoogleAuthProvider,
   signInWithCredential,
+  fetchSignInMethodsForEmail,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 
@@ -39,6 +42,8 @@ const getAuthErrorMessage = (code) => {
       return 'Email não encontrado. Verifique ou registre-se.';
     case 'auth/wrong-password':
       return 'Senha incorreta. Tente novamente.';
+    case 'auth/too-many-requests':
+      return 'Muitas tentativas de login. Espere alguns minutos e tente novamente.';
     case 'auth/network-request-failed':
       return 'Sem conexão. Verifique sua internet.';
     case 'permission-denied':
@@ -56,6 +61,7 @@ export default function AuthenticationScreen({ navigation }) {
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [registerConfirm, setRegisterConfirm] = useState('');
+  const [resetEmail, setResetEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [registerErrors, setRegisterErrors] = useState({});
 
@@ -131,6 +137,51 @@ export default function AuthenticationScreen({ navigation }) {
       console.error('Erro no login:', error);
       const errorMessage = error.code ? getAuthErrorMessage(error.code) : (error.message || 'Erro desconhecido. Tente novamente.');
       Alert.alert('Erro no login', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPasswordPress = () => {
+    setResetEmail(loginEmail.trim());
+    setScreen('forgotPassword');
+  };
+
+  const handleResetPasswordSubmit = async () => {
+    const email = resetEmail.trim();
+    if (!email) {
+      Alert.alert('Atenção', 'Digite o Gmail usado para recuperar a conta.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (!methods || methods.length === 0) {
+        Alert.alert('Atenção', 'Email não cadastrado. Verifique ou crie uma nova conta.');
+        return;
+      }
+
+      if (methods.includes('google.com') && !methods.includes('password')) {
+        Alert.alert(
+          'Conta Google',
+          'Esta conta foi criada com o Google. Use o botão Entrar com o Google para recuperar o acesso.'
+        );
+        setScreen('welcome');
+        return;
+      }
+
+      await sendPasswordResetEmail(auth, email);
+      Alert.alert(
+        'Email enviado',
+        'Enviamos um email com instruções para redefinir sua senha. Verifique sua caixa de entrada do Gmail.'
+      );
+      setResetEmail('');
+      setScreen('login');
+    } catch (error) {
+      console.error('Erro no reset de senha:', error);
+      const errorMessage = error.code ? getAuthErrorMessage(error.code) : (error.message || 'Não foi possível recuperar a conta. Tente novamente.');
+      Alert.alert('Erro', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -256,6 +307,17 @@ export default function AuthenticationScreen({ navigation }) {
             onChangePassword={setLoginPassword}
             onSubmit={handleLoginSubmit}
             onBack={() => setScreen('welcome')}
+            onForgotPassword={handleForgotPasswordPress}
+            loading={loading}
+          />
+        )}
+
+        {screen === 'forgotPassword' && (
+          <ForgotPasswordScreen
+            email={resetEmail}
+            onChangeEmail={setResetEmail}
+            onSubmit={handleResetPasswordSubmit}
+            onBack={() => setScreen('login')}
             loading={loading}
           />
         )}
