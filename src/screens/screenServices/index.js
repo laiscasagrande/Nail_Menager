@@ -4,7 +4,7 @@ import { FormProvider } from 'react-hook-form';
 import ActionButtonAdd from '../../components/ActionButtonAdd';
 import { ServiceCard } from './components/serviceCard';
 import { useService } from './hooks/useService';
-import { FormSheetServices } from './components/FormSheetServices'
+import { FormSheetServices } from './components/formSheetServices'
 
 export default function ScreenServices() {
   const { methods, services, editingId, sheetOpen, setSheetOpen, handlers, sheetRef } = useService();
