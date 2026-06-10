@@ -8,6 +8,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { PieChart } from 'react-native-chart-kit';
@@ -51,6 +52,7 @@ const MONTHS = [
 ];
  
 export default function FaturamentoTela() {
+  const { theme } = useTheme();
 
   const [appointments, setAppointments] = useState([]); 
   const [loading, setLoading] = useState(true);          
@@ -176,9 +178,9 @@ export default function FaturamentoTela() {
 
   if (loading) {
         return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#E91E8C" />
-        <Text style={styles.loadingText}>Carregando faturamento...</Text>
+      <View style={[styles.centered, { backgroundColor: theme.background }]}> 
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={[styles.loadingText, { color: theme.subtitle }]}>Carregando faturamento...</Text>
       </View>
     );
   }
@@ -188,14 +190,14 @@ export default function FaturamentoTela() {
     const serviceLabel = item.serviceName || item.service || 'Serviço Desconhecido';
 
     return (
-      <View style={styles.appointmentCard}>
+      <View style={[styles.appointmentCard, { backgroundColor: theme.card }]}> 
         <View style={styles.appointmentRow}>
-          <Text style={styles.appointmentPrimaryText}>{clientLabel}</Text>
-          <Text style={styles.appointmentValue}>{formatCurrency(item.servicePrice)}</Text>
+          <Text style={[styles.appointmentPrimaryText, { color: theme.text }]}>{clientLabel}</Text>
+          <Text style={[styles.appointmentValue, { color: theme.primary }]}>{formatCurrency(item.servicePrice)}</Text>
         </View>
         <View style={styles.appointmentRow}>
-          <Text style={styles.appointmentSecondaryText}>{serviceLabel}</Text>
-          <Text style={styles.appointmentDate}>{formatDate(item.start)}</Text>
+          <Text style={[styles.appointmentSecondaryText, { color: theme.subtitle }]}>{serviceLabel}</Text>
+          <Text style={[styles.appointmentDate, { color: theme.subtitle }]}>{formatDate(item.start)}</Text>
         </View>
       </View>
     );
@@ -220,16 +222,16 @@ export default function FaturamentoTela() {
   }
 
   return (
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScrollView style={[styles.container, { backgroundColor: theme.background }]} contentContainerStyle={styles.content}>
 
-        <Text style={styles.title}>Faturamento</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Faturamento</Text>
 
          <View style={styles.monthSelector}>
         <TouchableOpacity onPress={goToPreviousMonth} style={styles.arrowButton}>
-          <Text style={styles.arrowText}>{'‹'}</Text>
+          <Text style={[styles.arrowText, { color: theme.primary }]}>{'‹'}</Text>
         </TouchableOpacity>
  
-        <Text style={styles.monthText}>
+        <Text style={[styles.monthText, { color: theme.text }]}> 
           {MONTHS[selectedMonth]} {selectedYear}
         </Text>
  
@@ -240,18 +242,18 @@ export default function FaturamentoTela() {
 
       <View style={styles.cardRow}>
         <View style={[styles.card, styles.highlightCard]}>
-          <Text style={styles.cardTitle}>Total Faturado</Text>
-          <Text style={styles.cardValue}>{formatCurrency(totalRevenue)}</Text>
+              <Text style={[styles.cardTitle, { color: '#FFF' }]}>Total Faturado</Text>
+              <Text style={styles.cardValue}>{formatCurrency(totalRevenue)}</Text>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardLabel}>Total do Mês</Text>
-          <Text style={styles.cardNumber}>{appointmentsInMonth.length}</Text>
+        <View style={[styles.card, { backgroundColor: theme.card }]}> 
+          <Text style={[styles.cardLabel, { color: theme.subtitle }]}>Total do Mês</Text>
+          <Text style={[styles.cardNumber, { color: theme.text }]}>{appointmentsInMonth.length}</Text>
         </View>
 
-        <View style={styles.card}>
-          <Text style={styles.cardLabel}>Ticket Médio</Text>
-          <Text style={styles.cardNumber}>
+        <View style={[styles.card, { backgroundColor: theme.card }]}> 
+          <Text style={[styles.cardLabel, { color: theme.subtitle }]}>Ticket Médio</Text>
+          <Text style={[styles.cardNumber, { color: theme.text }]}> 
             {formatCurrency(
               completedAppointments.length === 0
                 ? 0

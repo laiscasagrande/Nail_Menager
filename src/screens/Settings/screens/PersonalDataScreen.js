@@ -84,7 +84,7 @@ export default function PersonalDataScreen({ navigation }) {
                     </Text>
                 </TouchableOpacity>
                 <Text style={{ fontSize: 16, fontWeight: '600', color: theme.text }}>
-                    Tema claro/escuro
+                    Dados pessoais
                 </Text>
                 <TouchableOpacity disabled={loading} onPress={handleSubmit(onSubmit)}>
                     {loading ? (

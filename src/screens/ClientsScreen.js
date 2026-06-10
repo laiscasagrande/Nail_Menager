@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 
 import {
+    SafeAreaView,
     View,
     Text,
     StyleSheet,
@@ -19,7 +20,7 @@ import {
 
 import ActionButtonAdd from '../components/ActionButtonAdd';
 import FormSheet from '../components/FormSheet';
-
+import { useTheme } from '../context/ThemeContext';
 import { COLORS } from '../constants/colors';
 
 const clientes = [
@@ -85,8 +86,10 @@ export default function ClientsScreen() {
         setObservacao('');
     }
 
+    const { theme } = useTheme();
+
     return (
-        <>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}> 
             <FlatList
                 data={clientes}
                 keyExtractor={(item) => item.id}
@@ -97,7 +100,7 @@ export default function ClientsScreen() {
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => (
 
-                    <View style={styles.card}>
+                    <View style={[styles.card, { backgroundColor: theme.card, shadowColor: theme.background === '#FFFFFF' ? '#000' : '#000', opacity: theme.background === '#FFFFFF' ? 1 : 0.97 }]}> 
 
                         <View style={styles.avatar}>
                             <Text style={styles.avatarText}>
@@ -111,16 +114,16 @@ export default function ClientsScreen() {
                         </View>
 
                         <View style={styles.info}>
-                            <Text style={styles.nome}>
+                            <Text style={[styles.nome, { color: theme.text }]}> 
                                 {item.nome}
                             </Text>
 
-                            <Text style={styles.telefone}>
+                            <Text style={[styles.telefone, { color: theme.subtitle }]}> 
                                 {item.telefone}
                             </Text>
 
                             {clienteAberto === item.id && item.alergia && (
-                                <Text style={styles.alergia}>
+                                <Text style={[styles.alergia, { color: theme.subtitle }]}> 
                                     {item.alergia}
                                 </Text>
                             )}
@@ -170,7 +173,7 @@ export default function ClientsScreen() {
                 onChange={(index) => setSheetIndex(index)}
             >
 
-                <View style={styles.formContainer}>
+<View style={[styles.formContainer, { backgroundColor: theme.background }]}>
 
                     <View style={styles.form}>
 
@@ -178,8 +181,8 @@ export default function ClientsScreen() {
                             Cadastrar novo cliente
                         </Text>
 
-                        <View style={styles.inputContainer}>
-                            <AntDesign name="user" size={20} color="#c7c7c7" />
+                        <View style={[styles.inputContainer, { backgroundColor: theme.card, borderColor: theme.border }]}> 
+                            <AntDesign name="user" size={20} color={theme.subtitle} />
 
                             <TextInput
                                 placeholder="Nome"
@@ -190,8 +193,8 @@ export default function ClientsScreen() {
                             />
                         </View>
 
-                        <View style={styles.inputContainer}>
-                            <Feather name="smartphone" size={20} color="#c7c7c7" />
+                        <View style={[styles.inputContainer, { backgroundColor: theme.card, borderColor: theme.border }]}> 
+                            <Feather name="smartphone" size={20} color={theme.subtitle} />
 
                             <TextInput
                                 placeholder="Telefone"
@@ -203,11 +206,11 @@ export default function ClientsScreen() {
                             />
                         </View>
 
-                        <View style={styles.textAreaContainer}>
+                        <View style={[styles.textAreaContainer, { backgroundColor: theme.card, borderColor: theme.border }]}> 
                             <MaterialCommunityIcons
                                 name="hair-dryer"
                                 size={22}
-                                color="#c7c7c7"
+                                color={theme.subtitle}
                             />
 
                             <TextInput
@@ -237,7 +240,7 @@ export default function ClientsScreen() {
 
             </FormSheet>
 
-        </>
+        </SafeAreaView>
     );
 }
 

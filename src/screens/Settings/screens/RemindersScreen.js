@@ -18,16 +18,20 @@ export default function RemindersScreen({ navigation }) {
     const { theme } = useTheme();
 
     async function handleSavePreferencesNotificationsUser() {
-
+        setLoading(true);
         try {
             await setDoc(doc(db, 'users', user.uid), {
                 notificationPreferences: {
                     push: push,
                     email: email,
                 }
-            }, { merge: true })
+            }, { merge: true });
+            Alert.alert('Sucesso', 'Preferências salvas com sucesso.');
         } catch (error) {
             console.log('Error saving notification preferences:', error);
+            Alert.alert('Erro', 'Não foi possível salvar as preferências.');
+        } finally {
+            setLoading(false);
         }
     }
 
