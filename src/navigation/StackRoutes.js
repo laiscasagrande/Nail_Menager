@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { AuthenticationScreen, ScheduleScreen } from '../screens';
+import AuthenticationScreen from '../screens/WelcomeUser/AuthenticationScreen';
+import ScheduleScreen from '../screens/ScheduleScreen';
 
 const Stack = createNativeStackNavigator();
 
