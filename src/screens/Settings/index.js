@@ -104,22 +104,6 @@ export default function ConfigurationScreen({ navigation }) {
                             </View>
                             <ChevronRight size={18} color="#999" />
                         </TouchableOpacity>
-                        <Divider />
-                        <TouchableOpacity
-                            style={{ backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-                            onPress={handleLogout}
-                        >
-                            <View style={styles.description}>
-                                <View style={styles.optionIcon}>
-                                    <UserCircle size={22} color={COLORS.primary} />
-                                </View>
-                                <View>
-                                    <Text style={{ fontSize: 16, fontWeight: '600', color: COLORS.primary }}>Sair da conta</Text>
-                                    <Text style={{ fontSize: 14, fontWeight: '600', color: theme.subtitle }}>Entrar novamente depois</Text>
-                                </View>
-                            </View>
-                            <ChevronRight size={18} color="#999" />
-                        </TouchableOpacity>
                     </Card.Content>
                 </Card>
 
@@ -185,7 +169,7 @@ export default function ConfigurationScreen({ navigation }) {
                 <Card style={{ backgroundColor: theme.card, marginBottom: 20 }}>
                     <Card.Content>
                         <TouchableOpacity
-                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
+                            style={{ backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
                             onPress={() => setActiveSection('account')}
                         >
                             <View style={styles.description}>
@@ -198,7 +182,7 @@ export default function ConfigurationScreen({ navigation }) {
                         </TouchableOpacity>
                         <Divider />
                         <TouchableOpacity
-                            style={{backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}
+                            style={{ backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
                             onPress={() => setActiveSection('notifications')}
                         >
                             <View style={styles.description}>
@@ -206,6 +190,27 @@ export default function ConfigurationScreen({ navigation }) {
                                     <UserCircle size={22} color={COLORS.primary} />
                                 </View>
                                 <Text style={{ fontSize: 16, fontWeight: '600', color: COLORS.primary }}>Termos e privacidade</Text>
+                            </View>
+                            <ChevronRight size={18} color="#999" />
+                        </TouchableOpacity>
+                    </Card.Content>
+                </Card>
+
+                <Text style={{ fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4 }}>Sair</Text>
+                <Card style={{ backgroundColor: theme.card, marginBottom: 20 }}>
+                    <Card.Content>
+                        <TouchableOpacity
+                            style={{ backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
+                            onPress={handleLogout}
+                        >
+                            <View style={styles.description}>
+                                <View style={styles.optionIcon}>
+                                    <UserCircle size={22} color={COLORS.primary} />
+                                </View>
+                                <View>
+                                    <Text style={{ fontSize: 16, fontWeight: '600', color: COLORS.primary }}>Sair da conta</Text>
+                                    <Text style={{ fontSize: 14, fontWeight: '600', color: theme.subtitle }}>Entrar novamente depois</Text>
+                                </View>
                             </View>
                             <ChevronRight size={18} color="#999" />
                         </TouchableOpacity>

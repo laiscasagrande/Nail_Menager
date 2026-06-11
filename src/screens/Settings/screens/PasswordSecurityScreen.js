@@ -125,35 +125,6 @@ export default function PasswordSecurityScreen({ navigation }) {
         navigation.navigate('Configurações');
     };
 
-    const handleForgotPassword = async () => {
-        const user = auth.currentUser;
-        if (!user || !user.email) {
-            Alert.alert('Erro', 'Não foi possível recuperar o email do usuário.');
-            return;
-        }
-
-        const passwordProvider = user.providerData.some((provider) => provider.providerId === 'password');
-        if (!passwordProvider) {
-            Alert.alert(
-                'Conta Google',
-                'Esta conta foi criada com o Google. Para alterar a senha, use o login do Google.'
-            );
-            return;
-        }
-
-        setResetLoading(true);
-        setResetMessage('');
-        try {
-            await sendPasswordResetEmail(auth, user.email);
-            setResetMessage(`Link de redefinição enviado para ${user.email}`);
-        } catch (error) {
-            console.error('Erro ao enviar email de recuperação:', error);
-            setResetMessage('Não foi possível enviar o email de recuperação.');
-        } finally {
-            setResetLoading(false);
-        }
-    };
-
     return (
         <View style={{flex: 1, backgroundColor: theme.background}}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: theme.card, borderBottomWidth: 0.5, borderBottomColor: theme.border || '#ddd' }}>
@@ -178,7 +149,7 @@ export default function PasswordSecurityScreen({ navigation }) {
             <ScrollView style={styles.contentPasswordSecurity}>
                 <Text style={{fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4,}}>Alterar senha</Text>
                 {(currentPasswordValue === '' || (newPasswordValue !== '' && newPasswordValue !== confirmPasswordValue)) && (
-                    <Text style={{ fontSize: 13, color: theme.subtitle, marginBottom: 16, lineHeight: 20 }}>
+                    <Text style={{ fontSize: 13, marginLeft: 4, color: theme.subtitle, marginBottom: 16, lineHeight: 20 }}>
                         {currentPasswordValue === ''
                             ? 'A senha atual precisa estar correta.'
                             : 'Senha nova e confirmar senha precisam ser iguais.'}
@@ -253,24 +224,6 @@ export default function PasswordSecurityScreen({ navigation }) {
                             {showConfirm ? <EyeOff size={16} color="#ccc" /> : <Eye size={16} color="#ccc" />}
                         </TouchableOpacity>
                     </View>
-                </View>
-                <View style={{ marginBottom: 16, paddingHorizontal: 16 }}>
-                    <TouchableOpacity
-                        style={[styles.saveButton, { backgroundColor: '#6C5CE7' }]}
-                        onPress={handleForgotPassword}
-                        disabled={resetLoading}
-                    >
-                        {resetLoading ? (
-                            <ActivityIndicator color="#fff" />
-                        ) : (
-                            <Text style={styles.saveButtonText}>Esqueci a minha senha</Text>
-                        )}
-                    </TouchableOpacity>
-                    {resetMessage ? (
-                        <Text style={{ color: theme.subtitle, fontSize: 13, marginTop: 12 }}>
-                            {resetMessage}
-                        </Text>
-                    ) : null}
                 </View>
             </ScrollView>
         </View>
