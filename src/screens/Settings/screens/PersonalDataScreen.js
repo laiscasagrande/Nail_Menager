@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Image,
     ScrollView,
     Text,
     TextInput,
@@ -9,6 +10,7 @@ import {
     View
 } from 'react-native';
 import { UserCircle } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { auth, db } from '../../../services/firebase';
 import {
     updateEmail,
@@ -24,6 +26,7 @@ import { useTheme } from '../../../context/ThemeContext';
 
 export default function PersonalDataScreen({ navigation }) {
     const [loading, setLoading] = useState(false);
+    const [photoUri, setPhotoUri] = useState(null);
     const { theme } = useTheme();
     const { handleSubmit, control, reset } = useForm({
         resolver: zodResolver(personalDataSchema),
@@ -39,9 +42,23 @@ export default function PersonalDataScreen({ navigation }) {
             reset({
                 name: user.displayName || '',
                 email: user.email || ''
-            })
+            });
+            if (user.photoURL) {
+                setPhotoUri(user.photoURL);
+            }
         }
     }, []);
+
+    const pickImage = async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setPhotoUri(result.assets[0].uri);
+        }
+    };
 
     const onSubmit = async (data) => {
         const user = auth.currentUser;
@@ -49,18 +66,30 @@ export default function PersonalDataScreen({ navigation }) {
 
         setLoading(true);
         try {
-            if (data.name !== user.displayName) {
-                await updateProfile(user, { displayName: data.name.trim() });
+            const updates = {};
+            if (data.name !== user.displayName) updates.displayName = data.name.trim();
+            if (photoUri && photoUri !== user.photoURL) updates.photoURL = photoUri;
+
+            if (Object.keys(updates).length > 0) {
+                await updateProfile(user, updates);
             }
+
             const sanitizedEmail = data.email.trim();
             if (sanitizedEmail !== user.email) {
                 await updateEmail(user, sanitizedEmail);
             }
+
             await setDoc(
                 doc(db, 'users', user.uid),
-                { name: data.name.trim(), email: data.email.trim(), updatedAt: new Date() },
+                {
+                    name: data.name.trim(),
+                    email: data.email.trim(),
+                    ...(photoUri ? { photoURL: photoUri } : {}),
+                    updatedAt: new Date()
+                },
                 { merge: true }
             );
+
             Alert.alert('Sucesso', 'Dados atualizados com sucesso.');
             navigation.navigate('Configurações');
         } catch (error) {
@@ -79,9 +108,7 @@ export default function PersonalDataScreen({ navigation }) {
 
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: theme.card, borderBottomWidth: 0.5, borderBottomColor: theme.border || '#ddd' }}>
                 <TouchableOpacity onPress={() => navigation.navigate('Configurações')}>
-                    <Text style={{ fontSize: 16, color: COLORS.primary }}>
-                        Cancelar
-                    </Text>
+                    <Text style={{ fontSize: 16, color: COLORS.primary }}>Cancelar</Text>
                 </TouchableOpacity>
                 <Text style={{ fontSize: 16, fontWeight: '600', color: theme.text }}>
                     Dados pessoais
@@ -100,16 +127,25 @@ export default function PersonalDataScreen({ navigation }) {
             <ScrollView contentContainerStyle={styles.contentPersonalData}>
 
                 <View style={styles.avatarSection}>
-                    <View style={styles.avatar}>
-                        <UserCircle size={48} color={COLORS.primary} />
-                    </View>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={pickImage}>
+                        <View style={styles.avatar}>
+                            {photoUri ? (
+                                <Image
+                                    source={{ uri: photoUri }}
+                                    style={{ width: 72, height: 72, borderRadius: 36 }}
+                                />
+                            ) : (
+                                <UserCircle size={48} color={COLORS.primary} />
+                            )}
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={pickImage}>
                         <Text style={styles.avatarChange}>Alterar foto</Text>
                     </TouchableOpacity>
                 </View>
 
-                <Text style={{fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4,}}>Informações pessoais</Text>
-                <View style={{backgroundColor: theme.card, borderRadius: 12, marginBottom: 24, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1,}}>
+                <Text style={{fontSize: 11, fontWeight: '600', color: theme.subtitle, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 8, marginLeft: 4}}>Informações pessoais</Text>
+                <View style={{backgroundColor: theme.card, borderRadius: 12, marginBottom: 24, overflow: 'hidden', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 1}}>
                     <View style={styles.fieldRow}>
                         <Text style={{width: 100, fontSize: 15, color: theme.text}}>Nome</Text>
                         <Controller

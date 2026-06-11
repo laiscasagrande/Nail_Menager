@@ -124,17 +124,23 @@ export default function AutomaticMessage({ navigation }) {
     }, []);
 
     return (
-        <View style={{flex: 1, backgroundColor: theme.background}}>
-            <View style={styles.header}>
+        <View style={{ flex: 1, backgroundColor: theme.background }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: theme.card, borderBottomWidth: 0.5, borderBottomColor: theme.border || '#ddd' }}>
                 <TouchableOpacity onPress={() => navigation.navigate('Configurações')}>
-                    <Text style={styles.headerCancel}>Cancelar</Text>
+                    <Text style={{ fontSize: 16, color: COLORS.primary }}>
+                        Cancelar
+                    </Text>
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Notificação Automática</Text>
+                <Text style={{ fontSize: 16, fontWeight: '600', color: theme.text }}>
+                    Notificação Automática
+                </Text>
                 <TouchableOpacity disabled={loading} onPress={handleSavePreferencesSchedulesDays}>
                     {loading ? (
                         <ActivityIndicator color={COLORS.primary} />
                     ) : (
-                        <Text style={styles.headerDone}>Concluído</Text>
+                        <Text style={{ fontSize: 16, color: COLORS.primary, fontWeight: '600' }}>
+                            Concluído
+                        </Text>
                     )}
                 </TouchableOpacity>
             </View>
