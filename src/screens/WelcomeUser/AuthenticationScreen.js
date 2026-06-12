@@ -61,6 +61,20 @@ export default function AuthenticationScreen({ navigation }) {
 
   const { setIsLoggedIn } = useContext(AuthContext); // pega do contexto
 
+  const createOrUpdateUserDoc = async (user, extraData = {}) => {
+    if (!user) return;
+    await setDoc(
+      doc(db, 'users', user.uid),
+      {
+        uid: user.uid,
+        email: user.email || '',
+        name: user.displayName || '',
+        ...extraData,
+      },
+      { merge: true }
+    );
+  };
+
   WebBrowser.maybeCompleteAuthSession();
 
   const redirectUri = makeRedirectUri({ useProxy: true });
@@ -88,6 +102,9 @@ export default function AuthenticationScreen({ navigation }) {
       const signInWithGoogle = async () => {
         try {
           await signInWithCredential(auth, credential);
+          await createOrUpdateUserDoc(auth.currentUser, {
+            lastLoginAt: new Date(),
+          });
           setIsLoggedIn(true);
         } catch (error) {
           console.error('Erro no login com Google:', error);
@@ -195,9 +212,9 @@ export default function AuthenticationScreen({ navigation }) {
       console.log('🟢 Perfil atualizado.');
 
       console.log('🟡 Salvando no Firestore...');
-      await setDoc(doc(db, 'users', userCredential.user.uid), {
+      await createOrUpdateUserDoc(userCredential.user, {
         name: registerName,
-        email: registerEmail,
+        email: registerEmail.trim(),
         createdAt: new Date(),
       });
       console.log('🟢 Documento salvo no Firestore!');

@@ -21,9 +21,11 @@ Notifications.setNotificationHandler({
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
       setIsLoggedIn(!!user);
       setAuthChecked(true);
     });
@@ -37,7 +39,7 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+      <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, user }}>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <PaperProvider>
             <NavigationContainer>
