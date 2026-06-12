@@ -9,7 +9,7 @@ import { FormProvider } from "react-hook-form";
 
 export default function SchedulingScreen() {
 
-    const {events, selectedEvent, handlers, renderEvent, bottomSheetRef, methods, isEditing, services} = useScheduling()
+    const {events, selectedEvent, handlers, renderEvent, bottomSheetRef, methods, isEditing, services, customers} = useScheduling()
 
     return (
         <>
@@ -36,6 +36,7 @@ export default function SchedulingScreen() {
                     <FormSheetScheduling
                         bottomSheetRef={bottomSheetRef}
                         services={services}
+                        customers={customers}
                         onSubmit={handlers.handleCreateScheduling}
                         onCancel={handlers.handlePressCancel}
                         onCompleted={handlers.handlePressCompleted}

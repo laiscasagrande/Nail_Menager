@@ -5,34 +5,10 @@ import { formScheduling } from "../../../schemas/schedulingSchema";
 import { v4 as uuidv4 } from 'uuid';
 import { COLORS } from "../../../constants/colors";
 import { DraggingEvent } from "@howljs/calendar-kit";
-import { Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { ca, is } from "zod/locales";
 import { addDoc, collection, doc, getDoc, getDocs, Timestamp, updateDoc } from "firebase/firestore";
 import { db } from "../../../services/firebase";
-
-export const CLIENTS = [
-    { label: "Laís Kaminski Casagrande", value: "1" },
-    { label: "João Silva", value: "2" },
-    { label: "Maria Souza", value: "3" },
-];
-
-export const SERVICES = [
-    {
-        label: "Manicure Tradicional",
-        value: "1",
-        price: 50
-    },
-    {
-        label: "Alongamento em Gel",
-        value: "2",
-        price: 120
-    },
-    {
-        label: "Banho de Gel",
-        value: "3",
-        price: 80
-    },
-];
 
 export function useScheduling() {
 
@@ -41,6 +17,7 @@ export function useScheduling() {
     const [idEvent, setIdEvent] = useState(null)
     const [isEditing, setIsEditing] = useState(false)
     const [services, setServices] = useState([]);
+    const [customers, setCustomers] = useState([])
 
     const bottomSheetRef = useRef(null);
 
@@ -107,8 +84,8 @@ export function useScheduling() {
 
     async function handleCreateScheduling(data) {
 
-        const selectedClient = CLIENTS.find(
-            (client) => client.value === data.client
+        const selectedClient = customers.find(
+            (client) => client.id === data.client
         );
 
         const selectedService = services.find(
@@ -120,7 +97,7 @@ export function useScheduling() {
                 client: data.client,
                 service: data.service,
                 servicePrice: selectedService?.price || 0,
-                title: selectedClient?.label || "",
+                title: selectedClient?.name || "",
                 start: Timestamp.fromDate(new Date(data.dateStart)),
                 end: Timestamp.fromDate(new Date(data.dateEnd)),
                 status: "scheduled",
@@ -145,8 +122,8 @@ export function useScheduling() {
 
     async function handleEditScheduling(data) {
 
-        const selectedClient = CLIENTS.find(
-            (client) => client.value === data.client
+        const selectedClient = customers.find(
+            (client) => client.id === data.client
         );
 
         const selectedService = services.find(
@@ -158,7 +135,7 @@ export function useScheduling() {
                 client: data.client,
                 service: data.service,
                 servicePrice: selectedService?.price || 0,
-                title: selectedClient?.label || "",
+                title: selectedClient?.name || "",
                 start: Timestamp.fromDate(data.dateStart),
                 end: Timestamp.fromDate(data.dateEnd),
                 status: data.status,
@@ -175,7 +152,7 @@ export function useScheduling() {
                             client: data.client,
                             service: data.service,
                             servicePrice: selectedService?.price || 0,
-                            title: selectedClient?.label || "",
+                            title: selectedClient?.name || "",
                             start: {
                                 dateTime: data.dateStart.toISOString(),
                             },
@@ -257,30 +234,42 @@ export function useScheduling() {
         getServices()
     }, [])
 
+    useEffect(() => {
+        getCustomers()
+    }, [])
+
     async function handlePressCancel(data) {
+    Alert.alert(
+        'Cancelar agendamento',
+        'Tem certeza que deseja cancelar este agendamento?',
+        [
+            { text: 'Voltar', style: 'cancel' },
+            {
+                text: 'Cancelar agendamento',
+                onPress: async () => {
+                    try {
+                        await updateDoc(doc(db, "scheduling", data.id), {
+                            status: "cancelled",
+                        });
 
-        try {
-            await updateDoc(doc(db, "scheduling", data.id), {
-                status: "cancelled",
-            });
+                        setEvents((prev) =>
+                            prev.map((e) =>
+                                e.id === data.id
+                                    ? { ...e, status: "cancelled", title: e.title }
+                                    : e
+                            )
+                        );
 
-            setEvents((prev) =>
-                prev.map((e) =>
-                    e.id === data.id
-                        ? {
-                            ...e,
-                            status: "cancelled"
-                        }
-                        : e
-                )
-            )
-
-            bottomSheetRef.current.close()
-            setSelectedEvent(null)
-        } catch (error) {
-            console.log("Erro ao cancelar agendamento:", error);
-        }
-    }
+                        bottomSheetRef.current.close();
+                        setSelectedEvent(null);
+                    } catch (error) {
+                        console.log("Erro ao cancelar agendamento:", error);
+                    }
+                }
+            }
+        ]
+    );
+}
 
     async function handlePressCompleted(data) {
 
@@ -320,6 +309,7 @@ export function useScheduling() {
                         ? {
                             ...e,
                             status: "scheduled",
+                            title: e.title
                         }
                         : e
                 )
@@ -342,6 +332,19 @@ export function useScheduling() {
             setServices(serviceList)
         } catch (error) {
             console.log("Erro ao buscar serviços:", error);
+        }
+    }
+
+    async function getCustomers() {
+        try {
+            const getCustomersData = await getDocs(collection(db, "customers"))
+            const customersList = getCustomersData.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }))
+            setCustomers(customersList)
+        } catch (error) {
+            console.log("Erro ao buscar clientes:", error);
         }
     }
 
@@ -384,6 +387,7 @@ export function useScheduling() {
         isEditing,
         methods,
         services,
+        customers,
 
         handlers: {
             handleDragCreateStart,
