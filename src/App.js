@@ -57,10 +57,11 @@ function AppContent({ isLoggedIn, setIsLoggedIn }) {
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      console.log('Auth state updated:', user ? 'logged in' : 'logged out');
+      setUser(user);
       setIsLoggedIn(!!user);
       setAuthChecked(true);
     });
@@ -78,7 +79,15 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <AppContent isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
+      <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, user }}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <PaperProvider>
+            <NavigationContainer>
+              <RootStack />
+            </NavigationContainer>
+          </PaperProvider>
+        </GestureHandlerRootView>
+      </AuthContext.Provider>
     </ThemeProvider>
   );
 }
