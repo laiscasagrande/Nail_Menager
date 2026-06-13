@@ -14,36 +14,43 @@ import { db } from '../services/firebase';
 import { PieChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { CLIENTS } from './SchedulingScreen/hooks/useScheduling';
+import colors, { COLORS } from '../constants/colors';
  
 const screenWidth = Dimensions.get('window').width;
  
 const STATUS_CONFIG = {
   completed: {
     label: 'Concluído',
-    color: '#4CAF50',
-    legendFontColor: '#555',
+    color: COLORS.primary,
+    legendFontColor: colors.text,
   },
   scheduled: {
     label: 'Agendado',
-    color: '#2196F3',
-    legendFontColor: '#555',
+    color: colors.accent,
+    legendFontColor: colors.text,
   },
   cancelled: {
     label: 'Cancelado',
-    color: '#F44336',
-    legendFontColor: '#555',
+    color: colors.primaryDark,
+    legendFontColor: colors.text,
   },
   pending: {
     label: 'Pendente',
-    color: '#FF9800',
-    legendFontColor: '#555',
+    color: '#F4B6D5',
+    legendFontColor: colors.text,
   },
   unknown: {
     label: 'Outros',
-    color: '#9E9E9E',
-    legendFontColor: '#555',
+    color: colors.textMuted,
+    legendFontColor: colors.text,
   },
 };
+
+const CLIENT_NAME_BY_VALUE = CLIENTS.reduce((accumulator, client) => {
+  accumulator[client.value] = client.label;
+  return accumulator;
+}, {});
  
 
 const MONTHS = [
@@ -55,6 +62,8 @@ export default function FaturamentoTela() {
   const { theme } = useTheme();
 
   const [appointments, setAppointments] = useState([]); 
+  const [clientNames, setClientNames] = useState({});
+  const [serviceNames, setServiceNames] = useState({});
   const [loading, setLoading] = useState(true);          
  
 
@@ -68,12 +77,49 @@ export default function FaturamentoTela() {
       async function fetchAppointments() {
         setLoading(true);
         try {
-          const snapshot = await getDocs(collection(db, 'scheduling'));
+          const [snapshot, clientsSnapshot, servicesSnapshot] = await Promise.all([
+            getDocs(collection(db, 'scheduling')),
+            getDocs(collection(db, 'clients')),
+            getDocs(collection(db, 'services')),
+          ]);
 
           const list = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           }));
+
+          const namesById = clientsSnapshot.docs.reduce((accumulator, docSnapshot) => {
+            const data = docSnapshot.data();
+            const clientName = data.name || data.clientName || data.label || docSnapshot.id;
+
+            accumulator[docSnapshot.id] = clientName;
+
+            if (data.name) {
+              accumulator[data.name] = data.name;
+            }
+
+            return accumulator;
+          }, {});
+
+          const serviceNamesById = servicesSnapshot.docs.reduce((accumulator, docSnapshot) => {
+            const data = docSnapshot.data();
+            const serviceName = data.procedure || data.serviceName || data.name || data.label || docSnapshot.id;
+
+            accumulator[docSnapshot.id] = serviceName;
+
+            if (data.procedure) {
+              accumulator[data.procedure] = data.procedure;
+            }
+
+            return accumulator;
+          }, {});
+
+          setClientNames({
+            ...CLIENT_NAME_BY_VALUE,
+            ...namesById,
+          });
+
+          setServiceNames(serviceNamesById);
 
           setAppointments(list);
           console.log(list[0]);
@@ -176,6 +222,25 @@ export default function FaturamentoTela() {
     return `R$ ${integerPart},${parts[1]}`;
   }
 
+  function getClientLabel(item) {
+    return (
+      item.clientName ||
+      item.title ||
+      clientNames[item.client] ||
+      item.client ||
+      'Cliente Desconhecido'
+    );
+  }
+
+  function getServiceLabel(item) {
+    return (
+      item.serviceName ||
+      serviceNames[item.service] ||
+      item.service ||
+      'Serviço Desconhecido'
+    );
+  }
+
   if (loading) {
         return (
       <View style={[styles.centered, { backgroundColor: theme.background }]}> 
@@ -186,8 +251,8 @@ export default function FaturamentoTela() {
   }
 
   function renderItem({ item }) {
-    const clientLabel = item.clientName || item.client || 'Cliente Desconhecido';
-    const serviceLabel = item.serviceName || item.service || 'Serviço Desconhecido';
+    const clientLabel = getClientLabel(item);
+    const serviceLabel = getServiceLabel(item);
 
     return (
       <View style={[styles.appointmentCard, { backgroundColor: theme.card }]}> 
@@ -263,7 +328,7 @@ export default function FaturamentoTela() {
         </View>
       </View>
 
-        <Text style={styles.sectionTittle}>Status dos Agendamentos</Text>
+        <Text style={styles.sectionTitle}>Status dos Agendamentos</Text>
 
         {pieData.length > 0 ? (
           <PieChart
@@ -293,7 +358,7 @@ export default function FaturamentoTela() {
  const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
+    backgroundColor: colors.background,
   },
   content: {
     padding: 16,
@@ -306,7 +371,7 @@ export default function FaturamentoTela() {
   },
   loadingText: {
     marginTop: 12,
-    color: '#888',
+    color: colors.textMuted,
     fontSize: 14,
   },
  
@@ -314,7 +379,7 @@ export default function FaturamentoTela() {
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#222',
+    color: colors.text,
     marginBottom: 16,
   },
  
@@ -331,13 +396,13 @@ export default function FaturamentoTela() {
   },
   arrowText: {
     fontSize: 28,
-    color: '#E91E8C',
+    color: COLORS.primary,
     lineHeight: 30,
   },
   monthText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text,
     minWidth: 110,
     textAlign: 'center',
   },
@@ -349,7 +414,7 @@ export default function FaturamentoTela() {
   },
   card: {
     flex: 1,
-    backgroundColor: '#FFF',
+    backgroundColor: colors.white,
     borderRadius: 12,
     padding: 12,
     alignItems: 'center',
@@ -361,43 +426,56 @@ export default function FaturamentoTela() {
   },
   highlightCard: {
     flex: 1.4,
-    backgroundColor: '#E91E8C',
+    backgroundColor: COLORS.primary,
+  },
+  cardTitle: {
+    fontSize: 11,
+    color: colors.white,
+    marginBottom: 4,
+    opacity: 0.95,
   },
   cardLabel: {
     fontSize: 11,
-    color: '#888',
+    color: colors.textMuted,
     marginBottom: 4,
   },
   cardValue: {
     fontSize: 16,
     fontWeight: 'bold', 
-    color: '#FFF',
+    color: colors.white,
   },
   cardNumber: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.text,
   },
  
 
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: colors.text,
     marginBottom: 12,
     marginTop: 8,
+  },
+
+  noDataText: {
+    color: colors.textMuted,
+    fontSize: 14,
+    textAlign: 'center',
+    marginVertical: 16,
   },
  
   
   emptyText: {
-    color: '#999',
+    color: colors.textMuted,
     fontSize: 14,
     textAlign: 'center',
     marginVertical: 16,
   },
 
   appointmentCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: colors.white,
     borderRadius: 10,
     padding: 12,
     elevation: 2,
@@ -416,23 +494,23 @@ export default function FaturamentoTela() {
   appointmentPrimaryText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#222',
+    color: colors.text,
     flex: 1,
   },
   appointmentSecondaryText: {
     fontSize: 13,
-    color: '#888',
+    color: colors.textMuted,
     flex: 1,
   },
   appointmentValue: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#4CAF50',
+    color: COLORS.primary,
     marginLeft: 8,
   },
   appointmentDate: {
     fontSize: 13,
-    color: '#888',
+    color: colors.textMuted,
     marginLeft: 8,
   },
 });
