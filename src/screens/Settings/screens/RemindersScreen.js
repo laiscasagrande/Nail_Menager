@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { Avatar, Button, Card, Checkbox, Chip, Divider, RadioButton, Switch } from "react-native-paper";
 import { COLORS } from "../../../constants/colors";
 import styles from "../styles";
@@ -12,7 +12,6 @@ export default function RemindersScreen({ navigation }) {
     const LeftContent = props => <Avatar.Icon {...props} icon="folder" />
     const [on, setOn] = useState(false);
     const [push, setPush] = useState(false);
-    const [email, setEmail] = useState(false);
     const [loading, setLoading] = useState(false);
     const user = auth.currentUser;
     const { theme } = useTheme();
@@ -22,11 +21,11 @@ export default function RemindersScreen({ navigation }) {
         try {
             await setDoc(doc(db, 'users', user.uid), {
                 notificationPreferences: {
-                    push: push,
-                    email: email,
+                    push: push
                 }
             }, { merge: true });
             Alert.alert('Sucesso', 'Preferências salvas com sucesso.');
+            navigation.navigate('Configurações');
         } catch (error) {
             console.log('Error saving notification preferences:', error);
             Alert.alert('Erro', 'Não foi possível salvar as preferências.');
@@ -42,8 +41,7 @@ export default function RemindersScreen({ navigation }) {
                 const preferences = docSnap.data().notificationPreferences;
                 if (preferences) {
                     setPush(preferences.push);
-                    setEmail(preferences.email);
-                    setOn(preferences.push || preferences.email);
+                    setOn(preferences.push);
                 }
             }
         } catch (error) {
@@ -97,16 +95,6 @@ export default function RemindersScreen({ navigation }) {
                                 <Checkbox.Item
                                     status={push ? 'checked' : 'unchecked'}
                                     onPress={() => setPush(!push)}
-                                    color={COLORS.primary}
-                                />
-                            </View>
-                            <Divider />
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <Text></Text>
-                                <Text style={{ fontSize: 16, color: theme.text }}>E-mail</Text>
-                                <Checkbox.Item
-                                    status={email ? 'checked' : 'unchecked'}
-                                    onPress={() => setEmail(!email)}
                                     color={COLORS.primary}
                                 />
                             </View>

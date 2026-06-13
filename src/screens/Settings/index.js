@@ -170,7 +170,7 @@ export default function ConfigurationScreen({ navigation }) {
                     <Card.Content>
                         <TouchableOpacity
                             style={{ backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-                            onPress={() => setActiveSection('account')}
+                            onPress={() => navigation.navigate('HelpSupport')}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
@@ -183,7 +183,7 @@ export default function ConfigurationScreen({ navigation }) {
                         <Divider />
                         <TouchableOpacity
                             style={{ backgroundColor: theme.card, padding: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}
-                            onPress={() => setActiveSection('notifications')}
+                            onPress={() => navigation.navigate('TermsPrivacy')}
                         >
                             <View style={styles.description}>
                                 <View style={styles.optionIcon}>
