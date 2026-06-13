@@ -14,6 +14,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import * as Notifications from 'expo-notifications';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { darkTheme } from './theme/themes';
+import { navigationRef } from './navigation/navigationRef';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -26,6 +27,40 @@ Notifications.setNotificationHandler({
 
 function AppContent({ isLoggedIn, setIsLoggedIn }) {
   const { theme } = useTheme();
+
+  useEffect(() => {
+
+  async function handleInitialNotification() {
+
+    const response =
+      await Notifications.getLastNotificationResponseAsync();
+
+    const screen =
+      response?.notification?.request?.content?.data?.screen;
+
+    if (screen && navigationRef.isReady()) {
+      navigationRef.navigate(screen);
+    }
+  }
+
+  handleInitialNotification();
+
+  const subscription =
+    Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+
+        const screen =
+          response.notification.request.content.data?.screen;
+
+        if (screen && navigationRef.isReady()) {
+          navigationRef.navigate(screen);
+        }
+      }
+    );
+
+  return () => subscription.remove();
+
+}, []);
 
   const paperTheme = {
     ...PaperDefaultTheme,
@@ -45,7 +80,7 @@ function AppContent({ isLoggedIn, setIsLoggedIn }) {
     <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <PaperProvider theme={paperTheme}>
-          <NavigationContainer>
+          <NavigationContainer ref={navigationRef}>
             <RootStack />
           </NavigationContainer>
         </PaperProvider>

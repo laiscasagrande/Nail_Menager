@@ -71,6 +71,9 @@ export default function AutomaticMessage({ navigation }) {
                 content: {
                     title: 'Resumo do dia 💅',
                     body: 'Confira seus agendamentos de hoje!',
+                    data: {
+                        screen: 'Horários agendados'
+                    }
                 },
                 trigger: {
                     type: Notifications.SchedulableTriggerInputTypes.WEEKLY,
