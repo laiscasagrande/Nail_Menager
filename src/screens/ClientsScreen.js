@@ -6,46 +6,52 @@ import {
     StyleSheet,
     TouchableOpacity,
     FlatList,
-    TextInput,
+    Alert,
 } from 'react-native';
 
 import {
     Feather,
     MaterialIcons,
     Ionicons,
-    AntDesign,
-    MaterialCommunityIcons,
 } from '@expo/vector-icons';
+
+import { TextInput } from 'react-native-paper';
 
 import ActionButtonAdd from '../components/ActionButtonAdd';
 import FormSheet from '../components/FormSheet';
 
 import { COLORS } from '../constants/colors';
-
-const clientes = [
-    {
-        id: '1',
-        nome: 'Laís Kaminski Casagrande',
-        telefone: '48992051505',
-        alergia: 'Alergia à acetona',
-    },
-    {
-        id: '2',
-        nome: 'Maria Eduarda',
-        telefone: '48999999999',
-        alergia: 'Alergia a esmalte em gel',
-    },
-];
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { formCustomer } from '../schemas/customerSchema';
+import {
+    addDoc,
+    collection,
+    getDocs,
+    updateDoc,
+    deleteDoc,
+    doc,
+} from 'firebase/firestore';
+import { db } from '../services/firebase';
 
 export default function ClientsScreen() {
 
     const [clienteAberto, setClienteAberto] = useState(null);
-
-    const [nome, setNome] = useState('');
-    const [telefone, setTelefone] = useState('');
-    const [observacao, setObservacao] = useState('');
-
     const [sheetIndex, setSheetIndex] = useState(0);
+    const [customers, setCustomers] = useState([]);
+    const [sheetOpen, setSheetOpen] = useState(false)
+    const [isEditing, setIsEditing] = useState(false)
+    const [idClient, setIdClient] = useState("")
+
+    const methods = useForm({
+        resolver: zodResolver(formCustomer),
+        defaultValues: {
+            id: "",
+            name: "",
+            telephone: "",
+            observation: "",
+        }
+    });
 
     const bottomSheetRef = useRef(null);
 
@@ -62,6 +68,13 @@ export default function ClientsScreen() {
     }
 
     function abrirSheet() {
+        methods.reset({
+            id: "",
+            name: "",
+            telephone: "",
+            observation: "",
+        });
+
         bottomSheetRef.current?.snapToIndex(1);
     }
 
@@ -69,26 +82,126 @@ export default function ClientsScreen() {
         bottomSheetRef.current?.snapToIndex(0);
     }
 
-    function handleSalvar() {
-        const novoCliente = {
-            nome,
-            telefone,
-            observacao,
-        };
+async function handleSaveClient(data) {
 
-        console.log(novoCliente);
+    const telefoneLimpo = (data.telephone || '').replace(/\D/g, '');
 
-        fecharSheet();
-
-        setNome('');
-        setTelefone('');
-        setObservacao('');
+    if (telefoneLimpo.length !== 11) {
+        Alert.alert(
+            "Telefone inválido",
+            "Preencha um telefone válido."
+        );
+        return;
     }
+    try {
+            await addDoc(collection(db, "customers"), {
+                name: data.name,
+                telephone: data.telephone,
+                observation: data.observation,
+            });
+
+            methods.reset({
+                id: "",
+                name: "",
+                telephone: "",
+                observation: "",
+            });
+
+            await getCustomers();
+
+            setSheetOpen(false)
+            bottomSheetRef.current?.close();
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async function getCustomers() {
+        try {
+            const customers = await getDocs(collection(db, "customers"));
+
+            const data = customers.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+
+            setCustomers(data);
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    function handleEdit(client){
+        console.log("llalalal", client)
+        setIdClient(client.id)
+        setIsEditing(true)
+        methods.reset({
+            name: client.name,
+            observation: client.observation,
+            telephone: client.telephone
+        })
+        bottomSheetRef.current.expand()
+    }
+
+async function handleEditClient(data) {
+    console.log(data)
+
+        const telefoneLimpo = (data.telephone || '').replace(/\D/g, '');
+
+    if (telefoneLimpo.length !== 11) {
+        Alert.alert(
+            "Telefone inválido",
+            "Preencha um telefone válido."
+        );
+        return;
+    }
+    try {
+            await updateDoc(doc(db, "customers", idClient), {
+                name: data.name,
+                telephone: data.telephone,
+                observation: data.observation,
+            });
+
+            await getCustomers();
+
+            methods.reset({
+                id: "",
+                name: "",
+                telephone: "",
+                observation: "",
+            });
+
+            setIsEditing(false);
+            setSheetOpen(false)
+
+            bottomSheetRef.current?.close();
+
+        } catch (error) {
+            console.log("Erro ao editar cliente:", error);
+        }
+    }
+
+    async function deleteClient(id) {
+        try {
+            await deleteDoc(doc(db, 'customers', id));
+            setCustomers((prev) => prev.filter((client) => client.id !== id));
+        } catch (error) {
+            Alert.alert('Erro', 'Não foi possível deletar o cliente.');
+        }
+    }
+
+
+
+    useEffect(() => {
+        getCustomers();
+    }, []);
 
     return (
         <>
             <FlatList
-                data={clientes}
+                data={customers}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={{
                     paddingTop: 10,
@@ -101,8 +214,8 @@ export default function ClientsScreen() {
 
                         <View style={styles.avatar}>
                             <Text style={styles.avatarText}>
-                                {item.nome
-                                    .split(' ')
+                                {item.name
+                                    ?.split(' ')
                                     .map((n) => n[0])
                                     .slice(0, 2)
                                     .join('')
@@ -112,16 +225,16 @@ export default function ClientsScreen() {
 
                         <View style={styles.info}>
                             <Text style={styles.nome}>
-                                {item.nome}
+                                {item.name}
                             </Text>
 
                             <Text style={styles.telefone}>
-                                {item.telefone}
+                                {item.telephone}
                             </Text>
 
-                            {clienteAberto === item.id && item.alergia && (
+                            {clienteAberto === item.id && item.observation && (
                                 <Text style={styles.alergia}>
-                                    {item.alergia}
+                                    {item.observation}
                                 </Text>
                             )}
                         </View>
@@ -133,6 +246,7 @@ export default function ClientsScreen() {
                                     name="edit-2"
                                     size={20}
                                     color={COLORS.primary}
+                                    onPress={() => handleEdit(item)}
                                 />
                             </TouchableOpacity>
 
@@ -141,6 +255,7 @@ export default function ClientsScreen() {
                                     name="delete-outline"
                                     size={24}
                                     color={COLORS.primary}
+                                    onPress={() => deleteClient(item.id)}
                                 />
                             </TouchableOpacity>
 
@@ -165,12 +280,18 @@ export default function ClientsScreen() {
                 )}
             />
 
+            {!sheetOpen &&
+                (
+                    <ActionButtonAdd onPress={() => bottomSheetRef.current?.expand()} />
+                )
+            }
+
             <FormSheet
                 ref={bottomSheetRef}
-                onChange={(index) => setSheetIndex(index)}
+                onChange={(index) => setSheetOpen(index >= 0)}
             >
 
-                <View style={styles.formContainer}>
+                <View style={styles.container}>
 
                     <View style={styles.form}>
 
@@ -178,59 +299,73 @@ export default function ClientsScreen() {
                             Cadastrar novo cliente
                         </Text>
 
-                        <View style={styles.inputContainer}>
-                            <AntDesign name="user" size={20} color="#c7c7c7" />
+                        <Controller
+                            control={methods.control}
+                            name="name"
+                            render={({ field: { onChange, value } }) => (
+                                <TextInput
+                                    label="Nome"
+                                    value={value}
+                                    onChangeText={onChange}
+                                    mode="outlined"
+                                    left={
+                                        <TextInput.Icon icon="account-outline" />
+                                    }
+                                />
+                            )}
+                        />
 
-                            <TextInput
-                                placeholder="Nome"
-                                placeholderTextColor="#c7c7c7"
-                                value={nome}
-                                onChangeText={setNome}
-                                style={styles.input}
-                            />
-                        </View>
+                        <Controller
+                            control={methods.control}
+                            name="telephone"
+                            render={({ field: { onChange, value } }) => (
+                                <TextInput
+                                    label="Telefone"
+                                    value={value}
+                                    onChangeText={onChange}
+                                    keyboardType="phone-pad"
+                                    mode="outlined"
+                                    maxLength={11}
+                                    left={
+                                        <TextInput.Icon icon="cellphone" />
+                                    }
+                                />
+                            )}
+                        />
 
-                        <View style={styles.inputContainer}>
-                            <Feather name="smartphone" size={20} color="#c7c7c7" />
-
-                            <TextInput
-                                placeholder="Telefone"
-                                placeholderTextColor="#c7c7c7"
-                                keyboardType="phone-pad"
-                                value={telefone}
-                                onChangeText={setTelefone}
-                                style={styles.input}
-                            />
-                        </View>
-
-                        <View style={styles.textAreaContainer}>
-                            <MaterialCommunityIcons
-                                name="hair-dryer"
-                                size={22}
-                                color="#c7c7c7"
-                            />
-
-                            <TextInput
-                                placeholder="Observação"
-                                placeholderTextColor="#c7c7c7"
-                                multiline
-                                textAlignVertical="top"
-                                value={observacao}
-                                onChangeText={setObservacao}
-                                style={styles.textArea}
-                            />
-                        </View>
+                        <Controller
+                            control={methods.control}
+                            name="observation"
+                            render={({ field: { onChange, value } }) => (
+                                <TextInput
+                                    label="Observação"
+                                    value={value}
+                                    onChangeText={onChange}
+                                    mode="outlined"
+                                    multiline
+                                    numberOfLines={5}
+                                    textAlignVertical="top"
+                                    left={
+                                        <TextInput.Icon icon="note-text-outline" />
+                                    }
+                                    style={styles.textArea}
+                                />
+                            )}
+                        />
 
                     </View>
 
-                    <View style={styles.containerButton}>
-                        <TouchableOpacity
-                            style={styles.buttonSave}
-                        >
-                            <Text style={styles.buttonText}>
-                                Salvar
-                            </Text>
-                        </TouchableOpacity>
+                    <View>
+                        <View style={styles.buttonRow}>
+                            <TouchableOpacity
+                                style={styles.buttonSave}
+                                onPress={!isEditing ? methods.handleSubmit(handleSaveClient) : methods.handleSubmit(handleEditClient)}
+                            >
+                                <Text style={styles.buttonText}>
+                                    Salvar
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                 </View>
@@ -245,7 +380,7 @@ const styles = StyleSheet.create({
 
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        justifyContent: "space-between",
     },
 
     card: {
@@ -305,20 +440,8 @@ const styles = StyleSheet.create({
         marginLeft: 10,
     },
 
-    fab: {
-        position: 'absolute',
-        right: 20,
-        bottom: 20,
-    },
-
-    formContainer: {
-        flex: 1,
-        justifyContent: 'space-between',
-        height: '100%',
-    },
-
     form: {
-        gap: 14,
+        gap: 10,
     },
 
     formTitle: {
@@ -329,59 +452,29 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
 
-    inputContainer: {
-        height: 60,
-        borderWidth: 1,
-        borderColor: '#e5e5e5',
-        borderRadius: 16,
-        backgroundColor: COLORS.white,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 18,
-    },
-
-    input: {
-        flex: 1,
-        marginLeft: 12,
-        fontSize: 16,
-        color: '#444',
-    },
-
-    textAreaContainer: {
-        minHeight: 150,
-        borderWidth: 1,
-        borderColor: '#e5e5e5',
-        borderRadius: 16,
-        backgroundColor: COLORS.white,
-        flexDirection: 'row',
-        paddingHorizontal: 18,
-        paddingTop: 18,
-    },
-
     textArea: {
-        flex: 1,
-        marginLeft: 12,
-        fontSize: 16,
-        color: '#444',
-        minHeight: 120,
+        minHeight: 150,
     },
 
-    containerButton: {
-        marginTop: 20
+    buttonRow: {
+        width: '100%',
+        height: 65,
+        marginBottom: 15,
+        flexDirection: "row",
+        gap: 10,
     },
 
     buttonSave: {
-        height: 60,
-        borderRadius: 16,
+        borderRadius: 10,
         backgroundColor: COLORS.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: "center",
+        flex: 1,
+        justifyContent: "center",
         marginBottom: 15,
     },
 
     buttonText: {
         fontSize: 18,
-        fontWeight: '700',
         color: COLORS.white,
     },
 

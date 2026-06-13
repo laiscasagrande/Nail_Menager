@@ -40,6 +40,7 @@ export function useScheduling() {
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [idEvent, setIdEvent] = useState(null)
     const [isEditing, setIsEditing] = useState(false)
+    const [services, setServices] = useState([]);
 
     const bottomSheetRef = useRef(null);
 
@@ -110,8 +111,8 @@ export function useScheduling() {
             (client) => client.value === data.client
         );
 
-        const selectedService = SERVICES.find(
-            (service) => service.value === data.service
+        const selectedService = services.find(
+            (service) => service.id === data.service
         );
 
         try {
@@ -150,14 +151,16 @@ export function useScheduling() {
             (client) => client.value === data.client
         );
 
-        const selectedService = SERVICES.find(
-            (service) => service.value === data.service
+        const selectedService = services.find(
+            (service) => service.id === data.service
         );
 
         try {
             await updateDoc(doc(db, "scheduling", data.id), {
                 client: data.client,
                 service: data.service,
+                clientName: selectedClient?.label || "",
+                serviceName: selectedService?.label || "",
                 servicePrice: selectedService?.price || 0,
                 title: selectedClient?.label || "",
                 start: Timestamp.fromDate(data.dateStart),
@@ -175,6 +178,8 @@ export function useScheduling() {
                             ...event,
                             client: data.client,
                             service: data.service,
+                            clientName: selectedClient?.label || "",
+                            serviceName: selectedService?.label || "",
                             servicePrice: selectedService?.price || 0,
                             title: selectedClient?.label || "",
                             start: {
@@ -254,7 +259,15 @@ export function useScheduling() {
         getSchedulings()
     }, [])
 
+    useEffect(() => {
+        getServices()
+    }, [])
+
     async function handlePressCancel(data) {
+        if (!data?.id) {
+            console.log("Cancelamento ignorado: agendamento sem id.");
+            return;
+        }
 
         try {
             await updateDoc(doc(db, "scheduling", data.id), {
@@ -280,6 +293,10 @@ export function useScheduling() {
     }
 
     async function handlePressCompleted(data) {
+        if (!data?.id) {
+            console.log("Conclusao ignorada: agendamento sem id.");
+            return;
+        }
 
         try {
             await updateDoc(doc(db, "scheduling", data.id), {
@@ -305,6 +322,10 @@ export function useScheduling() {
     }
 
     async function handlePressonReactivate(data) {
+        if (!data?.id) {
+            console.log("Reativacao ignorada: agendamento sem id.");
+            return;
+        }
 
         try {
             await updateDoc(doc(db, "scheduling", data.id), {
@@ -326,6 +347,19 @@ export function useScheduling() {
             setSelectedEvent(null)
         } catch (error) {
             console.log("Erro ao reativar agendamento:", error);
+        }
+    }
+
+    async function getServices() {
+        try {
+            const getServicesData = await getDocs(collection(db, "services"))
+            const serviceList = getServicesData.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }))
+            setServices(serviceList)
+        } catch (error) {
+            console.log("Erro ao buscar serviços:", error);
         }
     }
 
@@ -367,6 +401,7 @@ export function useScheduling() {
         bottomSheetRef,
         isEditing,
         methods,
+        services,
 
         handlers: {
             handleDragCreateStart,

@@ -8,8 +8,17 @@ import { COLORS } from "../constants/colors";
 import { ICONS } from "../constants/icons";
 import BillingScreen from "../screens/BillingScreen";
 import SchedulingScreen from "../screens/SchedulingScreen";
+import ScreenServices from "../screens/screenServices";
 import ClientsScreen from "../screens/ClientsScreen";
 import ScreenServices from "../screens/screenServices";
+import ConfigurationScreen from "../screens/Settings";
+import PersonalDataScreen from "../screens/Settings/screens/PersonalDataScreen";
+import PasswordSecurityScreen from "../screens/Settings/screens/PasswordSecurityScreen";
+import RemindersScreen from "../screens/Settings/screens/RemindersScreen";
+import AutomaticMessage from "../screens/Settings/screens/AutomaticMessage";
+import Theme from "../screens/Settings/screens/Theme";
+import HelpSupport from "../screens/Settings/screens/HelpSupport";
+import TermsPrivacy from "../screens/Settings/screens/TermsPrivacy";
 
 const DrawerNav = createDrawerNavigator();
 
@@ -24,7 +33,7 @@ export default function DrawerRoutes() {
                 component={SchedulingScreen}
                 options={{
                     drawerIcon: ({ color, size }) => (
-                        <ICONS.clock/>
+                        <ICONS.clock />
                     ),
                 }}
             />
@@ -33,7 +42,7 @@ export default function DrawerRoutes() {
                 component={ScheduleScreen}
                 options={{
                     drawerIcon: ({ color, size }) => (
-                        <ICONS.coffee/>
+                        <ICONS.coffee />
                     ),
                 }}
             />
@@ -42,16 +51,16 @@ export default function DrawerRoutes() {
                 component={ClientsScreen}
                 options={{
                     drawerIcon: ({ color, size }) => (
-                        <ICONS.usersRound/>
+                        <ICONS.usersRound />
                     ),
                 }}
             />
             <DrawerNav.Screen
                 name="Serviços"
                 component={ScreenServices}
-                options={{  
+                options={{
                     drawerIcon: ({ color, size }) => (
-                        <ICONS.sparkles/>
+                        <ICONS.sparkles />
                     ),
                 }}
             />
@@ -61,7 +70,7 @@ export default function DrawerRoutes() {
                 options={{
                     headerRight: () => <HeaderButton />,
                     drawerIcon: ({ color, size }) => (
-                        <ICONS.handCoins/>
+                        <ICONS.handCoins />
                     ),
                 }}
             />
@@ -71,17 +80,74 @@ export default function DrawerRoutes() {
                 options={{
                     headerRight: () => <HeaderButton />,
                     drawerIcon: ({ color, size }) => (
-                        <ICONS.chartColumnBig/>
+                        <ICONS.chartColumnBig />
                     ),
                 }}
             />
             <DrawerNav.Screen
                 name="Configurações"
-                component={ScheduleScreen}
+                component={ConfigurationScreen}
                 options={{
+                    headerShown: true,
                     drawerIcon: ({ color, size }) => (
-                        <ICONS.settings/>
+                        <ICONS.settings />
                     ),
+                }}
+            />
+            <DrawerNav.Screen
+                name="PersonalData"
+                component={PersonalDataScreen}
+                options={{
+                    title: 'Dados Pessoais',
+                    drawerItemStyle: { display: 'none' }, 
+                }}
+            />
+            <DrawerNav.Screen
+                name="PasswordSecurity"
+                component={PasswordSecurityScreen}
+                options={{
+                    title: 'Senha e Segurança',
+                    drawerItemStyle: { display: 'none' }, 
+                }}
+            />
+            <DrawerNav.Screen
+                name="RemindersScreen"
+                component={RemindersScreen}
+                options={{
+                    title: 'Lembretes',
+                    drawerItemStyle: { display: 'none' }, 
+                }}
+            />
+            <DrawerNav.Screen
+                name="AutomaticMessage"
+                component={AutomaticMessage}
+                options={{
+                    title: 'Mensagem Automática',
+                    drawerItemStyle: { display: 'none' }, 
+                }}
+            />
+            <DrawerNav.Screen
+                name="Theme"
+                component={Theme}
+                options={{
+                    title: 'Tema',
+                    drawerItemStyle: { display: 'none' }, 
+                }}
+            />
+            <DrawerNav.Screen
+                name="HelpSupport"
+                component={HelpSupport}
+                options={{
+                    title: 'Ajuda e Suporte',
+                    drawerItemStyle: { display: 'none' }, 
+                }}
+            />
+            <DrawerNav.Screen
+                name="TermsPrivacy"
+                component={TermsPrivacy}
+                options={{
+                    title: 'Termos e Privacidade',
+                    drawerItemStyle: { display: 'none' }, 
                 }}
             />
         </DrawerNav.Navigator>

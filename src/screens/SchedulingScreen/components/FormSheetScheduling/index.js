@@ -13,13 +13,7 @@ export const CLIENTS = [
     { label: "Maria Souza", value: "3" },
 ];
 
-export const SERVICES = [
-    { label: "Manicure Tradicional", value: "1" },
-    { label: "Alongamento em Gel", value: "2" },
-    { label: "Banho de Gel", value: "3" },
-];
-
-export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel, onCompleted, isEditing, onReactivate, onEdit }) {
+export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel, onCompleted, isEditing, onReactivate, onEdit, services }) {
 
     const [modal, setModal] = useState({
         visible: false,
@@ -97,7 +91,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                 name="service"
                                 render={({ field: { onChange, value } }) => {
                                     const selectedLabel =
-                                        SERVICES.find((item) => item.value === value)?.label || "";
+                                        services.find((item) => item.id === value)?.procedure || "";
 
                                     return (
                                         <Menu
@@ -119,12 +113,12 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                                 />
                                             }
                                         >
-                                            {SERVICES.map((item) => (
+                                            {services.map((item) => (
                                                 <Menu.Item
-                                                    key={item.value}
-                                                    title={item.label}
+                                                    key={item.id}
+                                                    title={item.procedure}
                                                     onPress={() => {
-                                                        onChange(item.value);
+                                                        onChange(item.id);
                                                         setVisibleService(false);
                                                     }}
                                                 />
