@@ -10,6 +10,7 @@ import BillingScreen from "../screens/BillingScreen";
 import SchedulingScreen from "../screens/SchedulingScreen";
 import ScreenServices from "../screens/screenServices";
 import ClientsScreen from "../screens/ClientsScreen";
+import ScreenServices from "../screens/screenServices";
 import ConfigurationScreen from "../screens/Settings";
 import PersonalDataScreen from "../screens/Settings/screens/PersonalDataScreen";
 import PasswordSecurityScreen from "../screens/Settings/screens/PasswordSecurityScreen";
