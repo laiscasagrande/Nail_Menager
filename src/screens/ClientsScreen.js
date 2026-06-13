@@ -82,8 +82,18 @@ export default function ClientsScreen() {
         bottomSheetRef.current?.snapToIndex(0);
     }
 
-    async function handleSaveClient(data) {
-        try {
+async function handleSaveClient(data) {
+
+    const telefoneLimpo = (data.telephone || '').replace(/\D/g, '');
+
+    if (telefoneLimpo.length !== 11) {
+        Alert.alert(
+            "Telefone inválido",
+            "Preencha um telefone válido."
+        );
+        return;
+    }
+    try {
             await addDoc(collection(db, "customers"), {
                 name: data.name,
                 telephone: data.telephone,
@@ -135,9 +145,19 @@ export default function ClientsScreen() {
         bottomSheetRef.current.expand()
     }
 
-    async function handleEditClient(data) {
-        console.log(data)
-        try {
+async function handleEditClient(data) {
+    console.log(data)
+
+        const telefoneLimpo = (data.telephone || '').replace(/\D/g, '');
+
+    if (telefoneLimpo.length !== 11) {
+        Alert.alert(
+            "Telefone inválido",
+            "Preencha um telefone válido."
+        );
+        return;
+    }
+    try {
             await updateDoc(doc(db, "customers", idClient), {
                 name: data.name,
                 telephone: data.telephone,
@@ -305,6 +325,7 @@ export default function ClientsScreen() {
                                     onChangeText={onChange}
                                     keyboardType="phone-pad"
                                     mode="outlined"
+                                    maxLength={11}
                                     left={
                                         <TextInput.Icon icon="cellphone" />
                                     }
