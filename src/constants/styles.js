@@ -77,7 +77,7 @@ export default StyleSheet.create({
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E4C8D8',
+    backgroundColor: '#ff0090ff',
   },
   orText: {
     marginHorizontal: 12,

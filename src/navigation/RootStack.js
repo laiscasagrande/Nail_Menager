@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import AuthenticationScreen from '../screens/AuthenticationScreen';
+import AuthenticationScreen from '../screens/WelcomeUser/AuthenticationScreen';
 import DrawerRoutes from './DrawerRoutes';
 import { AuthContext } from '../context/AuthContext';
 

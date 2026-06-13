@@ -1,20 +1,23 @@
 import 'react-native-get-random-values';
-import { useFormContext } from "react-hook-form";
 import { Modal, Platform, StyleSheet, Text, View } from "react-native";
 import { Button } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { COLORS } from "../../../../constants/colors";
+import { COLORS } from '../../../constants/colors';
 
 export default function DatePickerModal({
     visible,
     setVisible,
-    title,
-    mode,
-    name,
+    minutes,
+    setMinutes,
+    hours,
+    setHours
 }) {
-    const { watch, setValue } = useFormContext();
 
-    const value = watch(name) || new Date();
+    const value = new Date();
+    value.setHours(hours);
+    value.setMinutes(minutes);
+    value.setSeconds(0);
+    value.setMilliseconds(0);
 
     function handleDateChange(event, selectedDate) {
         if (!selectedDate) {
@@ -24,16 +27,11 @@ export default function DatePickerModal({
 
         const updated = new Date(value);
 
-        if (mode === "date") {
-            updated.setFullYear(selectedDate.getFullYear());
-            updated.setMonth(selectedDate.getMonth());
-            updated.setDate(selectedDate.getDate());
-        } else {
-            updated.setHours(selectedDate.getHours());
-            updated.setMinutes(selectedDate.getMinutes());
-        }
+        updated.setHours(selectedDate.getHours());
+        updated.setMinutes(selectedDate.getMinutes());
 
-        setValue(name, updated);
+        setHours(updated.getHours());
+        setMinutes(updated.getMinutes());
 
         if (Platform.OS === "android") {
             setVisible(false);
@@ -49,7 +47,7 @@ export default function DatePickerModal({
         return (
             <DateTimePicker
                 value={value}
-                mode={mode}
+                mode="time"
                 display="default"
                 onChange={handleDateChange}
             />
@@ -67,14 +65,14 @@ export default function DatePickerModal({
             <View style={styles.overlay}>
                 <View style={styles.modalContent}>
                     <Text style={styles.modalTitle}>
-                        {title}
+                        Selecionar Horário
                     </Text>
 
                     <DateTimePicker
                         value={value}
-                        mode={mode}
+                        mode="time"
                         locale="pt-BR"
-                        display={mode === "date" ? "inline" : "spinner"}
+                        display="spinner"
                         onChange={handleDateChange}
                     />
 
