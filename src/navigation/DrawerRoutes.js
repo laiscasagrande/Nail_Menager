@@ -10,7 +10,7 @@ import BillingScreen from "../screens/BillingScreen";
 import SchedulingScreen from "../screens/SchedulingScreen";
 //import ScreenServices from "../screens/ScreenServices";
 import ClientsScreen from "../screens/ClientsScreen";
-import ScreenServices from "../screens/ScreenServices";
+import ScreenServices from "../screens/screenServices/index";
 
 const DrawerNav = createDrawerNavigator();
 
