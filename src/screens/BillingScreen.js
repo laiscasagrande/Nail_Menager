@@ -116,11 +116,7 @@ export default function FaturamentoTela() {
     }, [])
   );
 
-  // ─── Resolução de nomes ──────────────────────────────────────────────────────
-  // O campo "client" no scheduling pode ser:
-  //   1. Um ID válido de customers → busca o nome no mapa
-  //   2. Um número/índice antigo    → usa o campo "title" como fallback
-  //   3. Já o nome direto (clientName) → usa direto
+
 
   function resolveClientName(item) {
     if (item.clientName) return item.clientName;                 // campo direto
