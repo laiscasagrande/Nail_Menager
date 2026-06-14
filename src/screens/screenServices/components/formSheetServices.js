@@ -17,7 +17,7 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
         <FormSheet ref={ref} onChange={onSheetChange}>
             <View style={[styles.container, { backgroundColor: theme.card }]}> 
                 <View style={styles.form}>
-                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', display: 'flex'}}>
+                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'stretch'}}>
                         <Text style={[styles.formTitle, { color: theme.primary }]}>Cadastrar Novo Serviço</Text>
                     <Controller
                         control={control}
@@ -25,6 +25,7 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
                         render={({ field: { onChange, value }, fieldState: { error } }) => (
                             <>
                                 <TextInput
+                                    style={{ width: '100%' }}
                                     label="Procedimento"
                                     mode="outlined"
                                     value={value}
@@ -42,6 +43,7 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
                         render={({ field: { onChange, value }, fieldState: { error } }) => (
                             <>
                                 <TextInput
+                                    style={{ width: '100%' }}
                                     label="Preço"
                                     mode="outlined"
                                     value={value}
@@ -60,6 +62,7 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
                         render={({ field: { onChange, value }, fieldState: { error } }) => (
                             <>
                                 <TextInput
+                                    style={{ width: '100%' }}
                                     label="Duração"
                                     mode="outlined"
                                     value={value}
@@ -119,6 +122,7 @@ const styles = StyleSheet.create({
     },
     form: {
         gap: 5,
+         width: '100%',
     },
     container: {
         flex: 1,
