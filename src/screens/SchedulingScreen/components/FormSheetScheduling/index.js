@@ -15,7 +15,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
         mode: "date",
         title: "",
     });
-    const { handleSubmit, control, watch } = useFormContext()
+    const { handleSubmit, control, watch, formState: { errors } } = useFormContext()
     const dateStart = watch("dateStart");
     const dateEnd = watch("dateEnd");
     const [visibleMenu, setVisibleMenu] = useState(false);
@@ -55,6 +55,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                                     value={selectedLabel}
                                                     mode="outlined"
                                                     editable={false}
+                                                    error={!!errors.client}
                                                     right={
                                                         <TextInput.Icon
                                                             icon="menu-down"
@@ -95,6 +96,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                                     label="Serviços"
                                                     value={selectedLabel}
                                                     mode="outlined"
+                                                    error={!!errors.service}
                                                     editable={false}
                                                     right={
                                                         <TextInput.Icon

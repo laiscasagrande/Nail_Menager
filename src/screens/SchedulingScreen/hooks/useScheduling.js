@@ -239,39 +239,48 @@ export function useScheduling() {
     }, [])
 
     async function handlePressCancel(data) {
-    Alert.alert(
-        'Cancelar agendamento',
-        'Tem certeza que deseja cancelar este agendamento?',
-        [
-            { text: 'Voltar', style: 'cancel' },
-            {
-                text: 'Cancelar agendamento',
-                onPress: async () => {
-                    try {
-                        await updateDoc(doc(db, "scheduling", data.id), {
-                            status: "cancelled",
-                        });
+        Alert.alert(
+            'Cancelar agendamento',
+            'Tem certeza que deseja cancelar este agendamento?',
+            [
+                { text: 'Voltar', style: 'cancel' },
+                {
+                    text: 'Cancelar agendamento',
+                    onPress: async () => {
+                        try {
+                            await updateDoc(doc(db, "scheduling", data.id), {
+                                status: "cancelled",
+                            });
 
-                        setEvents((prev) =>
-                            prev.map((e) =>
-                                e.id === data.id
-                                    ? { ...e, status: "cancelled", title: e.title }
-                                    : e
-                            )
-                        );
+                            setEvents((prev) =>
+                                prev.map((e) =>
+                                    e.id === data.id
+                                        ? { ...e, status: "cancelled", title: e.title }
+                                        : e
+                                )
+                            );
 
-                        bottomSheetRef.current.close();
-                        setSelectedEvent(null);
-                    } catch (error) {
-                        console.log("Erro ao cancelar agendamento:", error);
+                            bottomSheetRef.current.close();
+                            setSelectedEvent(null);
+                        } catch (error) {
+                            console.log("Erro ao cancelar agendamento:", error);
+                        }
                     }
                 }
-            }
-        ]
-    );
-}
+            ]
+        );
+    }
 
     async function handlePressCompleted(data) {
+
+        if (!data?.id) {
+            Alert.alert(
+                "Erro ao cancelar",
+                "Não foi possível cancelar o agendamento. Isso pode acontecer quando o agendamento foi criado em um horário que já passou. Tente criar um novo agendamento em uma data futura.",
+                [{ text: "Entendi" }]
+            );
+            return;
+        }
 
         try {
             await updateDoc(doc(db, "scheduling", data.id), {
