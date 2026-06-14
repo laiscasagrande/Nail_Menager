@@ -8,8 +8,10 @@ import {
   FlatList,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useTheme } from '../context/ThemeContext';
 
 const CalendarioTela = () => {
+  const { theme } = useTheme();
   const [dataAtual, setDataAtual] = useState(new Date());
   const [agendamentos, setAgendamentos] = useState([]);
 
@@ -80,16 +82,16 @@ const CalendarioTela = () => {
   const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { backgroundColor: theme.background }]}> 
+      <StatusBar style={theme.background === '#121212' ? 'light' : 'dark'} />
 
       {/* Navegação do mês */}
-      <View style={styles.mesContainer}>
-        <TouchableOpacity onPress={mesAnterior} style={styles.botaoNav}>
+      <View style={[styles.mesContainer, { backgroundColor: theme.card }]}> 
+        <TouchableOpacity onPress={mesAnterior} style={[styles.botaoNav, { backgroundColor: theme.primary }]}> 
           <Text style={styles.botaoNavTexto}>←</Text>
         </TouchableOpacity>
 
-        <Text style={styles.mesTitulo}>{nomeMes}</Text>
+<Text style={[styles.mesTitulo, { color: theme.text }]}>{nomeMes}</Text>
 
         <TouchableOpacity onPress={proximoMes} style={styles.botaoNav}>
           <Text style={styles.botaoNavTexto}>→</Text>
@@ -97,16 +99,16 @@ const CalendarioTela = () => {
       </View>
 
       {/* Dias da semana */}
-      <View style={styles.diasSemanaContainer}>
+      <View style={[styles.diasSemanaContainer, { backgroundColor: theme.card }]}> 
         {diasSemana.map((dia, index) => (
-          <Text key={index} style={styles.diaSemana}>
+          <Text key={index} style={[styles.diaSemana, { color: theme.subtitle }]}> 
             {dia}
           </Text>
         ))}
       </View>
 
       {/* Grid de dias */}
-      <View style={styles.diasGrid}>
+      <View style={[styles.diasGrid, { backgroundColor: theme.card }]}> 
         {diasMes.map((dia, index) => (
           <TouchableOpacity
             key={index}
@@ -121,6 +123,7 @@ const CalendarioTela = () => {
               <Text
                 style={[
                   styles.diaTexto,
+                  { color: theme.text },
                   ehHoje(dia) && styles.diaHojeTexto,
                 ]}
               >
@@ -132,12 +135,12 @@ const CalendarioTela = () => {
       </View>
 
       {/* Agendamentos do dia */}
-      <View style={styles.agendamentosContainer}>
+      <View style={[styles.agendamentosContainer, { backgroundColor: theme.card }]}> 
         <Text style={styles.agendamentosTitle}>Agendamentos de Hoje</Text>
         <ScrollView>
           <View style={styles.agendamentosList}>
             {agendamentos.length === 0 ? (
-              <Text style={styles.semAgendamentos}>
+              <Text style={[styles.semAgendamentos, { color: theme.subtitle }]}> 
                 Nenhum agendamento para hoje
               </Text>
             ) : (
@@ -218,7 +221,6 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     fontWeight: '600',
-    color: '#666',
     fontSize: 12,
   },
   diasGrid: {
@@ -226,7 +228,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     paddingHorizontal: 10,
     marginTop: 5,
-    backgroundColor: '#fff',
     marginHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 10,
@@ -240,12 +241,11 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   diaNulo: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#99999922',
   },
   diaTexto: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
   },
   diaHoje: {
     backgroundColor: '#d946a6',
@@ -256,7 +256,6 @@ const styles = StyleSheet.create({
   },
   agendamentosContainer: {
     flex: 1,
-    backgroundColor: '#fff',
     marginHorizontal: 10,
     marginTop: 15,
     marginBottom: 10,
@@ -266,7 +265,6 @@ const styles = StyleSheet.create({
   agendamentosTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
     paddingHorizontal: 15,
     paddingTop: 15,
     paddingBottom: 10,
@@ -276,7 +274,6 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
   },
   agendamentoItem: {
-    backgroundColor: '#f0f0f0',
     padding: 12,
     borderRadius: 8,
     marginBottom: 10,
@@ -286,16 +283,13 @@ const styles = StyleSheet.create({
   agendamentoHora: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#d946a6',
   },
   agendamentoCliente: {
     fontSize: 13,
-    color: '#666',
     marginTop: 5,
   },
   semAgendamentos: {
     fontSize: 14,
-    color: '#999',
     textAlign: 'center',
     paddingVertical: 20,
   },
