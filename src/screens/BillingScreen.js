@@ -266,18 +266,20 @@ export default function FaturamentoTela() {
         <Text style={[styles.sectionTitle, { color: theme.primary }]}>Status dos Agendamentos</Text>
 
         {pieData.length > 0 ? (
-          <PieChart
-            data={pieData}
-            width={screenWidth - 32}
-            height={220}
-            chartConfig={{
-                 color: () => theme.text,
-            }}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="15"
-            absolute
+          <View style={{ alignItems: 'center' }}>
+            <PieChart
+              data={pieData}
+              width={Math.min(screenWidth - 32, 360)}
+              height={220}
+              chartConfig={{
+                color: () => theme.text,
+              }}
+              accessor="population"
+              backgroundColor="transparent"
+              paddingLeft="15"
+              absolute
             />
+          </View>
         ) : (
           <Text style={styles.noDataText}>Nenhum agendamento para este mês</Text>
         )}
