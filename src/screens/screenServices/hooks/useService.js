@@ -140,7 +140,7 @@ export function useService() {
     }
 
     async function deleteService(id) {
-        try {   
+        try {
             const serviceRef = doc(db, "services", id);
             const serviceSnap = await getDoc(serviceRef);
 
@@ -162,6 +162,11 @@ export function useService() {
         }
     }
 
+    function handleSheetChange(index) {
+        setSheetOpen(index >= 0);
+        if (index === -1) resetForm();
+    }
+
     return {
         methods,
         services,
@@ -176,6 +181,7 @@ export function useService() {
             handleEdit,
             resetForm,
             confirmDelete,
+            handleSheetChange
         },
     };
 }

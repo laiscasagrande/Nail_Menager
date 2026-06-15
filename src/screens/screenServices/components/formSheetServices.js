@@ -18,7 +18,7 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
             <View style={[styles.container, { backgroundColor: theme.card }]}> 
                 <View style={styles.form}>
                     <View style={{flex: 1, justifyContent: 'center', alignItems: 'stretch'}}>
-                        <Text style={[styles.formTitle, { color: theme.primary }]}>Cadastrar Novo Serviço</Text>
+                        <Text style={[styles.formTitle, { color: theme.primary }]}>{editingId ? 'Atualizar Serviço' : 'Cadastrar Novo Serviço'}</Text>
                     <Controller
                         control={control}
                         name="procedure"
