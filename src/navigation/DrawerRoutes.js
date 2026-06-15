@@ -8,7 +8,7 @@ import { COLORS } from "../constants/colors";
 import { ICONS } from "../constants/icons";
 import BillingScreen from "../screens/BillingScreen";
 import SchedulingScreen from "../screens/SchedulingScreen";
-import ScreenServices from "../screens/screenServices";
+import ScreenServices from "../screens/ScreenServices";
 import ClientsScreen from "../screens/ClientsScreen";
 import ConfigurationScreen from "../screens/Settings";
 import PersonalDataScreen from "../screens/Settings/screens/PersonalDataScreen";
@@ -37,15 +37,6 @@ export default function DrawerRoutes() {
                 }}
             />
             <DrawerNav.Screen
-                name="Horários disponíveis"
-                component={ScheduleScreen}
-                options={{
-                    drawerIcon: ({ color, size }) => (
-                        <ICONS.coffee />
-                    ),
-                }}
-            />
-            <DrawerNav.Screen
                 name="Clientes"
                 component={ClientsScreen}
                 options={{
@@ -70,16 +61,6 @@ export default function DrawerRoutes() {
                     headerRight: () => <HeaderButton />,
                     drawerIcon: ({ color, size }) => (
                         <ICONS.handCoins />
-                    ),
-                }}
-            />
-            <DrawerNav.Screen
-                name="Dashboard"
-                component={ScheduleScreen}
-                options={{
-                    headerRight: () => <HeaderButton />,
-                    drawerIcon: ({ color, size }) => (
-                        <ICONS.chartColumnBig />
                     ),
                 }}
             />
