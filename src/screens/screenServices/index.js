@@ -7,7 +7,7 @@ import { FormSheetServices } from './components/formSheetServices'
 
 export default function ScreenServices() {
   const { theme } = useTheme();
-  const { methods, services, editingId, sheetOpen, setSheetOpen, handlers, sheetRef } = useService();
+  const { methods, services, editingId, sheetOpen, setSheetOpen, handlers, sheetRef, handleSheetChange } = useService();
   
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function ScreenServices() {
           pickImage={handlers.pickImage}
           onSave={handlers.handleSave}
           onCancel={handlers.resetForm}
-          onSheetChange={(index) => setSheetOpen(index >= 0)}
+          onSheetChange={handlers.handleSheetChange}
         />
       </FormProvider>
 
