@@ -30,6 +30,12 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
                                     value={value}
                                     onChangeText={onChange}
                                     error={!!error}
+                                    outlineColor={theme.border}
+                                    activeOutlineColor={theme.primary}
+                                    theme={{ colors: { text: theme.text, placeholder: theme.primary, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
+                                    style={{ color: theme.text, backgroundColor: theme.card }}
+                                    selectionColor={theme.primary}
+                                    textColor={theme.text}
                                 />
                                 {error && <Text style={styles.errorText}>{error.message}</Text>}
                             </>
@@ -48,6 +54,12 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
                                     onChangeText={onChange}
                                     keyboardType="numeric"
                                     error={!!error}
+                                    outlineColor={theme.border}
+                                    activeOutlineColor={theme.primary}
+                                    theme={{ colors: { text: theme.text, placeholder: theme.primary, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
+                                    style={{ color: theme.text, backgroundColor: theme.card }}
+                                    selectionColor={theme.primary}
+                                    textColor={theme.text}
                                 />
                                 {error && <Text style={styles.errorText}>{error.message}</Text>}
                             </>
@@ -65,6 +77,12 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
                                     value={value}
                                     onChangeText={onChange}
                                     error={!!error}
+                                    outlineColor={theme.border}
+                                    activeOutlineColor={theme.primary}
+                                    theme={{ colors: { text: theme.text, placeholder: theme.primary, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
+                                    style={{ color: theme.text, backgroundColor: theme.card }}
+                                    selectionColor={theme.primary}
+                                    textColor={theme.text}
                                 />
                                 {error && <Text style={styles.errorText}>{error.message}</Text>}
                             </>

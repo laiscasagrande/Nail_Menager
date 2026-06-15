@@ -11,7 +11,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useTheme } from '../context/ThemeContext';
 
 const CalendarioTela = () => {
-  const { theme } = useTheme();
+  const { theme, selectedTheme } = useTheme();
   const [dataAtual, setDataAtual] = useState(new Date());
   const [agendamentos, setAgendamentos] = useState([]);
 
@@ -136,7 +136,7 @@ const CalendarioTela = () => {
 
       {/* Agendamentos do dia */}
       <View style={[styles.agendamentosContainer, { backgroundColor: theme.card }]}> 
-        <Text style={styles.agendamentosTitle}>Agendamentos de Hoje</Text>
+        <Text style={[styles.agendamentosTitle, { color: selectedTheme === 'dark' ? theme.primary : theme.text }]}>Agendamentos de Hoje</Text>
         <ScrollView>
           <View style={styles.agendamentosList}>
             {agendamentos.length === 0 ? (

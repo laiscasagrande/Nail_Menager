@@ -1,15 +1,17 @@
 import { Calendar, Timer } from "lucide-react-native";
 import { StyleSheet, Text, View } from "react-native";
-import { COLORS } from "../../../../constants/colors";
+import { useTheme } from "../../../../context/ThemeContext";
 
 export default function DateCard({ date, title, onPressDate, onPressTime }) {
+    const { theme } = useTheme();
+
     return (
-        <View style={styles.card}>
-            <Text style={styles.label}>
+        <View style={[styles.card, { borderColor: theme.border, backgroundColor: theme.card }]}> 
+            <Text style={[styles.label, { color: theme.primary }]}> 
                 {title}
             </Text>
             <View style={styles.row}>
-                <Text>
+                <Text style={{ color: theme.text }}>
                     {date.toLocaleDateString(
                         "pt-BR",
                         {
@@ -20,12 +22,12 @@ export default function DateCard({ date, title, onPressDate, onPressTime }) {
                     )}
                 </Text>
                 <Calendar
-                    color={COLORS.primary}
+                    color={theme.primary}
                     onPress={onPressDate}
                 />
             </View>
             <View style={styles.row}>
-                <Text>
+                <Text style={{ color: theme.text }}>
                     {date.toLocaleTimeString(
                         "pt-BR",
                         {
@@ -35,7 +37,7 @@ export default function DateCard({ date, title, onPressDate, onPressTime }) {
                     )}
                 </Text>
                 <Timer
-                    color={COLORS.primary}
+                    color={theme.primary}
                     onPress={onPressTime}
                 />
             </View>
@@ -47,7 +49,6 @@ const styles = StyleSheet.create({
 
     card: {
         borderWidth: 1,
-        borderColor: COLORS.gray,
         borderRadius: 10,
         padding: 15,
         gap: 15,
@@ -55,7 +56,6 @@ const styles = StyleSheet.create({
 
     label: {
         fontSize: 15,
-        color: COLORS.primary,
         fontWeight: "600",
     },
 
