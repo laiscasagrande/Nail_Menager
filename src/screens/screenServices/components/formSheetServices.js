@@ -115,10 +115,11 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
 
 const styles = StyleSheet.create({
     formTitle: {
-        fontSize: 18,
+        textAlign: 'center',
+        fontSize: 20,
         fontWeight: '700',
         color: COLORS.primary,
-        marginBottom: 12
+        marginBottom: 20,
     },
     form: {
         gap: 5,

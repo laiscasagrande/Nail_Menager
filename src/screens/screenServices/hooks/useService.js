@@ -1,13 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as ImagePicker from 'expo-image-picker';
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { Alert } from "react-native";
-import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, updateDoc, where } from "firebase/firestore";
 import { db } from "../../../services/firebase";
 import { formService } from "../../../schemas/serviceSchema";
+import { AuthContext } from "../../../context/AuthContext";
 
 export function useService() {
+
+    const { user } = useContext(AuthContext);
     const [services, setServices] = useState([]);
     const [editingId, setEditingId] = useState(null);
     const [sheetOpen, setSheetOpen] = useState(false);
@@ -25,8 +28,11 @@ export function useService() {
     });
 
     async function seekServices() {
+        if (!user?.uid) return;
+
         try {
-            const snapshot = await getDocs(collection(db, 'services'));
+            const q = query(collection(db, "services"), where("uid", "==", user.uid));
+            const snapshot = await getDocs(q);
             const serviceList = snapshot.docs.map((docSnapshot) => ({
                 id: docSnapshot.id,
                 ...docSnapshot.data(),
@@ -49,7 +55,13 @@ export function useService() {
     }
 
     async function handleSave(data) {
+        if (!user?.uid) {
+            Alert.alert("Erro", "Usuário não autenticado");
+            return;
+        }
+
         const payload = {
+            uid: user.uid,
             procedure: data.procedure,
             price: data.price,
             duration: data.duration,
@@ -58,10 +70,26 @@ export function useService() {
 
         try {
             if (editingId) {
-                await updateDoc(doc(db, 'services', editingId), payload);
+                const serviceRef = doc(db, "services", editingId);
+                const serviceSnap = await getDoc(serviceRef);
+
+                if (!serviceSnap.exists()) {
+                    console.log("Serviço não encontrado");
+                    return;
+                }
+
+                if (serviceSnap.data().uid !== user.uid) {
+                    console.log("Sem permissão para editar");
+                    return;
+                }
+
+                await updateDoc(serviceRef, payload);
+
                 setServices((prev) =>
                     prev.map((service) =>
-                        service.id === editingId ? { ...service, ...payload } : service
+                        service.id === editingId
+                            ? { ...service, ...payload }
+                            : service
                     )
                 );
             } else {
@@ -112,9 +140,23 @@ export function useService() {
     }
 
     async function deleteService(id) {
-        try {
-            await deleteDoc(doc(db, 'services', id));
-            setServices((prev) => prev.filter((service) => service.id !== id));
+        try {   
+            const serviceRef = doc(db, "services", id);
+            const serviceSnap = await getDoc(serviceRef);
+
+            if (!serviceSnap.exists()) return;
+
+            if (serviceSnap.data().uid !== user.uid) {
+                console.log("Sem permissão");
+                return;
+            }
+
+            await deleteDoc(serviceRef);
+
+            setServices((prev) =>
+                prev.filter((service) => service.id !== id)
+            );
+
         } catch (error) {
             Alert.alert('Erro', 'Não foi possível deletar o serviço.');
         }
