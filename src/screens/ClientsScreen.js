@@ -284,10 +284,12 @@ async function handleEditClient(data) {
             />
 
             {!sheetOpen && (
-                <View style={{ position: 'absolute', right: 20, bottom: 25, zIndex: 1000, elevation: 10 }}>
-                    <ActionButtonAdd onPress={() => bottomSheetRef.current?.expand()} />
-                </View>
-            )}
+    <View style={styles.fabContainer}>
+        <ActionButtonAdd
+            onPress={() => bottomSheetRef.current?.expand()}
+        />
+    </View>
+)}
 
             <FormSheet
                 ref={bottomSheetRef}
@@ -496,6 +498,12 @@ const styles = StyleSheet.create({
     buttonText: {
         fontSize: 18,
         color: COLORS.white,
+    },
+
+    fabContainer: {
+        position: 'absolute',
+        bottom: 30,
+        right: 25,
     },
 
 });
