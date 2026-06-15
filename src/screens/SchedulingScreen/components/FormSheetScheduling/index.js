@@ -7,13 +7,7 @@ import { COLORS } from "../../../../constants/colors";
 import DatePickerModal from "./DatePickerModal";
 import DateCard from "./DateCard";
 
-export const CLIENTS = [
-    { label: "Laís Kaminski Casagrande", value: "1" },
-    { label: "João Silva", value: "2" },
-    { label: "Maria Souza", value: "3" },
-];
-
-export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel, onCompleted, isEditing, onReactivate, onEdit, services }) {
+export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel, onCompleted, isEditing, onReactivate, onEdit, services, customers }) {
 
     const [modal, setModal] = useState({
         visible: false,
@@ -21,7 +15,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
         mode: "date",
         title: "",
     });
-    const { handleSubmit, control, watch } = useFormContext()
+    const { handleSubmit, control, watch, formState: { errors } } = useFormContext()
     const dateStart = watch("dateStart");
     const dateEnd = watch("dateEnd");
     const [visibleMenu, setVisibleMenu] = useState(false);
@@ -29,7 +23,6 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
     const eventValue = watch("event");
     const status = watch("status");
     const statusIsOverdue = status === "scheduled" && new Date(dateEnd) < new Date();
-    const selectedLabel = CLIENTS.find((item) => String(item.value) === String(eventValue))?.label || "";
 
     function callFunctionCreateOrEdit() {
         if (isEditing) {
@@ -50,7 +43,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                 name="client"
                                 render={({ field: { onChange, value } }) => {
                                     const selectedLabel =
-                                        CLIENTS.find((item) => item.value === value)?.label || "";
+                                        customers.find((item) => item.id === value)?.name || "";
 
                                     return (
                                         <Menu
@@ -62,6 +55,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                                     value={selectedLabel}
                                                     mode="outlined"
                                                     editable={false}
+                                                    error={!!errors.client}
                                                     right={
                                                         <TextInput.Icon
                                                             icon="menu-down"
@@ -72,12 +66,12 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                                 />
                                             }
                                         >
-                                            {CLIENTS.map((item) => (
+                                            {customers.map((item) => (
                                                 <Menu.Item
-                                                    key={item.value}
-                                                    title={item.label}
+                                                    key={item.id}
+                                                    title={item.name}
                                                     onPress={() => {
-                                                        onChange(item.value);
+                                                        onChange(item.id);
                                                         setVisibleMenu(false);
                                                     }}
                                                 />
@@ -102,6 +96,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                                     label="Serviços"
                                                     value={selectedLabel}
                                                     mode="outlined"
+                                                    error={!!errors.service}
                                                     editable={false}
                                                     right={
                                                         <TextInput.Icon
@@ -190,7 +185,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                     {isEditing && (
                                         <TouchableOpacity style={styles.buttonCancel} onPress={handleSubmit(onCancel)}>
                                             <Text style={styles.buttonText}>
-                                                Cancelar
+                                                Cancelar horário
                                             </Text>
                                         </TouchableOpacity>
                                     )}
@@ -269,7 +264,7 @@ const styles = StyleSheet.create({
 
     buttonCompleted: {
         borderRadius: 10,
-        backgroundColor: COLORS.gray,
+        backgroundColor: COLORS.primary,
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
