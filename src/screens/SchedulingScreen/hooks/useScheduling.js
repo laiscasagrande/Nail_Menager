@@ -1,17 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { formScheduling } from "../../../schemas/schedulingSchema";
 import { v4 as uuidv4 } from 'uuid';
 import { COLORS } from "../../../constants/colors";
 import { DraggingEvent } from "@howljs/calendar-kit";
 import { Alert, Text, View } from "react-native";
-import { ca, is } from "zod/locales";
-import { addDoc, collection, doc, getDoc, getDocs, Timestamp, updateDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, getDocs, query, Timestamp, updateDoc, where } from "firebase/firestore";
 import { db } from "../../../services/firebase";
+import { AuthContext } from "../../../context/AuthContext";
+import { useFocusEffect } from '@react-navigation/native';
 
 export function useScheduling() {
 
+    const { user } = useContext(AuthContext);
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [idEvent, setIdEvent] = useState(null)
@@ -84,6 +86,11 @@ export function useScheduling() {
 
     async function handleCreateScheduling(data) {
 
+        if (!user?.uid) {
+            console.log("Usuário não autenticado");
+            return;
+        }
+
         const selectedClient = customers.find(
             (client) => client.id === data.client
         );
@@ -94,6 +101,7 @@ export function useScheduling() {
 
         try {
             await addDoc(collection(db, "scheduling"), {
+                uid: user.uid,
                 client: data.client,
                 service: data.service,
                 clientName: selectedClient?.label || "",
@@ -131,6 +139,19 @@ export function useScheduling() {
         const selectedService = services.find(
             (service) => service.id === data.service
         );
+
+        const schedulingRef = doc(db, "scheduling", data.id);
+        const schedulingSnap = await getDoc(schedulingRef);
+
+        if (!schedulingSnap.exists()) {
+            console.log("Agendamento não encontrado");
+            return;
+        }
+
+        if (schedulingSnap.data().uid !== user.uid) {
+            console.log("Sem permissão para editar");
+            return;
+        }
 
         try {
             await updateDoc(doc(db, "scheduling", data.id), {
@@ -186,32 +207,43 @@ export function useScheduling() {
     }
 
     async function getSchedulingById(id) {
+        if (!user?.uid) return;
         setIsEditing(true)
+
         try {
             const schedulingSnap = await getDoc(doc(db, "scheduling", id))
 
-            bottomSheetRef.current.expand()
-            if (schedulingSnap.exists()) {
-                methods.reset({
-                    id: schedulingSnap.id,
-                    client: schedulingSnap.data().client,
-                    service: schedulingSnap.data().service,
-                    dateStart: new Date(schedulingSnap.data().start.toDate()),
-                    dateEnd: new Date(schedulingSnap.data().end.toDate()),
-                    status: schedulingSnap.data().status
-                })
-            } else {
-                console.log("Nenhum agendamento encontrado com o ID:", id);
-                return null
+            if (schedulingSnap.data().uid !== user.uid) {
+                console.log("Sem permissão");
+                return;
             }
+
+            bottomSheetRef.current.expand()
+
+            methods.reset({
+                id: schedulingSnap.id,
+                client: schedulingSnap.data().client,
+                service: schedulingSnap.data().service,
+                dateStart: new Date(schedulingSnap.data().start.toDate()),
+                dateEnd: new Date(schedulingSnap.data().end.toDate()),
+                status: schedulingSnap.data().status
+            })
+
         } catch (error) {
             console.log("Erro ao buscar agendamento por ID:", error);
         }
     }
 
     async function getSchedulings() {
+        if (!user?.uid) return;
+
         try {
-            const getData = await getDocs(collection(db, "scheduling"))
+            const q = query(
+                collection(db, "scheduling"),
+                where("uid", "==", user.uid)
+            );
+
+            const getData = await getDocs(q)
 
             const data = getData.docs.map((doc) => ({
                 id: doc.id,
@@ -232,17 +264,16 @@ export function useScheduling() {
         }
     }
 
-    useEffect(() => {
-        getSchedulings()
-    }, [])
+    useFocusEffect(
+        useCallback(() => {
+            if (user) {
+                getSchedulings();
+                getServices();
+                getCustomers();
+            }
+        }, [user])
+    );
 
-    useEffect(() => {
-        getServices()
-    }, [])
-
-    useEffect(() => {
-        getCustomers()
-    }, [])
 
     async function handlePressCancel(data) {
 
@@ -250,7 +281,7 @@ export function useScheduling() {
             console.log("Cancelamento ignorado: agendamento sem id.");
             return;
         }
-        
+
         Alert.alert(
             'Cancelar agendamento',
             'Tem certeza que deseja cancelar este agendamento?',
@@ -260,6 +291,19 @@ export function useScheduling() {
                     text: 'Cancelar agendamento',
                     onPress: async () => {
                         try {
+                            const schedulingRef = doc(db, "scheduling", data.id);
+                            const schedulingSnap = await getDoc(schedulingRef);
+
+                            if (!schedulingSnap.exists()) {
+                                console.log("Agendamento não encontrado");
+                                return;
+                            }
+
+                            if (schedulingSnap.data().uid !== user.uid) {
+                                console.log("Sem permissão");
+                                return;
+                            }
+
                             await updateDoc(doc(db, "scheduling", data.id), {
                                 status: "cancelled",
                             });
@@ -284,21 +328,30 @@ export function useScheduling() {
     }
 
     async function handlePressCompleted(data) {
-        if (!data?.id) {
-            console.log("Conclusao ignorada: agendamento sem id.");
-            return;
-        }
 
         if (!data?.id) {
             Alert.alert(
-                "Erro ao cancelar",
-                "Não foi possível cancelar o agendamento. Isso pode acontecer quando o agendamento foi criado em um horário que já passou. Tente criar um novo agendamento em uma data futura.",
+                "Erro ao concluir",
+                "Não foi possível concluir o agendamento. Isso pode acontecer quando o agendamento foi criado em um horário que já passou. Tente criar um novo agendamento em uma data futura.",
                 [{ text: "Entendi" }]
             );
             return;
         }
 
         try {
+            const schedulingRef = doc(db, "scheduling", data.id);
+            const schedulingSnap = await getDoc(schedulingRef);
+
+            if (!schedulingSnap.exists()) {
+                console.log("Agendamento não encontrado");
+                return;
+            }
+
+            if (schedulingSnap.data().uid !== user.uid) {
+                console.log("Sem permissão");
+                return;
+            }
+
             await updateDoc(doc(db, "scheduling", data.id), {
                 status: "completed",
             });
@@ -328,6 +381,20 @@ export function useScheduling() {
         }
 
         try {
+
+            const schedulingRef = doc(db, "scheduling", data.id);
+            const schedulingSnap = await getDoc(schedulingRef);
+
+            if (!schedulingSnap.exists()) {
+                console.log("Agendamento não encontrado");
+                return;
+            }
+
+            if (schedulingSnap.data().uid !== user.uid) {
+                console.log("Sem permissão");
+                return;
+            }
+
             await updateDoc(doc(db, "scheduling", data.id), {
                 status: "scheduled",
             });
@@ -352,8 +419,15 @@ export function useScheduling() {
     }
 
     async function getServices() {
+        if (!user?.uid) return;
+
         try {
-            const getServicesData = await getDocs(collection(db, "services"))
+            const q = query(
+                collection(db, "services"),
+                where("uid", "==", user.uid)
+            );
+
+            const getServicesData = await getDocs(q)
             const serviceList = getServicesData.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
@@ -365,8 +439,15 @@ export function useScheduling() {
     }
 
     async function getCustomers() {
+        if (!user?.uid) return;
+
         try {
-            const getCustomersData = await getDocs(collection(db, "customers"))
+            const q = query(
+                collection(db, "customers"),
+                where("uid", "==", user.uid)
+            );
+
+            const getCustomersData = await getDocs(q)
             const customersList = getCustomersData.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
