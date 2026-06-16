@@ -2,12 +2,13 @@ import { StyleSheet } from "react-native";
 import { Button } from "react-native-paper";
 import { Plus } from "lucide-react-native";
 import { useTheme } from '../context/ThemeContext';
+import { COLORS } from '../constants';
 
 export default function ActionButtonAdd({onPress}) {
     const { theme } = useTheme();
     return (
         <Button style={[styles.button, { backgroundColor: theme.primary }]} onPress={onPress}>
-            <Plus size={32} color={theme.text} />
+            <Plus size={32} color={COLORS.white} />
         </Button>
     )
 }
