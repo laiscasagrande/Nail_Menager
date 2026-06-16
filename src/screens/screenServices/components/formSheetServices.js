@@ -17,19 +17,26 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
         <FormSheet ref={ref} onChange={onSheetChange}>
             <View style={[styles.container, { backgroundColor: theme.card }]}> 
                 <View style={styles.form}>
-                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', display: 'flex'}}>
-                        <Text style={[styles.formTitle, { color: theme.primary }]}>Cadastrar Novo Serviço</Text>
+                    <View style={{flex: 1, justifyContent: 'center', alignItems: 'stretch'}}>
+                        <Text style={[styles.formTitle, { color: theme.primary }]}>{editingId ? 'Atualizar Serviço' : 'Cadastrar Novo Serviço'}</Text>
                     <Controller
                         control={control}
                         name="procedure"
                         render={({ field: { onChange, value }, fieldState: { error } }) => (
                             <>
                                 <TextInput
+                                    style={{ width: '100%' }}
                                     label="Procedimento"
                                     mode="outlined"
                                     value={value}
                                     onChangeText={onChange}
                                     error={!!error}
+                                    outlineColor={theme.border}
+                                    activeOutlineColor={theme.primary}
+                                    theme={{ colors: { text: theme.text, placeholder: theme.primary, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
+                                    style={{ color: theme.text, backgroundColor: theme.card }}
+                                    selectionColor={theme.primary}
+                                    textColor={theme.text}
                                 />
                                 {error && <Text style={styles.errorText}>{error.message}</Text>}
                             </>
@@ -42,12 +49,19 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
                         render={({ field: { onChange, value }, fieldState: { error } }) => (
                             <>
                                 <TextInput
+                                    style={{ width: '100%' }}
                                     label="Preço"
                                     mode="outlined"
                                     value={value}
                                     onChangeText={onChange}
                                     keyboardType="numeric"
                                     error={!!error}
+                                    outlineColor={theme.border}
+                                    activeOutlineColor={theme.primary}
+                                    theme={{ colors: { text: theme.text, placeholder: theme.primary, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
+                                    style={{ color: theme.text, backgroundColor: theme.card }}
+                                    selectionColor={theme.primary}
+                                    textColor={theme.text}
                                 />
                                 {error && <Text style={styles.errorText}>{error.message}</Text>}
                             </>
@@ -60,11 +74,18 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
                         render={({ field: { onChange, value }, fieldState: { error } }) => (
                             <>
                                 <TextInput
+                                    style={{ width: '100%' }}
                                     label="Duração"
                                     mode="outlined"
                                     value={value}
                                     onChangeText={onChange}
                                     error={!!error}
+                                    outlineColor={theme.border}
+                                    activeOutlineColor={theme.primary}
+                                    theme={{ colors: { text: theme.text, placeholder: theme.primary, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
+                                    style={{ color: theme.text, backgroundColor: theme.card }}
+                                    selectionColor={theme.primary}
+                                    textColor={theme.text}
                                 />
                                 {error && <Text style={styles.errorText}>{error.message}</Text>}
                             </>
@@ -112,13 +133,15 @@ export const FormSheetServices = forwardRef(({ pickImage, editingId, onSave, onC
 
 const styles = StyleSheet.create({
     formTitle: {
-        fontSize: 18,
+        textAlign: 'center',
+        fontSize: 20,
         fontWeight: '700',
         color: COLORS.primary,
-        marginBottom: 12
+        marginBottom: 20,
     },
     form: {
         gap: 5,
+         width: '100%',
     },
     container: {
         flex: 1,

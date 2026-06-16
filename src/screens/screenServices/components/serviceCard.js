@@ -9,14 +9,14 @@ export function ServiceCard({ item, onEdit, onDelete }) {
         <View style={[styles.card, { backgroundColor: theme.card }]}> 
             <Image
                 source={{ uri: item.image || 'https://via.placeholder.com/150' }}
-                style={styles.cardImage}
+                style={[styles.cardImage, { backgroundColor: theme.text === '#FFFFFF' ? '#2A2A2A' : '#FCE4EC' }]}
             />
 
             <View style={styles.cardInfo}>
                 <Text style={[styles.cardTitle, { color: theme.text }]}>{item.procedure}</Text>
                 <View style={styles.dataLinha}>
                     <Text style={[styles.price, { color: theme.primary }]}>R$ {item.price}</Text>
-                    <Text style={[styles.dataTexto, { color: theme.subtitle }]}>{item.duration}h</Text>
+                    <Text style={[styles.dataTexto, { color: theme.text }]}>{item.duration}h</Text>
                 </View>
             </View>
 
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     price: {
         fontSize: 14,
         fontWeight: '600',
-        color: COLORS.primary,
+        color: '#ff008c',
     },
     dataTexto: {
         fontSize: 12,

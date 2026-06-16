@@ -21,6 +21,7 @@ import ActionButtonAdd from '../components/ActionButtonAdd';
 import FormSheet from '../components/FormSheet';
 
 import { COLORS } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { formCustomer } from '../schemas/customerSchema';
@@ -39,6 +40,8 @@ import { db } from '../services/firebase';
 import { AuthContext } from '../context/AuthContext';
 
 export default function ClientsScreen() {
+
+    const { theme, selectedTheme } = useTheme();
 
     const [clienteAberto, setClienteAberto] = useState(null);
     const [sheetIndex, setSheetIndex] = useState(0);
@@ -223,7 +226,7 @@ async function handleEditClient(data) {
     }, []);
 
     return (
-        <>
+        <View style={{ flex: 1, backgroundColor: theme.background }}>
             <FlatList
                 data={customers}
                 keyExtractor={(item) => item.id}
@@ -234,10 +237,10 @@ async function handleEditClient(data) {
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => (
 
-                    <View style={styles.card}>
+                    <View style={[styles.card, { backgroundColor: theme.card, borderWidth: selectedTheme === 'light' ? 1 : 0, borderColor: theme.border }]}> 
 
-                        <View style={styles.avatar}>
-                            <Text style={styles.avatarText}>
+                        <View style={[styles.avatar, { backgroundColor: selectedTheme === 'dark' ? theme.primary : '#ffd8ea' }]}> 
+                            <Text style={[styles.avatarText, { color: selectedTheme === 'dark' ? theme.card : '#d96a9c' }] }>
                                 {item.name
                                     ?.split(' ')
                                     .map((n) => n[0])
@@ -248,16 +251,16 @@ async function handleEditClient(data) {
                         </View>
 
                         <View style={styles.info}>
-                            <Text style={styles.nome}>
+                            <Text style={[styles.nome, { color: theme.text }]}>
                                 {item.name}
                             </Text>
 
-                            <Text style={styles.telefone}>
+                            <Text style={[styles.telefone, { color: theme.subtitle }]}>
                                 {item.telephone}
                             </Text>
 
                             {clienteAberto === item.id && item.observation && (
-                                <Text style={styles.alergia}>
+                                <Text style={[styles.alergia, { color: theme.subtitle }]}>
                                     {item.observation}
                                 </Text>
                             )}
@@ -266,19 +269,19 @@ async function handleEditClient(data) {
                         <View style={styles.actions}>
 
                             <TouchableOpacity>
-                                <Feather
-                                    name="edit-2"
-                                    size={20}
-                                    color={COLORS.primary}
-                                    onPress={() => handleEdit(item)}
-                                />
+                                    <Feather
+                                        name="edit-2"
+                                        size={20}
+                                        color={theme.primary}
+                                        onPress={() => handleEdit(item)}
+                                    />
                             </TouchableOpacity>
 
                             <TouchableOpacity>
                                 <MaterialIcons
                                     name="delete-outline"
                                     size={24}
-                                    color={COLORS.primary}
+                                    color={theme.primary}
                                     onPress={() => deleteClient(item.id)}
                                 />
                             </TouchableOpacity>
@@ -293,7 +296,7 @@ async function handleEditClient(data) {
                                             : 'eye-outline'
                                     }
                                     size={22}
-                                    color="#bbb"
+                                    color={theme.subtitle}
                                 />
                             </TouchableOpacity>
 
@@ -317,12 +320,12 @@ async function handleEditClient(data) {
                 onChange={(index) => setSheetOpen(index >= 0)}
             >
 
-                <View style={styles.container}>
+                <View style={[styles.container, { backgroundColor: theme.card }]}> 
 
                     <View style={styles.form}>
 
-                        <Text style={styles.formTitle}>
-                            {isEditing ? "Editar cliente" : "Cadastrar novo cliente"}
+                        <Text style={[styles.formTitle, { color: theme.primary }] }>
+                            Cadastrar novo cliente
                         </Text>
 
                         <Controller
@@ -337,6 +340,12 @@ async function handleEditClient(data) {
                                     left={
                                         <TextInput.Icon icon="account-outline" />
                                     }
+                                    outlineColor={theme.border}
+                                    activeOutlineColor={theme.primary}
+                                    theme={{ colors: { text: theme.text, placeholder: theme.subtitle, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
+                                    style={{ color: theme.text, backgroundColor: theme.card }}
+                                    selectionColor={theme.primary}
+                                    textColor={theme.text}
                                 />
                             )}
                         />
@@ -355,6 +364,12 @@ async function handleEditClient(data) {
                                     left={
                                         <TextInput.Icon icon="cellphone" />
                                     }
+                                    outlineColor={theme.border}
+                                    activeOutlineColor={theme.primary}
+                                    theme={{ colors: { text: theme.text, placeholder: theme.subtitle, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
+                                    style={{ color: theme.text, backgroundColor: theme.card }}
+                                    selectionColor={theme.primary}
+                                    textColor={theme.text}
                                 />
                             )}
                         />
@@ -374,7 +389,12 @@ async function handleEditClient(data) {
                                     left={
                                         <TextInput.Icon icon="note-text-outline" />
                                     }
-                                    style={styles.textArea}
+                                    style={[styles.textArea, { color: theme.text, backgroundColor: theme.card }]}
+                                    outlineColor={theme.border}
+                                    activeOutlineColor={theme.primary}
+                                    theme={{ colors: { text: theme.text, placeholder: theme.subtitle, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
+                                    selectionColor={theme.primary}
+                                    textColor={theme.text}
                                 />
                             )}
                         />
@@ -384,10 +404,10 @@ async function handleEditClient(data) {
                     <View>
                         <View style={styles.buttonRow}>
                             <TouchableOpacity
-                                style={styles.buttonSave}
+                                style={[styles.buttonSave, { backgroundColor: theme.primary }]}
                                 onPress={!isEditing ? methods.handleSubmit(handleSaveClient) : methods.handleSubmit(handleEditClient)}
                             >
-                                <Text style={styles.buttonText}>
+                                <Text style={[styles.buttonText, { color: COLORS.white }] }>
                                     Salvar
                                 </Text>
                             </TouchableOpacity>
@@ -398,7 +418,7 @@ async function handleEditClient(data) {
 
             </FormSheet>
 
-        </>
+        </View>
     );
 }
 

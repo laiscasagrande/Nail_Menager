@@ -2,9 +2,11 @@ import React, { forwardRef, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { COLORS } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 
 const FormSheet = forwardRef(({ children, onChange }, ref) => {
   const snapPoints = useMemo(() => ['80%'], []);
+  const { theme } = useTheme();
 
   return (
     <BottomSheet
@@ -13,7 +15,8 @@ const FormSheet = forwardRef(({ children, onChange }, ref) => {
       snapPoints={snapPoints}
       onChange={onChange}
       enablePanDownToClose={true}
-      handleIndicatorStyle={{ backgroundColor: COLORS.primary, width: 70 }}
+      handleIndicatorStyle={{ backgroundColor: theme.primary || COLORS.primary, width: 70 }}
+      backgroundStyle={{ backgroundColor: theme.card || COLORS.white }}
     >
       <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
         {children}

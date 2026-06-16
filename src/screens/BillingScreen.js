@@ -126,14 +126,14 @@ export default function FaturamentoTela() {
     });
 
     return Object.keys(counter).map((status) => {
-        const config = STATUS_CONFIG[status] || STATUS_CONFIG.unknown;
-        return {
-            name: config.label,
-            population: counter[status],
-            color: config.color,
-            legendFontColor: config.legendFontColor,
-            legendFontSize: 13,
-        };
+      const config = STATUS_CONFIG[status] || STATUS_CONFIG.unknown;
+      return {
+        name: config.label,
+        population: counter[status],
+        color: config.color,
+        legendFontColor: theme?.subtitle || config.legendFontColor,
+        legendFontSize: 13,
+      };
     });
   }
 
@@ -206,9 +206,9 @@ export default function FaturamentoTela() {
   function renderSection(title, data) {
     return (
       <>
-        <Text style={styles.sectionTitle}>{title}</Text>
+        <Text style={[styles.sectionTitle, { color: theme.primary }]}>{title}</Text>
         {data.length === 0 ? (
-          <Text style={styles.emptyText}>Nenhum registro neste período</Text>
+          <Text style={[styles.emptyText, { color: theme.subtitle }]}>Nenhum registro neste período</Text>
         ) : (
           <FlatList
             data={data}
@@ -263,21 +263,23 @@ export default function FaturamentoTela() {
         </View>
       </View>
 
-        <Text style={styles.sectionTittle}>Status dos Agendamentos</Text>
+        <Text style={[styles.sectionTitle, { color: theme.primary }]}>Status dos Agendamentos</Text>
 
         {pieData.length > 0 ? (
-          <PieChart
-            data={pieData}
-            width={screenWidth - 32}
-            height={220}
-            chartConfig={{
-                 color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            }}
-            accessor="population"
-            backgroundColor="transparent"
-            paddingLeft="15"
-            absolute
+          <View style={{ alignItems: 'center' }}>
+            <PieChart
+              data={pieData}
+              width={Math.min(screenWidth - 32, 360)}
+              height={220}
+              chartConfig={{
+                color: () => theme.text,
+              }}
+              accessor="population"
+              backgroundColor="transparent"
+              paddingLeft="15"
+              absolute
             />
+          </View>
         ) : (
           <Text style={styles.noDataText}>Nenhum agendamento para este mês</Text>
         )}
