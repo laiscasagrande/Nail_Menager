@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useContext } from 'react';
 
 import {
     View,
@@ -31,8 +31,12 @@ import {
     updateDoc,
     deleteDoc,
     doc,
+    query,
+    getDoc,
+    where,
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
+import { AuthContext } from '../context/AuthContext';
 
 export default function ClientsScreen() {
 
@@ -42,6 +46,7 @@ export default function ClientsScreen() {
     const [sheetOpen, setSheetOpen] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [idClient, setIdClient] = useState("")
+    const { user } = useContext(AuthContext);
 
     const methods = useForm({
         resolver: zodResolver(formCustomer),
@@ -83,6 +88,10 @@ export default function ClientsScreen() {
     }
 
 async function handleSaveClient(data) {
+    if (!user?.uid) {
+        Alert.alert("Erro", "Usuário não autenticado");
+        return;
+    }
 
     const telefoneLimpo = (data.telephone || '').replace(/\D/g, '');
 
@@ -95,6 +104,7 @@ async function handleSaveClient(data) {
     }
     try {
             await addDoc(collection(db, "customers"), {
+                uid: user.uid,
                 name: data.name,
                 telephone: data.telephone,
                 observation: data.observation,
@@ -118,8 +128,11 @@ async function handleSaveClient(data) {
     }
 
     async function getCustomers() {
+        if (!user?.uid) return;
+
         try {
-            const customers = await getDocs(collection(db, "customers"));
+            const q = query(collection(db, "customers"), where("uid", "==", user.uid));
+            const customers = await getDocs(q);
 
             const data = customers.docs.map((doc) => ({
                 id: doc.id,
@@ -142,23 +155,34 @@ async function handleSaveClient(data) {
             observation: client.observation,
             telephone: client.telephone
         })
-        bottomSheetRef.current.expand()
+        bottomSheetRef.current?.expand()
     }
 
 async function handleEditClient(data) {
-    console.log(data)
+
+    const customerRef = doc(db, "customers", idClient);
+
+    try {
+        const customerSnap = await getDoc(customerRef);
+
+        if (!customerSnap.exists()) return;
+
+        if(customerSnap.data().uid !==user.uid) {
+            console.log("Sem permissão");
+            return;
+        }
 
         const telefoneLimpo = (data.telephone || '').replace(/\D/g, '');
 
-    if (telefoneLimpo.length !== 11) {
-        Alert.alert(
+        if (telefoneLimpo.length !== 11) {
+            Alert.alert(
             "Telefone inválido",
             "Preencha um telefone válido."
         );
         return;
     }
-    try {
-            await updateDoc(doc(db, "customers", idClient), {
+
+            await updateDoc(customerRef, {
                 name: data.name,
                 telephone: data.telephone,
                 observation: data.observation,
@@ -174,7 +198,7 @@ async function handleEditClient(data) {
             });
 
             setIsEditing(false);
-            setSheetOpen(false)
+            setSheetOpen(false);
 
             bottomSheetRef.current?.close();
 
@@ -298,7 +322,7 @@ async function handleEditClient(data) {
                     <View style={styles.form}>
 
                         <Text style={styles.formTitle}>
-                            Cadastrar novo cliente
+                            {isEditing ? "Editar cliente" : "Cadastrar novo cliente"}
                         </Text>
 
                         <Controller
