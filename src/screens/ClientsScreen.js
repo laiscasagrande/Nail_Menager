@@ -17,7 +17,6 @@ import {
 
 import { TextInput } from 'react-native-paper';
 
-import ActionButtonAdd from '../components/ActionButtonAdd';
 import FormSheet from '../components/FormSheet';
 
 import { COLORS } from '../constants/colors';
@@ -44,11 +43,10 @@ export default function ClientsScreen() {
     const { theme, selectedTheme } = useTheme();
 
     const [clienteAberto, setClienteAberto] = useState(null);
-    const [sheetIndex, setSheetIndex] = useState(0);
     const [customers, setCustomers] = useState([]);
-    const [sheetOpen, setSheetOpen] = useState(false)
-    const [isEditing, setIsEditing] = useState(false)
-    const [idClient, setIdClient] = useState("")
+    const [sheetOpen, setSheetOpen] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [idClient, setIdClient] = useState("");
     const { user } = useContext(AuthContext);
 
     const methods = useForm({
@@ -63,19 +61,13 @@ export default function ClientsScreen() {
 
     const bottomSheetRef = useRef(null);
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            bottomSheetRef.current?.snapToIndex(0);
-        }, 300);
-
-        return () => clearTimeout(timer);
-    }, []);
-
     function toggleCliente(id) {
         setClienteAberto(clienteAberto === id ? null : id);
     }
 
     function abrirSheet() {
+        setIsEditing(false);
+
         methods.reset({
             id: "",
             name: "",
@@ -83,29 +75,26 @@ export default function ClientsScreen() {
             observation: "",
         });
 
-        bottomSheetRef.current?.snapToIndex(1);
+        bottomSheetRef.current?.expand();
     }
 
-    function fecharSheet() {
-        bottomSheetRef.current?.snapToIndex(0);
-    }
+    async function handleSaveClient(data) {
+        if (!user?.uid) {
+            Alert.alert("Erro", "Usuário não autenticado");
+            return;
+        }
 
-async function handleSaveClient(data) {
-    if (!user?.uid) {
-        Alert.alert("Erro", "Usuário não autenticado");
-        return;
-    }
+        const telefoneLimpo = (data.telephone || '').replace(/\D/g, '');
 
-    const telefoneLimpo = (data.telephone || '').replace(/\D/g, '');
+        if (telefoneLimpo.length !== 11) {
+            Alert.alert(
+                "Telefone inválido",
+                "Preencha um telefone válido."
+            );
+            return;
+        }
 
-    if (telefoneLimpo.length !== 11) {
-        Alert.alert(
-            "Telefone inválido",
-            "Preencha um telefone válido."
-        );
-        return;
-    }
-    try {
+        try {
             await addDoc(collection(db, "customers"), {
                 uid: user.uid,
                 name: data.name,
@@ -122,7 +111,7 @@ async function handleSaveClient(data) {
 
             await getCustomers();
 
-            setSheetOpen(false)
+            setSheetOpen(false);
             bottomSheetRef.current?.close();
 
         } catch (error) {
@@ -134,7 +123,11 @@ async function handleSaveClient(data) {
         if (!user?.uid) return;
 
         try {
-            const q = query(collection(db, "customers"), where("uid", "==", user.uid));
+            const q = query(
+                collection(db, "customers"),
+                where("uid", "==", user.uid)
+            );
+
             const customers = await getDocs(q);
 
             const data = customers.docs.map((doc) => ({
@@ -149,41 +142,42 @@ async function handleSaveClient(data) {
         }
     }
 
-    function handleEdit(client){
-        console.log("llalalal", client)
-        setIdClient(client.id)
-        setIsEditing(true)
+    function handleEdit(client) {
+        setIdClient(client.id);
+        setIsEditing(true);
+
         methods.reset({
             name: client.name,
             observation: client.observation,
             telephone: client.telephone
-        })
-        bottomSheetRef.current?.expand()
+        });
+
+        bottomSheetRef.current?.expand();
     }
 
-async function handleEditClient(data) {
+    async function handleEditClient(data) {
 
-    const customerRef = doc(db, "customers", idClient);
+        const customerRef = doc(db, "customers", idClient);
 
-    try {
-        const customerSnap = await getDoc(customerRef);
+        try {
+            const customerSnap = await getDoc(customerRef);
 
-        if (!customerSnap.exists()) return;
+            if (!customerSnap.exists()) return;
 
-        if(customerSnap.data().uid !==user.uid) {
-            console.log("Sem permissão");
-            return;
-        }
+            if (customerSnap.data().uid !== user.uid) {
+                console.log("Sem permissão");
+                return;
+            }
 
-        const telefoneLimpo = (data.telephone || '').replace(/\D/g, '');
+            const telefoneLimpo = (data.telephone || '').replace(/\D/g, '');
 
-        if (telefoneLimpo.length !== 11) {
-            Alert.alert(
-            "Telefone inválido",
-            "Preencha um telefone válido."
-        );
-        return;
-    }
+            if (telefoneLimpo.length !== 11) {
+                Alert.alert(
+                    "Telefone inválido",
+                    "Preencha um telefone válido."
+                );
+                return;
+            }
 
             await updateDoc(customerRef, {
                 name: data.name,
@@ -211,15 +205,47 @@ async function handleEditClient(data) {
     }
 
     async function deleteClient(id) {
-        try {
-            await deleteDoc(doc(db, 'customers', id));
-            setCustomers((prev) => prev.filter((client) => client.id !== id));
-        } catch (error) {
-            Alert.alert('Erro', 'Não foi possível deletar o cliente.');
-        }
+        Alert.alert(
+            "Excluir cliente",
+            "Tem certeza que deseja excluir este cliente?",
+            [
+                {
+                    text: "Cancelar",
+                    style: "cancel",
+                },
+                {
+                    text: "Excluir",
+                    style: "destructive",
+                    onPress: async () => {
+                        const customerRef = doc(db, "customers", id);
+
+                        try {
+                            const customerSnap = await getDoc(customerRef);
+
+                            if (!customerSnap.exists()) return;
+
+                            if (customerSnap.data().uid !== user.uid) {
+                                console.log("Sem permissão");
+                                return;
+                            }
+
+                            await deleteDoc(customerRef);
+
+                            setCustomers((prev) =>
+                                prev.filter((client) => client.id !== id)
+                            );
+
+                        } catch (error) {
+                            Alert.alert(
+                                "Erro",
+                                "Não foi possível deletar o cliente."
+                            );
+                        }
+                    }
+                }
+            ]
+        );
     }
-
-
 
     useEffect(() => {
         getCustomers();
@@ -237,10 +263,33 @@ async function handleEditClient(data) {
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => (
 
-                    <View style={[styles.card, { backgroundColor: theme.card, borderWidth: selectedTheme === 'light' ? 1 : 0, borderColor: theme.border }]}> 
+                    <View style={[
+                        styles.card,
+                        {
+                            backgroundColor: theme.card,
+                            borderWidth: selectedTheme === 'light' ? 1 : 0,
+                            borderColor: theme.border
+                        }
+                    ]}>
 
-                        <View style={[styles.avatar, { backgroundColor: selectedTheme === 'dark' ? theme.primary : '#ffd8ea' }]}> 
-                            <Text style={[styles.avatarText, { color: selectedTheme === 'dark' ? theme.card : '#d96a9c' }] }>
+                        <View style={[
+                            styles.avatar,
+                            {
+                                backgroundColor:
+                                    selectedTheme === 'dark'
+                                        ? theme.primary
+                                        : '#ffd8ea'
+                            }
+                        ]}>
+                            <Text style={[
+                                styles.avatarText,
+                                {
+                                    color:
+                                        selectedTheme === 'dark'
+                                            ? theme.card
+                                            : '#d96a9c'
+                                }
+                            ]}>
                                 {item.name
                                     ?.split(' ')
                                     .map((n) => n[0])
@@ -255,12 +304,18 @@ async function handleEditClient(data) {
                                 {item.name}
                             </Text>
 
-                            <Text style={[styles.telefone, { color: theme.subtitle }]}>
+                            <Text style={[
+                                styles.telefone,
+                                { color: theme.subtitle }
+                            ]}>
                                 {item.telephone}
                             </Text>
 
                             {clienteAberto === item.id && item.observation && (
-                                <Text style={[styles.alergia, { color: theme.subtitle }]}>
+                                <Text style={[
+                                    styles.alergia,
+                                    { color: theme.subtitle }
+                                ]}>
                                     {item.observation}
                                 </Text>
                             )}
@@ -269,12 +324,12 @@ async function handleEditClient(data) {
                         <View style={styles.actions}>
 
                             <TouchableOpacity>
-                                    <Feather
-                                        name="edit-2"
-                                        size={20}
-                                        color={theme.primary}
-                                        onPress={() => handleEdit(item)}
-                                    />
+                                <Feather
+                                    name="edit-2"
+                                    size={20}
+                                    color={theme.primary}
+                                    onPress={() => handleEdit(item)}
+                                />
                             </TouchableOpacity>
 
                             <TouchableOpacity>
@@ -308,24 +363,42 @@ async function handleEditClient(data) {
             />
 
             {!sheetOpen && (
-    <View style={styles.fabContainer}>
-        <ActionButtonAdd
-            onPress={() => bottomSheetRef.current?.expand()}
-        />
-    </View>
-)}
+                <View style={styles.fabContainer}>
+                    <TouchableOpacity
+                        style={[
+                            styles.buttonAdd,
+                            { backgroundColor: theme.primary }
+                        ]}
+                        onPress={abrirSheet}
+                    >
+                        <Feather
+                            name="plus"
+                            size={28}
+                            color={COLORS.white}
+                        />
+                    </TouchableOpacity>
+                </View>
+            )}
 
             <FormSheet
                 ref={bottomSheetRef}
                 onChange={(index) => setSheetOpen(index >= 0)}
             >
 
-                <View style={[styles.container, { backgroundColor: theme.card }]}> 
+                <View style={[
+                    styles.container,
+                    { backgroundColor: theme.card }
+                ]}>
 
                     <View style={styles.form}>
 
-                        <Text style={[styles.formTitle, { color: theme.primary }] }>
-                            Cadastrar novo cliente
+                        <Text style={[
+                            styles.formTitle,
+                            { color: theme.primary }
+                        ]}>
+                            {isEditing
+                                ? 'Editar cliente'
+                                : 'Cadastrar novo cliente'}
                         </Text>
 
                         <Controller
@@ -337,13 +410,23 @@ async function handleEditClient(data) {
                                     value={value}
                                     onChangeText={onChange}
                                     mode="outlined"
-                                    left={
-                                        <TextInput.Icon icon="account-outline" />
-                                    }
+                                    left={<TextInput.Icon icon="account-outline" />}
                                     outlineColor={theme.border}
                                     activeOutlineColor={theme.primary}
-                                    theme={{ colors: { text: theme.text, placeholder: theme.subtitle, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
-                                    style={{ color: theme.text, backgroundColor: theme.card }}
+                                    theme={{
+                                        colors: {
+                                            text: theme.text,
+                                            placeholder: theme.subtitle,
+                                            primary: theme.primary,
+                                            background: theme.card,
+                                            onSurfaceVariant: theme.primary,
+                                            onSurface: theme.text
+                                        }
+                                    }}
+                                    style={{
+                                        color: theme.text,
+                                        backgroundColor: theme.card
+                                    }}
                                     selectionColor={theme.primary}
                                     textColor={theme.text}
                                 />
@@ -361,13 +444,23 @@ async function handleEditClient(data) {
                                     keyboardType="phone-pad"
                                     mode="outlined"
                                     maxLength={11}
-                                    left={
-                                        <TextInput.Icon icon="cellphone" />
-                                    }
+                                    left={<TextInput.Icon icon="cellphone" />}
                                     outlineColor={theme.border}
                                     activeOutlineColor={theme.primary}
-                                    theme={{ colors: { text: theme.text, placeholder: theme.subtitle, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
-                                    style={{ color: theme.text, backgroundColor: theme.card }}
+                                    theme={{
+                                        colors: {
+                                            text: theme.text,
+                                            placeholder: theme.subtitle,
+                                            primary: theme.primary,
+                                            background: theme.card,
+                                            onSurfaceVariant: theme.primary,
+                                            onSurface: theme.text
+                                        }
+                                    }}
+                                    style={{
+                                        color: theme.text,
+                                        backgroundColor: theme.card
+                                    }}
                                     selectionColor={theme.primary}
                                     textColor={theme.text}
                                 />
@@ -386,13 +479,26 @@ async function handleEditClient(data) {
                                     multiline
                                     numberOfLines={5}
                                     textAlignVertical="top"
-                                    left={
-                                        <TextInput.Icon icon="note-text-outline" />
-                                    }
-                                    style={[styles.textArea, { color: theme.text, backgroundColor: theme.card }]}
+                                    left={<TextInput.Icon icon="note-text-outline" />}
+                                    style={[
+                                        styles.textArea,
+                                        {
+                                            color: theme.text,
+                                            backgroundColor: theme.card
+                                        }
+                                    ]}
                                     outlineColor={theme.border}
                                     activeOutlineColor={theme.primary}
-                                    theme={{ colors: { text: theme.text, placeholder: theme.subtitle, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
+                                    theme={{
+                                        colors: {
+                                            text: theme.text,
+                                            placeholder: theme.subtitle,
+                                            primary: theme.primary,
+                                            background: theme.card,
+                                            onSurfaceVariant: theme.primary,
+                                            onSurface: theme.text
+                                        }
+                                    }}
                                     selectionColor={theme.primary}
                                     textColor={theme.text}
                                 />
@@ -404,11 +510,21 @@ async function handleEditClient(data) {
                     <View>
                         <View style={styles.buttonRow}>
                             <TouchableOpacity
-                                style={[styles.buttonSave, { backgroundColor: theme.primary }]}
-                                onPress={!isEditing ? methods.handleSubmit(handleSaveClient) : methods.handleSubmit(handleEditClient)}
+                                style={[
+                                    styles.buttonSave,
+                                    { backgroundColor: theme.primary }
+                                ]}
+                                onPress={
+                                    !isEditing
+                                        ? methods.handleSubmit(handleSaveClient)
+                                        : methods.handleSubmit(handleEditClient)
+                                }
                             >
-                                <Text style={[styles.buttonText, { color: COLORS.white }] }>
-                                    Salvar
+                                <Text style={[
+                                    styles.buttonText,
+                                    { color: COLORS.white }
+                                ]}>
+                                    {isEditing ? 'Atualizar' : 'Salvar'}
                                 </Text>
                             </TouchableOpacity>
                         </View>
@@ -528,6 +644,15 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 30,
         right: 25,
+    },
+
+    buttonAdd: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
     },
 
 });
