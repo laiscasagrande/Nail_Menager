@@ -1,21 +1,46 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';import { useTheme } from '../../context/ThemeContext';import { FormProvider } from 'react-hook-form';
-import ActionButtonAdd from '../../components/ActionButtonAdd';
+import React, { useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  FlatList,
+  TouchableOpacity
+} from 'react-native';
+
+import { Feather } from '@expo/vector-icons';
+import { FormProvider } from 'react-hook-form';
+
+import { useTheme } from '../../context/ThemeContext';
+import { COLORS } from '../../constants/colors';
+
 import { ServiceCard } from './components/serviceCard';
 import { useService } from './hooks/useService';
-import { FormSheetServices } from './components/formSheetServices'
+import { FormSheetServices } from './components/formSheetServices';
 
 export default function ScreenServices() {
   const { theme } = useTheme();
-  const { methods, services, editingId, sheetOpen, setSheetOpen, handlers, sheetRef, handleSheetChange } = useService();
-  
+
+  const {
+    methods,
+    services,
+    editingId,
+    sheetOpen,
+    handlers,
+    sheetRef,
+  } = useService();
 
   useEffect(() => {
     handlers.seekServices();
   }, []);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}> 
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: theme.background }
+      ]}
+    >
       <FlatList
         data={services}
         renderItem={({ item }) => (
@@ -28,7 +53,14 @@ export default function ScreenServices() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
-          <Text style={[styles.emptyText, { color: theme.subtitle }]}>Nenhum serviço cadastrado.</Text>
+          <Text
+            style={[
+              styles.emptyText,
+              { color: theme.subtitle }
+            ]}
+          >
+            Nenhum serviço cadastrado.
+          </Text>
         }
       />
 
@@ -45,7 +77,19 @@ export default function ScreenServices() {
 
       {!sheetOpen && (
         <View style={styles.fab}>
-          <ActionButtonAdd onPress={() => sheetRef.current?.expand()} />
+          <TouchableOpacity
+            style={[
+              styles.buttonAdd,
+              { backgroundColor: theme.primary }
+            ]}
+            onPress={() => sheetRef.current?.expand()}
+          >
+            <Feather
+              name="plus"
+              size={28}
+              color={COLORS.white}
+            />
+          </TouchableOpacity>
         </View>
       )}
     </SafeAreaView>
@@ -56,23 +100,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
   list: {
     padding: 12,
     gap: 12,
     paddingBottom: 100,
   },
+
   emptyText: {
     textAlign: 'center',
     marginTop: 30,
     color: '#888',
   },
+
   fab: {
     position: 'absolute',
-    right: 20,
-    bottom: 25,
+    right: 25,
+    bottom: 30,
+  },
+
+  buttonAdd: {
     width: 60,
     height: 60,
+    borderRadius: 30,
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 5,
   },
 });

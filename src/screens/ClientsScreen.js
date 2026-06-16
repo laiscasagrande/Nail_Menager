@@ -7,6 +7,8 @@ import {
     TouchableOpacity,
     FlatList,
     Alert,
+    SafeAreaView,
+    ActivityIndicator,
 } from 'react-native';
 
 import {
@@ -47,6 +49,8 @@ export default function ClientsScreen() {
     const [sheetOpen, setSheetOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [idClient, setIdClient] = useState("");
+    const [loading, setLoading] = useState(true);
+
     const { user } = useContext(AuthContext);
 
     const methods = useForm({
@@ -120,9 +124,14 @@ export default function ClientsScreen() {
     }
 
     async function getCustomers() {
-        if (!user?.uid) return;
+        if (!user?.uid) {
+            setLoading(false);
+            return;
+        }
 
         try {
+            setLoading(true);
+
             const q = query(
                 collection(db, "customers"),
                 where("uid", "==", user.uid)
@@ -139,6 +148,8 @@ export default function ClientsScreen() {
 
         } catch (error) {
             console.log(error);
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -251,15 +262,29 @@ export default function ClientsScreen() {
         getCustomers();
     }, []);
 
+    if (loading) {
+        return (
+            <SafeAreaView style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+                <ActivityIndicator size="large" color={theme.primary} />
+            </SafeAreaView>
+        );
+    }
+
     return (
-        <View style={{ flex: 1, backgroundColor: theme.background }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
             <FlatList
                 data={customers}
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={{
-                    paddingTop: 10,
-                    paddingBottom: 140,
+                    padding: 12,
+                    gap: 12,
+                    paddingBottom: 100,
                 }}
+                ListEmptyComponent={
+                    <Text style={[styles.emptyText, { color: theme.subtitle }]}>
+                        Nenhum cliente cadastrado.
+                    </Text>
+                }
                 showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => (
 
@@ -534,7 +559,7 @@ export default function ClientsScreen() {
 
             </FormSheet>
 
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -642,8 +667,12 @@ const styles = StyleSheet.create({
 
     fabContainer: {
         position: 'absolute',
-        bottom: 30,
-        right: 25,
+        right: 20,
+        bottom: 25,
+        width: 60,
+        height: 60,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 
     buttonAdd: {
@@ -653,6 +682,18 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         elevation: 5,
+    },
+
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    emptyText: {
+        textAlign: 'center',
+        marginTop: 30,
+        color: '#888',
     },
 
 });
