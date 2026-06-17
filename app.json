@@ -22,6 +22,7 @@
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.nail_menager"
     },
+    "scheme": "nailmenager",
     "web": {
       "favicon": "./assets/favicon.png"
     },
