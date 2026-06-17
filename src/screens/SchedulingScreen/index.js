@@ -10,7 +10,7 @@ import { useTheme } from "../../context/ThemeContext";
 
 export default function SchedulingScreen() {
     const { theme } = useTheme();
-    const {events, selectedEvent, handlers, renderEvent, bottomSheetRef, methods, isEditing, services, customers} = useScheduling()
+    const {events, selectedEvent, handlers, renderEvent, bottomSheetRef, methods, isEditing, services, clients} = useScheduling()
 
     return (
         <>
@@ -49,7 +49,7 @@ export default function SchedulingScreen() {
                     <FormSheetScheduling
                         bottomSheetRef={bottomSheetRef}
                         services={services}
-                        customers={customers}
+                        clients={clients} 
                         onSubmit={handlers.handleCreateScheduling}
                         onCancel={handlers.handlePressCancel}
                         onCompleted={handlers.handlePressCompleted}
