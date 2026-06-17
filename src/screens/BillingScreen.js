@@ -365,7 +365,6 @@ export default function FaturamentoTela() {
         style={[styles.container, { backgroundColor: theme.background }]}
         contentContainerStyle={styles.content}
       >
-        <Text style={[styles.title, { color: theme.text }]}>Faturamento</Text>
 
         {/* Seletor de mês */}
         <View style={[styles.monthSelector, { backgroundColor: theme.card, borderColor: theme.border }]}>

@@ -8,7 +8,7 @@ import { COLORS } from "../constants/colors";
 import { ICONS } from "../constants/icons";
 import BillingScreen from "../screens/BillingScreen";
 import SchedulingScreen from "../screens/SchedulingScreen";
-import ScreenServices from "../screens/screenServices";
+import ScreenServices from "../screens/ScreenServices";
 import ClientsScreen from "../screens/ClientsScreen";
 import ConfigurationScreen from "../screens/Settings";
 import PersonalDataScreen from "../screens/Settings/screens/PersonalDataScreen";
@@ -58,7 +58,7 @@ export default function DrawerRoutes() {
                 name="Faturamento"
                 component={BillingScreen}
                 options={{
-                    headerRight: () => <HeaderButton />,
+                    // headerRight: () => <HeaderButton />,
                     drawerIcon: ({ color, size }) => (
                         <ICONS.handCoins />
                     ),

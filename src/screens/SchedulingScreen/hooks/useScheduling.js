@@ -1,21 +1,25 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { formScheduling } from "../../../schemas/schedulingSchema";
 import { v4 as uuidv4 } from 'uuid';
 import { COLORS } from "../../../constants/colors";
-import { Text, View } from "react-native";
-import { addDoc, collection, doc, getDoc, getDocs, Timestamp, updateDoc } from "firebase/firestore";
+import { DraggingEvent } from "@howljs/calendar-kit";
+import { Alert, Text, View } from "react-native";
+import { addDoc, collection, doc, getDoc, getDocs, query, Timestamp, updateDoc, where } from "firebase/firestore";
 import { db } from "../../../services/firebase";
+import { AuthContext } from "../../../context/AuthContext";
+import { useFocusEffect } from '@react-navigation/native';
 
 export function useScheduling() {
 
+    const { user } = useContext(AuthContext);
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
-    const [idEvent, setIdEvent] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
+    const [idEvent, setIdEvent] = useState(null)
+    const [isEditing, setIsEditing] = useState(false)
     const [services, setServices] = useState([]);
-    const [clients, setClients] = useState([]);
+    const [customers, setCustomers] = useState([])
 
     const bottomSheetRef = useRef(null);
 
@@ -29,7 +33,7 @@ export function useScheduling() {
             dateEnd: new Date(),
             status: "scheduled"
         },
-    });
+    })
 
     const handleDragCreateStart = (start) => {
         console.log("começou:", start);
@@ -37,7 +41,7 @@ export function useScheduling() {
 
     const handleDragCreateEnd = (event) => {
         if (!event) return;
-        setIsEditing(false);
+        setIsEditing(false)
 
         bottomSheetRef.current.expand();
 
@@ -56,7 +60,7 @@ export function useScheduling() {
             status: "scheduled"
         });
 
-        setIdEvent(createdEvent.id);
+        setIdEvent(createdEvent.id)
         setEvents((prev) => [...prev, createdEvent]);
     };
 
@@ -65,60 +69,98 @@ export function useScheduling() {
     };
 
     const handleDragEnd = (event) => {
+
         setEvents((prev) =>
             prev.map((e) =>
-                e.id === event.id ? { ...e, ...event } : e
+                e.id === event.id
+                    ? {
+                        ...e,
+                        ...event,
+                    }
+                    : e
             )
         );
+
         setSelectedEvent(null);
     };
 
     async function handleCreateScheduling(data) {
-        const selectedClient = clients.find((c) => c.value === data.client);
-        const selectedService = services.find((s) => s.id === data.service);
+
+        if (!user?.uid) {
+            console.log("Usuário não autenticado");
+            return;
+        }
+
+        const selectedClient = customers.find(
+            (client) => client.id === data.client
+        );
+
+        const selectedService = services.find(
+            (service) => service.id === data.service
+        );
 
         try {
             await addDoc(collection(db, "scheduling"), {
+                uid: user.uid,
                 client: data.client,
                 service: data.service,
                 clientName: selectedClient?.label || "",
-                serviceName: selectedService?.procedure || "",
+                serviceName: selectedService?.label || "",
                 servicePrice: selectedService?.price || 0,
-                title: selectedClient?.label || "",
+                title: selectedClient?.name || "",
                 start: Timestamp.fromDate(new Date(data.dateStart)),
                 end: Timestamp.fromDate(new Date(data.dateEnd)),
                 status: "scheduled",
-            });
+            })
 
             await getSchedulings();
 
-            setIdEvent(null);
-            setSelectedEvent(null);
+            setIdEvent(null)
+            setSelectedEvent(null)
             methods.reset({
                 client: "",
                 service: "",
                 dateStart: new Date(),
                 dateEnd: new Date(),
                 status: "scheduled"
-            });
-            bottomSheetRef.current.close();
+            })
+            bottomSheetRef.current.close()
         } catch (error) {
             console.log("Erro ao criar agendamento:", error);
         }
     }
 
     async function handleEditScheduling(data) {
-        const selectedClient = clients.find((c) => c.value === data.client);
-        const selectedService = services.find((s) => s.id === data.service);
+
+        const selectedClient = customers.find(
+            (client) => client.id === data.client
+        );
+
+        const selectedService = services.find(
+            (service) => service.id === data.service
+        );
+
+        const schedulingRef = doc(db, "scheduling", data.id);
+        const schedulingSnap = await getDoc(schedulingRef);
+
+        if (!schedulingSnap.exists()) {
+            console.log("Agendamento não encontrado");
+            return;
+        }
+
+        if (schedulingSnap.data().uid !== user.uid) {
+            console.log("Sem permissão para editar");
+            return;
+        }
 
         try {
             await updateDoc(doc(db, "scheduling", data.id), {
                 client: data.client,
                 service: data.service,
                 clientName: selectedClient?.label || "",
-                serviceName: selectedService?.procedure || "",
+                serviceName: selectedService?.label || "",
                 servicePrice: selectedService?.price || 0,
-                title: selectedClient?.label || "",
+                title: selectedClient?.name || "",
                 start: Timestamp.fromDate(data.dateStart),
                 end: Timestamp.fromDate(data.dateEnd),
                 status: data.status,
@@ -129,22 +171,24 @@ export function useScheduling() {
 
             setEvents((prev) =>
                 prev.map((event) =>
-                    event.id === data.id
-                        ? {
+                    event.id === data.id ?
+                        {
                             ...event,
                             client: data.client,
                             service: data.service,
                             clientName: selectedClient?.label || "",
-                            serviceName: selectedService?.procedure || "",
+                            serviceName: selectedService?.label || "",
                             servicePrice: selectedService?.price || 0,
-                            title: selectedClient?.label || "",
-                            start: { dateTime: data.dateStart.toISOString() },
-                            end: { dateTime: data.dateEnd.toISOString() },
+                            title: selectedClient?.name || "",
+                            start: {
+                                dateTime: data.dateStart.toISOString(),
+                            },
+                            end: {
+                                dateTime: data.dateEnd.toISOString(),
+                            },
                             status: data.status,
-                        }
-                        : event
-                )
-            );
+                        } : event
+                ))
 
             methods.reset({
                 id: "",
@@ -155,121 +199,267 @@ export function useScheduling() {
                 status: "scheduled"
             });
 
-            bottomSheetRef.current.close();
+            bottomSheetRef.current.close()
+
         } catch (error) {
             console.log("Erro ao editar agendamento:", error);
         }
     }
 
     async function getSchedulingById(id) {
-        setIsEditing(true);
+        if (!user?.uid) return;
+        setIsEditing(true)
+
         try {
-            const schedulingSnap = await getDoc(doc(db, "scheduling", id));
-            bottomSheetRef.current.expand();
-            if (schedulingSnap.exists()) {
-                methods.reset({
-                    id: schedulingSnap.id,
-                    client: schedulingSnap.data().client,
-                    service: schedulingSnap.data().service,
-                    dateStart: new Date(schedulingSnap.data().start.toDate()),
-                    dateEnd: new Date(schedulingSnap.data().end.toDate()),
-                    status: schedulingSnap.data().status
-                });
-            } else {
-                console.log("Nenhum agendamento encontrado com o ID:", id);
-                return null;
+            const schedulingSnap = await getDoc(doc(db, "scheduling", id))
+
+            if (schedulingSnap.data().uid !== user.uid) {
+                console.log("Sem permissão");
+                return;
             }
+
+            bottomSheetRef.current.expand()
+
+            methods.reset({
+                id: schedulingSnap.id,
+                client: schedulingSnap.data().client,
+                service: schedulingSnap.data().service,
+                dateStart: new Date(schedulingSnap.data().start.toDate()),
+                dateEnd: new Date(schedulingSnap.data().end.toDate()),
+                status: schedulingSnap.data().status
+            })
+
         } catch (error) {
             console.log("Erro ao buscar agendamento por ID:", error);
         }
     }
 
     async function getSchedulings() {
+        if (!user?.uid) return;
+
         try {
-            const getData = await getDocs(collection(db, "scheduling"));
+            const q = query(
+                collection(db, "scheduling"),
+                where("uid", "==", user.uid)
+            );
+
+            const getData = await getDocs(q)
+
             const data = getData.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
-                start: { dateTime: doc.data().start?.toDate?.().toISOString() },
-                end: { dateTime: doc.data().end?.toDate?.().toISOString() },
-            }));
-            setEvents(data);
+                start: {
+                    dateTime: doc.data().start?.toDate?.().toISOString(),
+                },
+
+                end: {
+                    dateTime: doc.data().end?.toDate?.().toISOString(),
+                },
+            }))
+
+            setEvents(data)
         } catch (error) {
             console.log("Erro ao buscar agendamentos:", error);
-            return [];
+            return []
         }
     }
 
-    async function getClients() {
-        try {
-            const snap = await getDocs(collection(db, 'customers'));
-            const clientList = snap.docs.map((doc) => ({
-                id: doc.id,
-                label: doc.data().name,
-                value: doc.id,
-            }));
-            setClients(clientList);
-        } catch (error) {
-            console.log('Erro ao buscar clientes:', error);
-        }
-    }
+    useFocusEffect(
+        useCallback(() => {
+            if (user) {
+                getSchedulings();
+                getServices();
+                getCustomers();
+            }
+        }, [user])
+    );
 
-    async function getServices() {
-        try {
-            const getServicesData = await getDocs(collection(db, "services"));
-            const serviceList = getServicesData.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            setServices(serviceList);
-        } catch (error) {
-            console.log("Erro ao buscar serviços:", error);
-        }
-    }
 
     async function handlePressCancel(data) {
-        if (!data?.id) return;
-        try {
-            await updateDoc(doc(db, "scheduling", data.id), { status: "cancelled" });
-            setEvents((prev) =>
-                prev.map((e) => e.id === data.id ? { ...e, status: "cancelled" } : e)
-            );
-            bottomSheetRef.current.close();
-            setSelectedEvent(null);
-        } catch (error) {
-            console.log("Erro ao cancelar agendamento:", error);
+
+        if (!data?.id) {
+            console.log("Cancelamento ignorado: agendamento sem id.");
+            return;
         }
+
+        Alert.alert(
+            'Cancelar agendamento',
+            'Tem certeza que deseja cancelar este agendamento?',
+            [
+                { text: 'Voltar', style: 'cancel' },
+                {
+                    text: 'Cancelar agendamento',
+                    onPress: async () => {
+                        try {
+                            const schedulingRef = doc(db, "scheduling", data.id);
+                            const schedulingSnap = await getDoc(schedulingRef);
+
+                            if (!schedulingSnap.exists()) {
+                                console.log("Agendamento não encontrado");
+                                return;
+                            }
+
+                            if (schedulingSnap.data().uid !== user.uid) {
+                                console.log("Sem permissão");
+                                return;
+                            }
+
+                            await updateDoc(doc(db, "scheduling", data.id), {
+                                status: "cancelled",
+                            });
+
+                            setEvents((prev) =>
+                                prev.map((e) =>
+                                    e.id === data.id
+                                        ? { ...e, status: "cancelled", title: e.title }
+                                        : e
+                                )
+                            );
+
+                            bottomSheetRef.current.close();
+                            setSelectedEvent(null);
+                        } catch (error) {
+                            console.log("Erro ao cancelar agendamento:", error);
+                        }
+                    }
+                }
+            ]
+        );
     }
 
     async function handlePressCompleted(data) {
-        if (!data?.id) return;
-        try {
-            await updateDoc(doc(db, "scheduling", data.id), { status: "completed" });
-            setEvents((prev) =>
-                prev.map((e) => e.id === data.id ? { ...e, status: "completed" } : e)
+
+        if (!data?.id) {
+            Alert.alert(
+                "Erro ao concluir",
+                "Não foi possível concluir o agendamento. Isso pode acontecer quando o agendamento foi criado em um horário que já passou. Tente criar um novo agendamento em uma data futura.",
+                [{ text: "Entendi" }]
             );
+            return;
+        }
+
+        try {
+            const schedulingRef = doc(db, "scheduling", data.id);
+            const schedulingSnap = await getDoc(schedulingRef);
+
+            if (!schedulingSnap.exists()) {
+                console.log("Agendamento não encontrado");
+                return;
+            }
+
+            if (schedulingSnap.data().uid !== user.uid) {
+                console.log("Sem permissão");
+                return;
+            }
+
+            await updateDoc(doc(db, "scheduling", data.id), {
+                status: "completed",
+            });
+
+            setEvents((prev) =>
+                prev.map((e) =>
+                    e.id === data.id
+                        ? {
+                            ...e,
+                            status: "completed",
+                        }
+                        : e
+                )
+            );
+
             bottomSheetRef.current.close();
-            setSelectedEvent(null);
+            setSelectedEvent(null)
         } catch (error) {
             console.log("Erro ao concluir agendamento:", error);
         }
     }
 
     async function handlePressonReactivate(data) {
-        if (!data?.id) return;
+        if (!data?.id) {
+            console.log("Reativacao ignorada: agendamento sem id.");
+            return;
+        }
+
         try {
-            await updateDoc(doc(db, "scheduling", data.id), { status: "scheduled" });
+
+            const schedulingRef = doc(db, "scheduling", data.id);
+            const schedulingSnap = await getDoc(schedulingRef);
+
+            if (!schedulingSnap.exists()) {
+                console.log("Agendamento não encontrado");
+                return;
+            }
+
+            if (schedulingSnap.data().uid !== user.uid) {
+                console.log("Sem permissão");
+                return;
+            }
+
+            await updateDoc(doc(db, "scheduling", data.id), {
+                status: "scheduled",
+            });
+
             setEvents((prev) =>
-                prev.map((e) => e.id === data.id ? { ...e, status: "scheduled" } : e)
+                prev.map((e) =>
+                    e.id === data.id
+                        ? {
+                            ...e,
+                            status: "scheduled",
+                            title: e.title
+                        }
+                        : e
+                )
             );
+
             bottomSheetRef.current.close();
-            setSelectedEvent(null);
+            setSelectedEvent(null)
         } catch (error) {
             console.log("Erro ao reativar agendamento:", error);
         }
     }
 
+    async function getServices() {
+        if (!user?.uid) return;
+
+        try {
+            const q = query(
+                collection(db, "services"),
+                where("uid", "==", user.uid)
+            );
+
+            const getServicesData = await getDocs(q)
+            const serviceList = getServicesData.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }))
+            setServices(serviceList)
+        } catch (error) {
+            console.log("Erro ao buscar serviços:", error);
+        }
+    }
+
+    async function getCustomers() {
+        if (!user?.uid) return;
+
+        try {
+            const q = query(
+                collection(db, "customers"),
+                where("uid", "==", user.uid)
+            );
+
+            const getCustomersData = await getDocs(q)
+            const customersList = getCustomersData.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }))
+            setCustomers(customersList)
+        } catch (error) {
+            console.log("Erro ao buscar clientes:", error);
+        }
+    }
+
     const renderEvent = useCallback((event) => {
+
         const isOverdue =
             event.status === "scheduled" &&
             new Date(event.end.dateTime) < new Date();
@@ -284,30 +474,31 @@ export function useScheduling() {
                         : COLORS.primary;
 
         return (
-            <View style={{
-                flex: 1,
-                backgroundColor,
-                borderRadius: 8,
-                padding: 4,
-                justifyContent: "center",
-            }}>
-                <Text style={{ color: COLORS.white }}>{event.title}</Text>
+            <View
+                style={{
+                    flex: 1,
+                    backgroundColor,
+                    borderRadius: 8,
+                    padding: 4,
+                    justifyContent: "center",
+                }}
+            >
+                <Text style={{ color: COLORS.white }}>
+                    {event.title}
+                </Text>
             </View>
         );
     }, []);
 
-    useEffect(() => { getSchedulings(); }, []);
-    useEffect(() => { getServices(); }, []);
-    useEffect(() => { getClients(); }, []);
-
     return {
         events,
-        clients,
         selectedEvent,
         bottomSheetRef,
         isEditing,
         methods,
         services,
+        customers,
+
         handlers: {
             handleDragCreateStart,
             handleDragCreateEnd,
@@ -318,8 +509,10 @@ export function useScheduling() {
             handleCreateScheduling,
             handlePressCancel,
             handlePressCompleted,
-            handlePressonReactivate,
+            handlePressonReactivate
+
         },
+
         renderEvent,
-    };
+    }
 }
