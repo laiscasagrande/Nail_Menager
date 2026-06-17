@@ -5,7 +5,8 @@ import {
   StyleSheet,
   SafeAreaView,
   FlatList,
-  TouchableOpacity
+  TouchableOpacity,
+  ActivityIndicator
 } from 'react-native';
 
 import { Feather } from '@expo/vector-icons';
@@ -28,11 +29,28 @@ export default function ScreenServices() {
     sheetOpen,
     handlers,
     sheetRef,
+    loading,  
   } = useService();
 
   useEffect(() => {
     handlers.seekServices();
   }, []);
+
+  if (loading) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: theme.background }
+        ]}
+      >
+        <ActivityIndicator
+          size="large"
+          color={theme.primary}
+        />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
@@ -52,6 +70,7 @@ export default function ScreenServices() {
         )}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <Text
             style={[
@@ -115,8 +134,12 @@ const styles = StyleSheet.create({
 
   fab: {
     position: 'absolute',
-    right: 25,
-    bottom: 30,
+    right: 20,
+    bottom: 25,
+    width: 60,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   buttonAdd: {
@@ -126,5 +149,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

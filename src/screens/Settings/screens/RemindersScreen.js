@@ -62,7 +62,7 @@ export default function RemindersScreen({ navigation }) {
                     </Text>
                 </TouchableOpacity>
                 <Text style={{ fontSize: 16, fontWeight: '600', color: theme.text }}>
-                    Tema claro/escuro
+                    Lembretes
                 </Text>
                 <TouchableOpacity disabled={loading} onPress={handleSavePreferencesNotificationsUser}>
                     {loading ? (
