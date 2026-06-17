@@ -6,6 +6,7 @@ import { useState } from "react";
 import { COLORS } from "../../../../constants/colors";
 import DatePickerModal from "./DatePickerModal";
 import DateCard from "./DateCard";
+import { useTheme } from "../../../../context/ThemeContext";
 
 export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel, onCompleted, isEditing, onReactivate, onEdit, services, customers }) {
 
@@ -23,6 +24,7 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
     const eventValue = watch("event");
     const status = watch("status");
     const statusIsOverdue = status === "scheduled" && new Date(dateEnd) < new Date();
+    const { theme } = useTheme();
 
     function callFunctionCreateOrEdit() {
         if (isEditing) {
@@ -63,6 +65,12 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                                         />
                                                     }
                                                     onPressIn={() => setVisibleMenu(true)}
+                                                    outlineColor={theme.border}
+                                                    activeOutlineColor={theme.primary}
+                                                    theme={{ colors: { text: theme.text, placeholder: theme.primary, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
+                                                    style={{ color: theme.text, backgroundColor: theme.card }}
+                                                    selectionColor={theme.primary}
+                                                    textColor={theme.text}
                                                 />
                                             }
                                         >
@@ -105,6 +113,12 @@ export default function FormSheetScheduling({ bottomSheetRef, onSubmit, onCancel
                                                         />
                                                     }
                                                     onPressIn={() => setVisibleService(true)}
+                                                    outlineColor={theme.border}
+                                                    activeOutlineColor={theme.primary}
+                                                    theme={{ colors: { text: theme.text, placeholder: theme.primary, primary: theme.primary, background: theme.card, onSurfaceVariant: theme.primary, onSurface: theme.text } }}
+                                                    style={{ color: theme.text, backgroundColor: theme.card }}
+                                                    selectionColor={theme.primary}
+                                                    textColor={theme.text}
                                                 />
                                             }
                                         >
