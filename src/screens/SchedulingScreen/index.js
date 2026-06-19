@@ -15,6 +15,8 @@ export default function SchedulingScreen() {
     return (
         <>
             <CalendarContainer
+                locale="pt-BR"
+                firstDayOfWeek={1}
                 events={events}
                 theme={{
                     colors: {
