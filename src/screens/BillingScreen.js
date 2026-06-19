@@ -229,6 +229,12 @@ export default function FaturamentoTela() {
     if (selectedMonth === 11) { setSelectedYear(y => y + 1); setSelectedMonth(0); }
     else { setSelectedMonth(m => m + 1); }
   }
+  function goToNextMonth() {
+    if (selectedMonth === 11) { setSelectedYear(y => y + 1); setSelectedMonth(0); }
+    else { setSelectedMonth(m => m + 1); }
+  }
+
+  // ─── Loading ─────────────────────────────────────────────────────────────────
 
   // ─── Loading ─────────────────────────────────────────────────────────────────
 
