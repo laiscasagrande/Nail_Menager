@@ -11,11 +11,12 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { PieChart } from 'react-native-chart-kit';
 import { Dimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -87,11 +88,28 @@ export default function FaturamentoTela() {
       async function fetchAll() {
         setLoading(true);
         try {
-          // Busca as 3 coleções em paralelo para ser mais rápido
+          // 1. Pega o usuário logado
+          const auth = getAuth();
+          const user = auth.currentUser;
+
+          if (!user) {
+            console.log('Nenhum usuário logado encontrado.');
+            setLoading(false);
+            return;
+          }
+
+          const userUid = user.uid;
+
+          // 2. Cria as queries filtrando pelo campo 'uid' (conforme a sua imagem)
+          const schedQuery = query(collection(db, 'scheduling'), where('uid', '==', userUid));
+          const custQuery = query(collection(db, 'customers'), where('uid', '==', userUid));
+          const servQuery = query(collection(db, 'services'), where('uid', '==', userUid));
+
+          // 3. Executa as buscas usando as queries
           const [schedSnap, custSnap, servSnap] = await Promise.all([
-            getDocs(collection(db, 'scheduling')),
-            getDocs(collection(db, 'customers')),
-            getDocs(collection(db, 'services')),
+            getDocs(schedQuery),
+            getDocs(custQuery),
+            getDocs(servQuery),
           ]);
 
           // Monta mapas id → dados para cruzamento
@@ -107,11 +125,12 @@ export default function FaturamentoTela() {
           setServicesMap(sMap);
           setAppointments(list);
         } catch (error) {
-          console.error('Erro ao buscar dados:', error);
+          console.error('Erro ao buscar dados filtrados:', error);
         } finally {
           setLoading(false);
         }
       }
+      
       fetchAll();
     }, [])
   );
@@ -210,6 +229,12 @@ export default function FaturamentoTela() {
     if (selectedMonth === 11) { setSelectedYear(y => y + 1); setSelectedMonth(0); }
     else { setSelectedMonth(m => m + 1); }
   }
+  function goToNextMonth() {
+    if (selectedMonth === 11) { setSelectedYear(y => y + 1); setSelectedMonth(0); }
+    else { setSelectedMonth(m => m + 1); }
+  }
+
+  // ─── Loading ─────────────────────────────────────────────────────────────────
 
   // ─── Loading ─────────────────────────────────────────────────────────────────
 

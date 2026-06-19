@@ -16,6 +16,7 @@ import {
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
 import { makeRedirectUri } from 'expo-auth-session';
+import Constants from 'expo-constants';
 import ScreenLogin from './ScreenLogin';
 import ScreenRegister from './ScreenRegister';
 import ForgotPasswordScreen from './ForgotPasswordScreen';
@@ -164,14 +165,18 @@ export default function AuthenticationScreen({ navigation }) {
 
   WebBrowser.maybeCompleteAuthSession();
 
-  const redirectUri = makeRedirectUri({ useProxy: true });
+  // Detect if we're running inside Expo Go (proxy) or as a native standalone/APK
+  const isExpoGo = Constants.appOwnership === 'expo';
+  const useProxy = isExpoGo; // true for Expo Go, false for native APK
+
+  const redirectUri = makeRedirectUri({ useProxy, native: !useProxy });
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     expoClientId: '161226514717-7hcbbendck650ih3vs0mnmiumv7no0c1.apps.googleusercontent.com',
     iosClientId: '...',
-    androidClientId: '...',
+    androidClientId: '161226514717-4ndrfut0ohsolmp6cj6ijohndsqpjpoe.apps.googleusercontent.com',
     webClientId: '161226514717-ub190n2sbc3s5rn9l63g1sfui8feckda.apps.googleusercontent.com',
-    scopes: ['profile', 'email'],
+    scopes: ['openid', 'profile', 'email'],
     redirectUri,
   });
 
@@ -204,7 +209,7 @@ export default function AuthenticationScreen({ navigation }) {
       return;
     }
     setLoading(true);
-    const result = await promptAsync();
+    const result = await promptAsync({ useProxy });
     if (result.type !== 'success') {
       if (result.type === 'error') Alert.alert('Erro', 'Não foi possível fazer login com o Google.');
       setLoading(false);

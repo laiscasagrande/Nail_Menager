@@ -22,6 +22,7 @@
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.nail_menager"
     },
+    "scheme": "nailmenager",
     "web": {
       "favicon": "./assets/favicon.png"
     },
@@ -31,8 +32,14 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "057b4a09-d36a-44f2-852b-b4633751a2ac"
+        "projectId": "1133896f-fa74-41ed-a4ab-97e1e52ca197"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/1133896f-fa74-41ed-a4ab-97e1e52ca197"
     }
   }
 }

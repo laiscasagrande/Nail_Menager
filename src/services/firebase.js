@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { initializeAuth, getReactNativePersistence, getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC0iJ754KAb6CFhgPJGk-CVLU8QF9fBgzI",
@@ -14,4 +14,14 @@ const firebaseConfig = {
 const fireBase = initializeApp(firebaseConfig);
 
 export const db = getFirestore(fireBase);
-export const auth = getAuth(fireBase);
+let auth;
+try {
+  const ReactNativeAsyncStorage = require('@react-native-async-storage/async-storage');
+  const persistence = getReactNativePersistence(ReactNativeAsyncStorage);
+  auth = initializeAuth(fireBase, { persistence });
+} catch (e) {
+  console.warn('AsyncStorage not available, falling back to memory persistence for Firebase Auth.', e?.message || e);
+  auth = getAuth(fireBase);
+}
+
+export { auth };
